@@ -59,19 +59,19 @@ export default function PressKitPage() {
           <main className="flex-1 px-6 pb-12">
             <div className="max-w-3xl mx-auto">
 
-              {/* ── 1. Hero ── */}
-              <section className="press-section text-center">
-                <h1 className="font-heading text-6xl md:text-8xl leading-none body-text mb-2">
-                  Poke A Nose
-                </h1>
-                <p className="font-body text-base md:text-lg opacity-60 body-text">
-                  A hand-drawn point-and-click adventure
-                </p>
+              {/* ── 1. Hero — Game Logo ── */}
+              <section className="press-section flex justify-center">
+                <img
+                  src="/assets/gamelogo.png"
+                  alt="Poke A Nose"
+                  className="game-logo w-full h-auto"
+                  style={{ maxWidth: '100%', minWidth: 'min(400px, 100%)' }}
+                />
               </section>
 
               {/* ── 2. Video ── */}
               <section className="press-section">
-                <VideoSection />
+                <VideoSection youtubeLink={content.youtubeLink} />
               </section>
 
               {/* ── 3. About ── */}

@@ -10,9 +10,14 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AdminStatus {
+  'adminClaimed' : boolean,
+  'callerIsAdmin' : boolean,
+}
 export interface Content {
   'features' : Array<string>,
   'instagramLink' : string,
+  'youtubeLink' : string,
   'pressEmail' : string,
   'bodyTextColorHex' : string,
   'developerWebsite' : string,
@@ -58,61 +63,25 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'deleteCallerUserProfile' : ActorMethod<[], undefined>,
-  'disablePasswordProtection' : ActorMethod<
-    [],
-    { 'ok' : null } |
-      { 'err' : string }
-  >,
-  'enablePasswordProtection' : ActorMethod<
-    [string],
-    { 'ok' : null } |
-      { 'err' : string }
-  >,
+  'claimAdmin' : ActorMethod<[], undefined>,
+  'disablePasswordProtection' : ActorMethod<[], undefined>,
+  'enablePasswordProtection' : ActorMethod<[string], undefined>,
+  'getAdminStatus' : ActorMethod<[], AdminStatus>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getContent' : ActorMethod<[], Content>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'initializeAdmin' : ActorMethod<[], { 'ok' : null } | { 'err' : string }>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'updateAbout' : ActorMethod<[string], { 'ok' : null } | { 'err' : string }>,
-  'updateBodyTextColor' : ActorMethod<
-    [string],
-    { 'ok' : null } |
-      { 'err' : string }
-  >,
-  'updateDeveloperWebsite' : ActorMethod<
-    [string],
-    { 'ok' : null } |
-      { 'err' : string }
-  >,
-  'updateFeatures' : ActorMethod<
-    [Array<string>],
-    { 'ok' : null } |
-      { 'err' : string }
-  >,
-  'updateGameDetails' : ActorMethod<
-    [string, string, string],
-    { 'ok' : null } |
-      { 'err' : string }
-  >,
-  'updateInstagram' : ActorMethod<
-    [string],
-    { 'ok' : null } |
-      { 'err' : string }
-  >,
-  'updatePressEmail' : ActorMethod<
-    [string],
-    { 'ok' : null } |
-      { 'err' : string }
-  >,
-  'verifyAdmin' : ActorMethod<[], { 'ok' : boolean } | { 'err' : string }>,
-  'verifyPassword' : ActorMethod<
-    [string],
-    { 'ok' : boolean } |
-      { 'err' : string }
-  >,
+  'updateAbout' : ActorMethod<[string], undefined>,
+  'updateBodyTextColor' : ActorMethod<[string], undefined>,
+  'updateDeveloperWebsite' : ActorMethod<[string], undefined>,
+  'updateFeatures' : ActorMethod<[Array<string>], undefined>,
+  'updateGameDetails' : ActorMethod<[string, string, string], undefined>,
+  'updateInstagram' : ActorMethod<[string], undefined>,
+  'updatePressEmail' : ActorMethod<[string], undefined>,
+  'updateYoutubeLink' : ActorMethod<[string], undefined>,
+  'verifyPassword' : ActorMethod<[string], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

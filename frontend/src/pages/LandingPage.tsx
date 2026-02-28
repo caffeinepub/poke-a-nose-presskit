@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router';
 import Header from '../components/Header';
-import NewsletterPlaceholder from '../components/NewsletterPlaceholder';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -14,25 +13,18 @@ export default function LandingPage() {
       <div className="page-content min-h-screen flex flex-col">
         <Header />
 
-        <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-          <div className="w-full max-w-2xl flex flex-col items-center gap-6 text-center">
+        <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+          <div className="w-full flex flex-col items-center gap-8 text-center">
 
-            {/* Game Logo */}
+            {/* Game Logo — reduced size on desktop, responsive */}
             <div className="w-full flex justify-center">
               <img
                 src="/assets/gamelogo.png"
                 alt="Poke A Nose"
-                className="game-logo w-full max-w-xl"
-                style={{ minWidth: '320px' }}
+                className="game-logo h-auto"
+                style={{ maxWidth: '100%', width: 'min(480px, 100%)' }}
               />
             </div>
-
-            {/* Description */}
-            <p className="font-body text-base leading-relaxed max-w-md body-text opacity-80">
-              A hand-drawn point-and-click adventure game full of absurd humor,
-              quirky characters, and puzzles that will make you scratch your head —
-              and maybe poke a nose or two.
-            </p>
 
             {/* Press Kit Link */}
             <Link to="/press-kit">
@@ -44,11 +36,6 @@ export default function LandingPage() {
                 <ArrowRight size={14} />
               </Button>
             </Link>
-
-            {/* Newsletter */}
-            <div className="mt-2">
-              <NewsletterPlaceholder />
-            </div>
 
           </div>
         </main>

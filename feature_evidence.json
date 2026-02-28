@@ -1,4 +1,67 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-on-the-landing-page-reduce-the-game-logo-gamelogo-png-size-so-it-appears-noticeably-smaller-than-its-current-size-on-desktop-it-should-still-be-responsive-scaling-down-on-mobile-tablet-with-max-width-100-and-auto-height-but-the-desktop-maximum-size-must-be-reduced-use-a-max-width-in-the-range-of-480px-560px-down-from-the-current-full-natural-width-so-it-no-longer-dominates-the-viewport",
+      "featureTitle": "On the landing page (/), reduce the game logo (gamelogo.png) size so it appears noticeably smaller than its current size on desktop. It should still be responsive (scaling down on mobile/tablet with max-width: 100% and auto height), but the desktop maximum size must be reduced — use a max-width in the range of 480px–560px (down from the current full natural width) so it no longer dominates the viewport.",
+      "files": [
+        "frontend/src/pages/LandingPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-34"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-youtube-link-field-to-the-admin-dashboard-admin-cms-it-must-be-a-text-input-pre-populated-with-the-current-youtubelink-value-from-getcontent-with-a-save-button-that-calls-updateyoutubelink-and-then-invalidates-refetches-the-content-query-add-the-corresponding-useupdateyoutubelink-mutation-to-frontend-src-hooks-usequeries-ts",
+      "featureTitle": "Add a YouTube Link field to the Admin Dashboard (/admin) CMS. It must be a text input pre-populated with the current youtubeLink value from getContent(), with a Save button that calls updateYoutubeLink() and then invalidates/refetches the content query. Add the corresponding useUpdateYoutubeLink mutation to frontend/src/hooks/useQueries.ts.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/AdminDashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-36"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-videosection-component-on-press-kit-to-use-the-youtubelink-value-from-the-global-content-query-returned-by-getcontent-instead-of-a-hardcoded-youtube-url-when-the-user-clicks-the-video-thumbnail-play-button-the-embedded-youtube-iframe-must-use-this-admin-editable-link",
+      "featureTitle": "Update the VideoSection component on /press-kit to use the youtubeLink value from the global content query (returned by getContent()) instead of a hardcoded YouTube URL. When the user clicks the video thumbnail play button, the embedded YouTube iframe must use this admin-editable link.",
+      "files": [
+        "frontend/src/components/VideoSection.tsx",
+        "frontend/src/pages/PressKitPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-37"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

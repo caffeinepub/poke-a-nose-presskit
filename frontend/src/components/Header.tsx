@@ -3,7 +3,7 @@ import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function Header() {
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { toggleTheme, isDark } = useTheme();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
 
@@ -12,10 +12,7 @@ export default function Header() {
 
   return (
     <header className="relative z-10 w-full">
-      <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="font-heading text-xl tracking-wide hover:opacity-70 transition-opacity body-text">
-          Poke A Nose
-        </Link>
+      <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-end">
         <nav className="flex items-center gap-6">
           <Link
             to="/press-kit"

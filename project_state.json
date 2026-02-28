@@ -1,21 +1,21 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
-  "summary": "A minimal, responsive black-and-white game presskit website with ShadCN UI-inspired design. Features three routes: / (public landing), /press-kit (public or password-gated presskit), and /admin (Internet Identity-protected CMS dashboard). Internet Identity auth exists ONLY on /admin; first authenticated principal becomes permanent admin. Includes password protection system with SHA-256 hashing, dark/light mode toggle with background inversion, customizable body text color (admin-set, light mode only), and a full CMS for all presskit content stored in stable backend variables.",
+  "projectStateVersion": 17,
+  "summary": "A minimal, responsive black-and-white game presskit website with ShadCN UI-inspired design. Features three routes: / (public landing), /press-kit (public or password-gated presskit), and /admin (Internet Identity-protected CMS dashboard). Internet Identity auth exists ONLY on /admin. The first person to log in with Internet Identity on /admin automatically becomes the permanent admin via claimAdmin() — their principal is stored in stable storage and cannot be changed unless the canister is reset. Only the claimed admin principal can edit/save CMS content. Includes password protection system with SHA-256 hashing, dark/light mode toggle with background inversion, customizable body text color (admin-set, light mode only), and a full CMS for all presskit content stored in stable backend variables.",
   "architectural_notes": [
     "Internet Identity auth UI exists ONLY on /admin; no login UI on public pages",
-    "First Internet Identity principal to authenticate becomes permanent admin via initializeAdmin; stored in stable storage forever",
-    "All other principals rejected with 'Access denied: This press kit is owned by another admin principal'",
     "Password hashed with SHA-256 in backend; frontend never stores plaintext",
     "getContent() returns all content + passwordEnabled flag; content gating must prevent flash on load",
     "Dark mode: body text forced white, background/logo/festival logo inverted via CSS filter; admin-selected body text color only applies in light mode",
     "Fredoka One font used for all header text site-wide",
-    "ZIP file PokeANose_MediaImages.zip must be served with correct MIME type for direct download"
+    "ZIP file PokeANose_MediaImages.zip must be served with correct MIME type for direct download",
+    "createActor must not receive both agent and agentOptions simultaneously; pass only the authenticated agent, never agentOptions alongside it",
+    "First II-authenticated visitor to /admin claims permanent admin role via claimAdmin(); stored in stable storage, cannot be changed without canister reset",
+    "Only the claimed admin principal can call CMS update methods; all others receive access denied",
+    "YouTube video URL stored in backend stable storage as a CMS field; press kit video section reads it from getContent()"
   ],
-  "known_issues": [
-    "Admin sees CMS but gets 'Access denied: Only the admin can update content' when saving — backend update methods rejecting authenticated admin principal"
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-set-up-react-router-with-three-routes-landing-page-press-kit-press-kit-page-admin-admin-dashboard-no-authentication-ui-or-login-buttons-exist-on-or-press-kit-navigation-between-pages-uses-standard-router-links",
@@ -96,15 +96,89 @@
         "REQ-18"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-internet-identity-authentication-flow-on-admin-so-that-after-ii-login-completes-the-app-no-longer-gets-stuck-in-a-verifying-admin-access-state-the-root-causes-to-address-are-1-disallowed-origin-errors-from-the-ii-provider-rejecting-the-app-s-origin-ensure-the-internetidentityprovider-in-frontend-src-main-tsx-is-configured-with-the-correct-loginoptions-including-the-app-s-own-origin-in-derivationorigin-or-equivalent-allowed-origins-config-2-the-detected-both-agent-and-agentoptions-passed-to-createactor-warning-in-useactor-ts-refactor-actor-creation-so-that-only-agent-or-agentoptions-is-passed-to-createactor-never-both-simultaneously-3-after-these-fixes-confirm-that-the-actor-is-created-with-the-authenticated-identity-so-initializeadmin-receives-the-correct-principal-and-the-dashboard-renders-without-hanging",
+      "title": "Fix the Internet Identity authentication flow on /admin so that after II login completes, the app no longer gets stuck in a 'verifying admin access' state. The root causes to address are: (1) disallowed origin errors from the II provider rejecting the app's origin — ensure the InternetIdentityProvider in frontend/src/main.tsx is configured with the correct `loginOptions` including the app's own origin in `derivationOrigin` or equivalent allowed-origins config; (2) the 'Detected both agent and agentOptions passed to createActor' warning in useActor.ts — refactor actor creation so that only `agent` OR `agentOptions` is passed to createActor, never both simultaneously; (3) after these fixes, confirm that the actor is created with the authenticated identity so `initializeAdmin()` receives the correct principal and the dashboard renders without hanging.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-dashboard-admin-page-so-that-after-internet-identity-login-succeeds-the-full-cms-editing-dashboard-is-displayed-immediately-without-calling-initializeadmin-or-any-admin-verification-step-remove-the-verifying-admin-access-state-the-access-denied-branch-and-any-ui-that-references-admin-principal-registration-the-page-flow-must-be-1-not-authenticated-show-ii-login-button-2-authenticated-show-cms-dashboard-directly",
+      "title": "Update the Admin Dashboard (/admin) page so that after Internet Identity login succeeds, the full CMS editing dashboard is displayed immediately — without calling initializeAdmin() or any admin-verification step. Remove the 'verifying admin access' state, the access-denied branch, and any UI that references admin principal registration. The page flow must be: (1) not authenticated → show II login button; (2) authenticated → show CMS dashboard directly.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-page-frontend-flow-as-follows-1-not-authenticated-show-internet-identity-login-button-unchanged-2-authenticated-call-getadminstatus-to-check-registration-state-3-if-adminclaimed-is-false-call-claimadmin-to-register-the-current-principal-as-the-permanent-admin-then-show-the-full-cms-dashboard-4-if-adminclaimed-is-true-and-callerisadmin-is-true-show-the-full-cms-dashboard-directly-5-if-adminclaimed-is-true-and-callerisadmin-is-false-show-an-access-denied-message-explaining-that-an-admin-is-already-registered-with-no-cms-controls-visible-show-a-loading-checking-state-while-getadminstatus-or-claimadmin-are-in-flight",
+      "title": "Update the /admin page frontend flow as follows: (1) Not authenticated → show Internet Identity login button (unchanged). (2) Authenticated → call getAdminStatus() to check registration state. (3) If adminClaimed is false, call claimAdmin() to register the current principal as the permanent admin, then show the full CMS dashboard. (4) If adminClaimed is true and callerIsAdmin is true, show the full CMS dashboard directly. (5) If adminClaimed is true and callerIsAdmin is false, show an 'Access Denied' message explaining that an admin is already registered, with no CMS controls visible. Show a loading/checking state while getAdminStatus() or claimAdmin() are in flight.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-any-poke-a-nose-or-game-title-text-rendered-as-plain-text-in-the-site-header-header-tsx-on-all-pages-the-header-must-contain-only-navigation-links-and-the-dark-light-mode-toggle-no-game-title-text",
+      "title": "Remove any 'Poke A Nose' or game title text rendered as plain text in the site header (Header.tsx) on all pages. The header must contain only navigation links and the dark/light mode toggle — no game title text.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-landing-page-remove-the-newsletter-subscribe-section-the-email-input-subscribe-button-and-any-surrounding-stay-tuned-or-newsletter-copy-also-remove-the-description-paragraph-a-hand-drawn-point-and-click-adventure-game-full-of-absurd-humor-quirky-characters-and-puzzles-that-will-make-you-scratch-your-head-and-maybe-poke-a-nose-or-two-the-rest-of-the-landing-page-background-game-logo-press-kit-button-footer-must-remain-unchanged",
+      "title": "On the landing page (/), remove the newsletter/subscribe section (the email input, Subscribe button, and any surrounding 'Stay Tuned' or newsletter copy). Also remove the description paragraph 'A hand-drawn point-and-click adventure game full of absurd humor, quirky characters, and puzzles that will make you scratch your head — and maybe poke a nose or two.' The rest of the landing page (background, game logo, press kit button, footer) must remain unchanged.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-landing-page-make-the-game-logo-gamelogo-png-display-at-its-natural-full-size-and-be-fully-responsive-on-desktop-it-should-fill-a-large-portion-of-the-viewport-width-minimum-400px-up-to-its-natural-maximum-size-and-on-mobile-tablet-it-should-scale-down-fluidly-to-fill-the-available-width-without-cropping-or-overflow-use-max-width-100-with-an-auto-height-so-it-never-breaks-the-layout-on-any-screen-size",
+      "title": "On the landing page (/), make the game logo (gamelogo.png) display at its natural full size and be fully responsive: on desktop it should fill a large portion of the viewport width (minimum 400px, up to its natural maximum size), and on mobile/tablet it should scale down fluidly to fill the available width without cropping or overflow. Use max-width: 100% with an auto height so it never breaks the layout on any screen size.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-press-kit-page-press-kit-remove-the-hero-section-s-plain-text-game-title-poke-a-nose-rendered-as-a-heading-and-the-tagline-text-a-hand-drawn-point-and-click-adventure-or-any-variant-replace-them-with-the-gamelogo-png-image-displayed-prominently-at-the-top-of-the-press-kit-using-the-same-responsive-sizing-rules-as-the-landing-page-logo-full-natural-width-on-desktop-scales-down-on-mobile-apply-dark-mode-inversion-css-filter-invert-to-this-logo-consistent-with-the-rest-of-the-site",
+      "title": "On the press kit page (/press-kit), remove the hero section's plain text game title ('Poke A Nose' rendered as a heading) and the tagline text 'A hand-drawn point-and-click adventure' (or any variant). Replace them with the gamelogo.png image displayed prominently at the top of the press kit, using the same responsive sizing rules as the landing page logo (full natural width on desktop, scales down on mobile). Apply dark mode inversion (CSS filter invert) to this logo consistent with the rest of the site.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-landing-page-reduce-the-game-logo-gamelogo-png-size-so-it-appears-noticeably-smaller-than-its-current-size-on-desktop-it-should-still-be-responsive-scaling-down-on-mobile-tablet-with-max-width-100-and-auto-height-but-the-desktop-maximum-size-must-be-reduced-use-a-max-width-in-the-range-of-480px-560px-down-from-the-current-full-natural-width-so-it-no-longer-dominates-the-viewport",
+      "title": "On the landing page (/), reduce the game logo (gamelogo.png) size so it appears noticeably smaller than its current size on desktop. It should still be responsive (scaling down on mobile/tablet with max-width: 100% and auto height), but the desktop maximum size must be reduced — use a max-width in the range of 480px–560px (down from the current full natural width) so it no longer dominates the viewport.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-youtube-link-field-to-the-admin-dashboard-admin-cms-it-must-be-a-text-input-pre-populated-with-the-current-youtubelink-value-from-getcontent-with-a-save-button-that-calls-updateyoutubelink-and-then-invalidates-refetches-the-content-query-add-the-corresponding-useupdateyoutubelink-mutation-to-frontend-src-hooks-usequeries-ts",
+      "title": "Add a YouTube Link field to the Admin Dashboard (/admin) CMS. It must be a text input pre-populated with the current youtubeLink value from getContent(), with a Save button that calls updateYoutubeLink() and then invalidates/refetches the content query. Add the corresponding useUpdateYoutubeLink mutation to frontend/src/hooks/useQueries.ts.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-videosection-component-on-press-kit-to-use-the-youtubelink-value-from-the-global-content-query-returned-by-getcontent-instead-of-a-hardcoded-youtube-url-when-the-user-clicks-the-video-thumbnail-play-button-the-embedded-youtube-iframe-must-use-this-admin-editable-link",
+      "title": "Update the VideoSection component on /press-kit to use the youtubeLink value from the global content query (returned by getContent()) instead of a hardcoded YouTube URL. When the user clicks the video thumbnail play button, the embedded YouTube iframe must use this admin-editable link.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Internet Identity authentication on /admin only; first principal becomes permanent admin, all others rejected",
-      "reqIds": [],
-      "status": "pending"
-    },
     {
       "id": "AR-2",
       "summary": "Password protection system: admin can enable/disable, SHA-256 hashed password stored in stable storage, password gate modal on /press-kit",
@@ -168,22 +242,6 @@
       "status": "pending"
     },
     {
-      "id": "AR-12",
-      "summary": "Implement initializeAdmin() backend method: if no admin principal is stored, save the calling principal as the permanent admin and return #ok. If an admin already exists and the calling principal matches, return #ok (already admin). If an admin exists and calling principal does not match, return #err with message 'Access denied: This press kit is owned by another admin principal.'",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Implement verifyAdmin() backend query method: returns #ok(true) if the calling principal matches the stored admin principal, #ok(false) if no admin is set yet, and #err with denial message if a different principal is stored.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
       "id": "AR-14",
       "summary": "Implement enablePasswordProtection(password: Text) backend update method (admin only): hash the provided password using SHA-256, store the hash in stable passwordHash variable, set passwordEnabled to true. Reject with error if caller is not the admin.",
       "reqIds": [
@@ -224,34 +282,64 @@
       "status": "pending"
     },
     {
-      "id": "AR-19",
-      "summary": "Fix the backend admin authorization check so that authenticated admin update calls are correctly accepted. The root cause is that the actor's update methods are rejecting the authenticated principal even though it matches the stored adminPrincipal. Audit the isAdmin() / caller verification logic in backend/main.mo: ensure that the caller principal passed to each update method (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) is compared correctly against the stored adminPrincipal option value, with no anonymous-principal false-positive rejections.",
+      "id": "AR-26",
+      "summary": "Implement claimAdmin() backend method: the very first authenticated II principal to call it becomes the permanent admin stored in stable storage. Subsequent calls are rejected. Only the claimed admin principal can call CMS update methods. The admin principal cannot be changed unless the canister is reset.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Update /admin frontend flow: after II login, call claimAdmin() if no admin is yet registered (first visitor). If claimAdmin succeeds or the current principal is already the admin, show the full CMS dashboard. If an admin is already registered and the current principal is NOT the admin, show an 'Access Denied' message with no CMS controls.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Implement a claimAdmin() backend method in main.mo: the very first authenticated Internet Identity principal to call it becomes the permanent admin, stored in a stable variable (e.g., adminPrincipal: ?Principal). Subsequent calls from any other principal must be rejected with an error (e.g., 'Admin already claimed'). If the caller is already the registered admin, the call should be idempotent (succeed without error). The adminPrincipal must persist across canister upgrades via stable storage and cannot be changed unless the canister is reset.",
       "reqIds": [
-        "REQ-19"
+        "REQ-26"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-20",
-      "summary": "Fix the frontend actor instantiation in useActor.ts to ensure that when a user is authenticated via Internet Identity, the actor is always created with the authenticated identity (not the anonymous identity). The actor used for all CMS mutation calls in useQueries.ts must carry the authenticated principal so the backend receives the correct caller. Verify that the actor is re-created and query cache is invalidated whenever the identity changes from anonymous to authenticated.",
+      "id": "AR-29",
+      "summary": "Enforce admin-only authorization on all CMS update methods in main.mo (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection). Each method must verify that msg.caller equals the stored adminPrincipal before persisting changes; reject with an 'Access denied' error otherwise.",
       "reqIds": [
-        "REQ-20"
+        "REQ-27"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-21",
-      "summary": "Fix frontend actor instantiation in useActor.ts so that after Internet Identity authentication succeeds, the ICP actor is always re-created using the authenticated identity object (not the anonymous identity). The actor instance must be invalidated and re-created whenever the identity transitions from anonymous to authenticated. All mutation calls in useQueries.ts must use this authenticated actor so the backend receives the correct caller principal.",
+      "id": "AR-30",
+      "summary": "Add a getAdminStatus() backend query method that returns a record indicating whether an admin has been claimed and whether the caller is that admin. Example: { adminClaimed: Bool; callerIsAdmin: Bool }. This allows the frontend to determine the registration state without exposing the stored principal directly.",
       "reqIds": [
-        "REQ-21"
+        "REQ-28"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-22",
-      "summary": "Fix the backend isAdmin authorization logic in backend/main.mo so that update methods correctly accept the authenticated admin principal. Audit the isAdmin() / caller verification function: ensure the stored adminPrincipal Option value is properly unwrapped before comparison, that no code path falls through to an anonymous-principal false-positive rejection, and that every admin-only update method (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) uses this corrected check.",
+      "id": "AR-31",
+      "summary": "Remove 'Poke A Nose' text from the header on all pages. On the landing page (/): remove the newsletter/subscribe section and the description paragraph. Make the game logo (gamelogo.png) display at full size and be fully responsive on mobile and desktop. On /press-kit: remove the 'Poke A Nose' hero text and the 'A hand-drawn point-and-click adventure' tagline text, and show the gamelogo.png PNG instead.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Make the landing page game logo (gamelogo.png) slightly smaller — it is currently too large on desktop.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Add a YouTube video link field to the CMS: admin can edit the YouTube URL for the press kit video section via the admin dashboard. Store in backend stable storage and return via getContent(). The press kit video section must use this admin-editable link instead of a hardcoded URL.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Add a stable text variable `youtubeLink` to the backend actor in backend/main.mo, initialized to 'https://youtu.be/5in-hIASH08'. Include it in the record returned by getContent(). Add an admin-only update method updateYoutubeLink(link: Text) that verifies the caller is the registered admin before persisting the new value. Reject with 'Access denied' otherwise.",
       "reqIds": [
-        "REQ-22"
+        "REQ-35"
       ],
       "status": "pending"
     }

@@ -1,40 +1,77 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T07:51:27.949Z",
+  "generatedAt": "2026-02-28T14:53:07.906Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 0,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-21",
-        "summary": "Fix frontend actor instantiation in useActor.ts so that after Internet Identity authentication succeeds, the ICP actor is always re-created using the authenticated identity object (not the anonymous identity). The actor instance must be invalidated and re-created whenever the identity transitions from anonymous to authenticated. All mutation calls in useQueries.ts must use this authenticated actor so the backend receives the correct caller principal.",
-        "status": "missing",
+        "id": "REQ-34",
+        "summary": "On the landing page (/), reduce the game logo (gamelogo.png) size so it appears noticeably smaller than its current size on desktop. It should still be responsive (scaling down on mobile/tablet with max-width: 100% and auto height), but the desktop maximum size must be reduced — use a max-width in the range of 480px–560px (down from the current full natural width) so it no longer dominates the viewport.",
+        "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useActor.ts",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/pages/LandingPage.tsx"
         ],
-        "matchedFiles": []
+        "matchedFiles": [
+          "frontend/src/pages/LandingPage.tsx"
+        ]
       },
       {
-        "id": "REQ-22",
-        "summary": "Fix the backend isAdmin authorization logic in backend/main.mo so that update methods correctly accept the authenticated admin principal. Audit the isAdmin() / caller verification function: ensure the stored adminPrincipal Option value is properly unwrapped before comparison, that no code path falls through to an anonymous-principal false-positive rejection, and that every admin-only update method (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) uses this corrected check.",
+        "id": "REQ-35",
+        "summary": "Add a stable text variable `youtubeLink` to the backend actor in backend/main.mo, initialized to 'https://youtu.be/5in-hIASH08'. Include it in the record returned by getContent(). Add an admin-only update method updateYoutubeLink(link: Text) that verifies the caller is the registered admin before persisting the new value. Reject with 'Access denied' otherwise.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
+      },
+      {
+        "id": "REQ-36",
+        "summary": "Add a YouTube Link field to the Admin Dashboard (/admin) CMS. It must be a text input pre-populated with the current youtubeLink value from getContent(), with a Save button that calls updateYoutubeLink() and then invalidates/refetches the content query. Add the corresponding useUpdateYoutubeLink mutation to frontend/src/hooks/useQueries.ts.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminDashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminDashboard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-37",
+        "summary": "Update the VideoSection component on /press-kit to use the youtubeLink value from the global content query (returned by getContent()) instead of a hardcoded YouTube URL. When the user clicks the video thumbnail play button, the embedded YouTube iframe must use this admin-editable link.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/VideoSection.tsx",
+          "frontend/src/pages/PressKitPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/VideoSection.tsx",
+          "frontend/src/pages/PressKitPage.tsx"
+        ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/VideoSection.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminDashboard.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/PressKitPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

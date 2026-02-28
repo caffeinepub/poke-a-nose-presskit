@@ -12,9 +12,14 @@ export interface GameDetails {
     platforms: string;
     releaseDate: string;
 }
+export interface AdminStatus {
+    adminClaimed: boolean;
+    callerIsAdmin: boolean;
+}
 export interface Content {
     features: Array<string>;
     instagramLink: string;
+    youtubeLink: string;
     pressEmail: string;
     bodyTextColorHex: string;
     developerWebsite: string;
@@ -33,95 +38,23 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    deleteCallerUserProfile(): Promise<void>;
-    disablePasswordProtection(): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    enablePasswordProtection(password: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
+    claimAdmin(): Promise<void>;
+    disablePasswordProtection(): Promise<void>;
+    enablePasswordProtection(password: string): Promise<void>;
+    getAdminStatus(): Promise<AdminStatus>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getContent(): Promise<Content>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
-    initializeAdmin(): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    updateAbout(text: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateBodyTextColor(colorHex: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateDeveloperWebsite(link: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateFeatures(newFeatures: Array<string>): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateGameDetails(genre: string, platforms: string, releaseDate: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateInstagram(link: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updatePressEmail(email: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    verifyAdmin(): Promise<{
-        __kind__: "ok";
-        ok: boolean;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    verifyPassword(password: string): Promise<{
-        __kind__: "ok";
-        ok: boolean;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
+    updateAbout(text: string): Promise<void>;
+    updateBodyTextColor(colorHex: string): Promise<void>;
+    updateDeveloperWebsite(link: string): Promise<void>;
+    updateFeatures(newFeatures: Array<string>): Promise<void>;
+    updateGameDetails(genre: string, platforms: string, releaseDate: string): Promise<void>;
+    updateInstagram(link: string): Promise<void>;
+    updatePressEmail(email: string): Promise<void>;
+    updateYoutubeLink(link: string): Promise<void>;
+    verifyPassword(password: string): Promise<boolean>;
 }

@@ -1,576 +1,647 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
-import { useActor } from '../hooks/useActor';
-import { useContent } from '../hooks/useQueries';
 import {
+  useContent,
+  useGetAdminStatus,
+  useClaimAdmin,
   useUpdateAbout,
   useUpdateFeatures,
   useUpdateGameDetails,
   useUpdateInstagram,
+  useUpdateYoutubeLink,
   useUpdateDeveloperWebsite,
   useUpdatePressEmail,
   useUpdateBodyTextColor,
   useEnablePasswordProtection,
   useDisablePasswordProtection,
 } from '../hooks/useQueries';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { LogIn, LogOut, Check, AlertCircle, Lock, Unlock } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
-type AdminStatus = 'idle' | 'checking' | 'authorized' | 'denied' | 'error';
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
-
-interface SaveFeedbackProps {
-  status: SaveStatus;
+interface SaveFeedback {
+  field: string;
+  status: 'saving' | 'saved' | 'error';
   errorMsg?: string;
 }
 
-function SaveFeedback({ status, errorMsg }: SaveFeedbackProps) {
-  if (status === 'idle') return null;
-  if (status === 'saving') return <span className="text-xs opacity-50 ml-2">Saving…</span>;
-  if (status === 'saved') return <span className="text-xs text-green-600 ml-2 flex items-center gap-1"><Check size={12} /> Saved</span>;
-  if (status === 'error') return <span className="text-xs text-red-500 ml-2">{errorMsg || 'Error'}</span>;
-  return null;
-}
-
 export default function AdminDashboard() {
-  const { identity, login, clear, isLoggingIn, isInitializing } = useInternetIdentity();
-  const { actor } = useActor();
+  const { identity, login, clear, loginStatus } = useInternetIdentity();
   const queryClient = useQueryClient();
-  const { data: content, isLoading: contentLoading } = useContent();
+  const { isDark, toggleTheme } = useTheme();
 
-  const [adminStatus, setAdminStatus] = useState<AdminStatus>('idle');
-  const [adminError, setAdminError] = useState('');
+  const isAuthenticated = !!identity;
+  const isLoggingIn = loginStatus === 'logging-in';
 
-  // Form states
-  const [about, setAbout] = useState('');
+  const [saveFeedback, setSaveFeedback] = useState<SaveFeedback | null>(null);
+
+  // Content state
+  const [aboutText, setAboutText] = useState('');
   const [features, setFeatures] = useState<string[]>(['', '', '', '']);
   const [genre, setGenre] = useState('');
   const [platforms, setPlatforms] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
-  const [instagram, setInstagram] = useState('');
-  const [devWebsite, setDevWebsite] = useState('');
+  const [instagramLink, setInstagramLink] = useState('');
+  const [youtubeLink, setYoutubeLink] = useState('');
+  const [developerWebsite, setDeveloperWebsite] = useState('');
   const [pressEmail, setPressEmail] = useState('');
-  const [bodyColor, setBodyColor] = useState('#111111');
+  const [bodyTextColor, setBodyTextColor] = useState('#000000');
+  const [passwordEnabled, setPasswordEnabled] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [contentLoaded, setContentLoaded] = useState(false);
 
-  // Save feedback states
-  const [aboutStatus, setAboutStatus] = useState<SaveStatus>('idle');
-  const [aboutErr, setAboutErr] = useState('');
-  const [featuresStatus, setFeaturesStatus] = useState<SaveStatus>('idle');
-  const [featuresErr, setFeaturesErr] = useState('');
-  const [detailsStatus, setDetailsStatus] = useState<SaveStatus>('idle');
-  const [detailsErr, setDetailsErr] = useState('');
-  const [instagramStatus, setInstagramStatus] = useState<SaveStatus>('idle');
-  const [instagramErr, setInstagramErr] = useState('');
-  const [devStatus, setDevStatus] = useState<SaveStatus>('idle');
-  const [devErr, setDevErr] = useState('');
-  const [emailStatus, setEmailStatus] = useState<SaveStatus>('idle');
-  const [emailErr, setEmailErr] = useState('');
-  const [colorStatus, setColorStatus] = useState<SaveStatus>('idle');
-  const [colorErr, setColorErr] = useState('');
-  const [pwStatus, setPwStatus] = useState<SaveStatus>('idle');
-  const [pwError, setPwError] = useState('');
+  const { data: content } = useContent();
+
+  // Admin status — only fetch when authenticated
+  const {
+    data: adminStatus,
+    isLoading: adminStatusLoading,
+    isFetched: adminStatusFetched,
+  } = useGetAdminStatus();
+
+  const claimAdmin = useClaimAdmin();
 
   const updateAbout = useUpdateAbout();
   const updateFeatures = useUpdateFeatures();
   const updateGameDetails = useUpdateGameDetails();
   const updateInstagram = useUpdateInstagram();
+  const updateYoutubeLinkMutation = useUpdateYoutubeLink();
   const updateDeveloperWebsite = useUpdateDeveloperWebsite();
   const updatePressEmail = useUpdatePressEmail();
   const updateBodyTextColor = useUpdateBodyTextColor();
   const enablePassword = useEnablePasswordProtection();
   const disablePassword = useDisablePasswordProtection();
 
-  // Populate form from content
+  // Auto-claim admin if no admin has been claimed yet
   useEffect(() => {
-    if (content) {
-      setAbout(content.aboutText || '');
-      const f = [...(content.features || [])];
-      while (f.length < 4) f.push('');
-      setFeatures(f.slice(0, 4));
+    if (
+      isAuthenticated &&
+      adminStatusFetched &&
+      adminStatus &&
+      !adminStatus.adminClaimed &&
+      !claimAdmin.isPending &&
+      !claimAdmin.isSuccess &&
+      !claimAdmin.isError
+    ) {
+      claimAdmin.mutate();
+    }
+  }, [isAuthenticated, adminStatusFetched, adminStatus, claimAdmin]);
+
+  // Load content into form when available
+  useEffect(() => {
+    if (content && !contentLoaded) {
+      setAboutText(content.aboutText || '');
+      const featureArr = [...(content.features || [])];
+      while (featureArr.length < 4) featureArr.push('');
+      setFeatures(featureArr.slice(0, 4));
       setGenre(content.gameDetails?.genre || '');
       setPlatforms(content.gameDetails?.platforms || '');
       setReleaseDate(content.gameDetails?.releaseDate || '');
-      setInstagram(content.instagramLink || '');
-      setDevWebsite(content.developerWebsite || '');
+      setInstagramLink(content.instagramLink || '');
+      setYoutubeLink(content.youtubeLink || '');
+      setDeveloperWebsite(content.developerWebsite || '');
       setPressEmail(content.pressEmail || '');
-      setBodyColor(content.bodyTextColorHex || '#111111');
+      setBodyTextColor(content.bodyTextColorHex || '#000000');
+      setPasswordEnabled(content.passwordEnabled || false);
+      setContentLoaded(true);
     }
-  }, [content]);
+  }, [content, contentLoaded]);
 
-  // Initialize admin after login
+  // Reset content loaded flag when user logs out so it reloads on next login
   useEffect(() => {
-    if (!identity || !actor) return;
-    if (adminStatus === 'authorized' || adminStatus === 'checking') return;
-
-    setAdminStatus('checking');
-    actor.initializeAdmin().then(result => {
-      if (result.__kind__ === 'ok') {
-        setAdminStatus('authorized');
-      } else {
-        setAdminStatus('denied');
-        setAdminError(result.err);
-      }
-    }).catch((err: unknown) => {
-      setAdminStatus('error');
-      setAdminError(err instanceof Error ? err.message : 'Unknown error');
-    });
-  }, [identity, actor, adminStatus]);
-
-  // Reset admin status on logout
-  useEffect(() => {
-    if (!identity) {
-      setAdminStatus('idle');
-      setAdminError('');
+    if (!isAuthenticated) {
+      setContentLoaded(false);
     }
-  }, [identity]);
-
-  const handleLogout = async () => {
-    await clear();
-    queryClient.clear();
-    setAdminStatus('idle');
-    setAdminError('');
-  };
+  }, [isAuthenticated]);
 
   const handleLogin = async () => {
     try {
       await login();
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message === 'User is already authenticated') {
+    } catch (error: unknown) {
+      const err = error as Error;
+      if (err?.message === 'User is already authenticated') {
         await clear();
         setTimeout(() => login(), 300);
       }
     }
   };
 
-  const withFeedback = async (
-    fn: () => Promise<void>,
-    setStatus: (s: SaveStatus) => void,
-    setErrMsg?: (e: string) => void
-  ) => {
-    setStatus('saving');
-    try {
-      await fn();
-      setStatus('saved');
-      setTimeout(() => setStatus('idle'), 2500);
-    } catch (err: unknown) {
-      setStatus('error');
-      setErrMsg?.(err instanceof Error ? err.message : 'Error');
-      setTimeout(() => setStatus('idle'), 3000);
+  const handleLogout = async () => {
+    await clear();
+    queryClient.clear();
+    setContentLoaded(false);
+  };
+
+  const showFeedback = (field: string, status: 'saving' | 'saved' | 'error', errorMsg?: string) => {
+    setSaveFeedback({ field, status, errorMsg });
+    if (status === 'saved') {
+      setTimeout(() => setSaveFeedback(null), 3000);
+    }
+    if (status === 'error') {
+      setTimeout(() => setSaveFeedback(null), 4000);
     }
   };
 
-  const isAuthenticated = !!identity;
+  const handleSaveAbout = async () => {
+    showFeedback('about', 'saving');
+    try {
+      await updateAbout.mutateAsync(aboutText);
+      showFeedback('about', 'saved');
+    } catch (err: unknown) {
+      showFeedback('about', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
 
+  const handleSaveFeatures = async () => {
+    showFeedback('features', 'saving');
+    try {
+      const filtered = features.filter(f => f.trim() !== '');
+      await updateFeatures.mutateAsync(filtered);
+      showFeedback('features', 'saved');
+    } catch (err: unknown) {
+      showFeedback('features', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
+  const handleSaveGameDetails = async () => {
+    showFeedback('gameDetails', 'saving');
+    try {
+      await updateGameDetails.mutateAsync({ genre, platforms, releaseDate });
+      showFeedback('gameDetails', 'saved');
+    } catch (err: unknown) {
+      showFeedback('gameDetails', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
+  const handleSaveInstagram = async () => {
+    showFeedback('instagram', 'saving');
+    try {
+      await updateInstagram.mutateAsync(instagramLink);
+      showFeedback('instagram', 'saved');
+    } catch (err: unknown) {
+      showFeedback('instagram', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
+  const handleSaveYoutubeLink = async () => {
+    showFeedback('youtubeLink', 'saving');
+    try {
+      await updateYoutubeLinkMutation.mutateAsync(youtubeLink);
+      showFeedback('youtubeLink', 'saved');
+    } catch (err: unknown) {
+      showFeedback('youtubeLink', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
+  const handleSaveDeveloperWebsite = async () => {
+    showFeedback('developerWebsite', 'saving');
+    try {
+      await updateDeveloperWebsite.mutateAsync(developerWebsite);
+      showFeedback('developerWebsite', 'saved');
+    } catch (err: unknown) {
+      showFeedback('developerWebsite', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
+  const handleSavePressEmail = async () => {
+    showFeedback('pressEmail', 'saving');
+    try {
+      await updatePressEmail.mutateAsync(pressEmail);
+      showFeedback('pressEmail', 'saved');
+    } catch (err: unknown) {
+      showFeedback('pressEmail', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
+  const handleSaveBodyTextColor = async () => {
+    showFeedback('bodyTextColor', 'saving');
+    try {
+      await updateBodyTextColor.mutateAsync(bodyTextColor);
+      showFeedback('bodyTextColor', 'saved');
+    } catch (err: unknown) {
+      showFeedback('bodyTextColor', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
+  const handleEnablePassword = async () => {
+    if (!newPassword.trim()) return;
+    showFeedback('password', 'saving');
+    try {
+      await enablePassword.mutateAsync(newPassword);
+      setPasswordEnabled(true);
+      setNewPassword('');
+      showFeedback('password', 'saved');
+    } catch (err: unknown) {
+      showFeedback('password', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
+  const handleDisablePassword = async () => {
+    showFeedback('password', 'saving');
+    try {
+      await disablePassword.mutateAsync();
+      setPasswordEnabled(false);
+      showFeedback('password', 'saved');
+    } catch (err: unknown) {
+      showFeedback('password', 'error', err instanceof Error ? err.message : 'Failed to disable');
+    }
+  };
+
+  const renderFeedback = (field: string) => {
+    if (!saveFeedback || saveFeedback.field !== field) return null;
+    const { status, errorMsg } = saveFeedback;
+    if (status === 'saving') return <span className="text-xs text-muted-foreground ml-2">Saving…</span>;
+    if (status === 'saved') return <span className="text-xs text-green-600 ml-2">✓ Saved</span>;
+    if (status === 'error') return <span className="text-xs text-red-500 ml-2">✗ {errorMsg || 'Error'}</span>;
+    return null;
+  };
+
+  // ── Login screen ──────────────────────────────────────────────────────────
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-card border border-border rounded-lg p-8 max-w-sm w-full mx-4 shadow-lg">
+          <h1 className="text-2xl font-heading font-bold text-foreground mb-2">CMS Login</h1>
+          <p className="text-muted-foreground text-sm mb-6">
+            Sign in with your Internet Identity to access the CMS dashboard.
+          </p>
+          <button
+            onClick={handleLogin}
+            disabled={isLoggingIn}
+            className="w-full bg-foreground text-background py-2.5 px-4 rounded font-medium hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {isLoggingIn ? 'Logging in…' : 'Login with Internet Identity'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Checking admin status / claiming admin ────────────────────────────────
+  const isCheckingAdmin = adminStatusLoading || !adminStatusFetched || claimAdmin.isPending;
+
+  if (isCheckingAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-card border border-border rounded-lg p-8 max-w-sm w-full mx-4 shadow-lg text-center">
+          <div className="flex justify-center mb-4">
+            <svg
+              className="animate-spin h-8 w-8 text-foreground"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            {claimAdmin.isPending ? 'Registering you as admin…' : 'Checking admin status…'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Access denied — another principal is already admin ────────────────────
+  if (adminStatus && adminStatus.adminClaimed && !adminStatus.callerIsAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-card border border-border rounded-lg p-8 max-w-sm w-full mx-4 shadow-lg text-center">
+          <div className="text-4xl mb-4">🔒</div>
+          <h1 className="text-xl font-heading font-bold text-foreground mb-2">Access Denied</h1>
+          <p className="text-muted-foreground text-sm mb-6">
+            This CMS is already claimed by another administrator. Only the registered admin can access the dashboard.
+          </p>
+          <button
+            onClick={handleLogout}
+            className="w-full bg-foreground text-background py-2.5 px-4 rounded font-medium hover:opacity-80 transition-opacity"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── claimAdmin error (race condition — re-check showed we're not admin) ───
+  if (claimAdmin.isError && adminStatus && !adminStatus.callerIsAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-card border border-border rounded-lg p-8 max-w-sm w-full mx-4 shadow-lg text-center">
+          <div className="text-4xl mb-4">🔒</div>
+          <h1 className="text-xl font-heading font-bold text-foreground mb-2">Access Denied</h1>
+          <p className="text-muted-foreground text-sm mb-6">
+            Another user claimed admin access just before you. Only the first registered admin can access the dashboard.
+          </p>
+          <button
+            onClick={handleLogout}
+            className="w-full bg-foreground text-background py-2.5 px-4 rounded font-medium hover:opacity-80 transition-opacity"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Dashboard (shown to the registered admin) ─────────────────────────────
   return (
     <div className="min-h-screen bg-background">
-      {/* Admin Header */}
-      <header className="border-b border-border px-6 py-4 flex items-center justify-between">
-        <h1 className="font-heading text-2xl">Admin Dashboard</h1>
-        {isAuthenticated && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLogout}
-            className="rounded-none gap-2 text-xs uppercase tracking-widest"
-          >
-            <LogOut size={14} />
-            Logout
-          </Button>
-        )}
+      {/* Header */}
+      <header className="border-b border-border bg-card sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-heading font-bold text-foreground">Press Kit CMS</h1>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+              title="Toggle theme"
+            >
+              {isDark ? '☀️' : '🌙'}
+            </button>
+            <span className="text-xs text-muted-foreground hidden sm:block">
+              {identity?.getPrincipal().toString().slice(0, 12)}…
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-muted-foreground hover:text-foreground underline transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
 
-        {/* ── Not logged in ── */}
-        {!isAuthenticated && (
-          <div className="flex flex-col items-center gap-6 py-16 text-center">
-            <div className="w-16 h-16 rounded-full border-2 border-foreground/20 flex items-center justify-center">
-              <Lock size={24} className="opacity-40" />
+        {/* About */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">About Text</h2>
+            {renderFeedback('about')}
+          </div>
+          <textarea
+            value={aboutText}
+            onChange={e => setAboutText(e.target.value)}
+            rows={5}
+            className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground resize-vertical focus:outline-none focus:ring-1 focus:ring-foreground"
+            placeholder="Describe your game…"
+          />
+          <button
+            onClick={handleSaveAbout}
+            disabled={updateAbout.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {updateAbout.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* Features */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">
+              Key Features <span className="text-xs font-normal text-muted-foreground">(max 4)</span>
+            </h2>
+            {renderFeedback('features')}
+          </div>
+          <div className="space-y-2">
+            {features.map((f, i) => (
+              <input
+                key={i}
+                value={f}
+                onChange={e => {
+                  const next = [...features];
+                  next[i] = e.target.value;
+                  setFeatures(next);
+                }}
+                className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                placeholder={`Feature ${i + 1}`}
+              />
+            ))}
+          </div>
+          <button
+            onClick={handleSaveFeatures}
+            disabled={updateFeatures.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {updateFeatures.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* Game Details */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">Game Details</h2>
+            {renderFeedback('gameDetails')}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Genre</label>
+              <input
+                value={genre}
+                onChange={e => setGenre(e.target.value)}
+                className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                placeholder="e.g. Puzzle"
+              />
             </div>
             <div>
-              <h2 className="font-heading text-3xl mb-2">Admin Access</h2>
-              <p className="font-body text-sm opacity-60 max-w-xs">
-                Login with Internet Identity to manage your press kit content.
-                The first login will register you as the permanent admin.
-              </p>
+              <label className="block text-xs text-muted-foreground mb-1">Platforms</label>
+              <input
+                value={platforms}
+                onChange={e => setPlatforms(e.target.value)}
+                className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                placeholder="e.g. PC, Mobile"
+              />
             </div>
-            <Button
-              onClick={handleLogin}
-              disabled={isLoggingIn || isInitializing}
-              className="rounded-none uppercase tracking-widest text-xs px-8 py-5 gap-2"
-            >
-              <LogIn size={14} />
-              {isLoggingIn ? 'Logging in…' : isInitializing ? 'Initializing…' : 'Login with Internet Identity'}
-            </Button>
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Release Date</label>
+              <input
+                value={releaseDate}
+                onChange={e => setReleaseDate(e.target.value)}
+                className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                placeholder="e.g. Q2 2025"
+              />
+            </div>
           </div>
-        )}
-
-        {/* ── Checking admin status ── */}
-        {isAuthenticated && adminStatus === 'checking' && (
-          <div className="flex items-center justify-center py-16">
-            <p className="font-body text-sm opacity-50">Verifying admin access…</p>
-          </div>
-        )}
-
-        {/* ── Access denied ── */}
-        {isAuthenticated && (adminStatus === 'denied' || adminStatus === 'error') && (
-          <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <AlertCircle size={32} className="text-red-500" />
-            <h2 className="font-heading text-2xl">Access Denied</h2>
-            <p className="font-body text-sm text-red-500 max-w-sm">{adminError}</p>
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="rounded-none text-xs uppercase tracking-widest gap-2 mt-2"
-            >
-              <LogOut size={14} />
-              Logout
-            </Button>
-          </div>
-        )}
-
-        {/* ── CMS Dashboard ── */}
-        {isAuthenticated && adminStatus === 'authorized' && (
-          <div className="space-y-8">
-            <p className="font-body text-xs opacity-40 uppercase tracking-widest">
-              Content Management
-            </p>
-
-            {contentLoading ? (
-              <p className="font-body text-sm opacity-50">Loading content…</p>
-            ) : (
-              <>
-                {/* About */}
-                <div className="admin-field-group">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="font-heading text-base">About the Game</Label>
-                    <SaveFeedback status={aboutStatus} errorMsg={aboutErr} />
-                  </div>
-                  <Textarea
-                    value={about}
-                    onChange={e => setAbout(e.target.value)}
-                    rows={5}
-                    className="rounded-none text-sm font-body resize-none"
-                    placeholder="Write about the game…"
-                  />
-                  <Button
-                    size="sm"
-                    className="mt-2 rounded-none text-xs uppercase tracking-widest"
-                    disabled={updateAbout.isPending}
-                    onClick={() => withFeedback(() => updateAbout.mutateAsync(about), setAboutStatus, setAboutErr)}
-                  >
-                    {updateAbout.isPending ? 'Saving…' : 'Save'}
-                  </Button>
-                </div>
-
-                <Separator />
-
-                {/* Features */}
-                <div className="admin-field-group">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="font-heading text-base">Features <span className="text-xs font-body opacity-40">(max 4)</span></Label>
-                    <SaveFeedback status={featuresStatus} errorMsg={featuresErr} />
-                  </div>
-                  <div className="space-y-2">
-                    {features.map((f, i) => (
-                      <div key={i} className="flex gap-2 items-center">
-                        <Input
-                          value={f}
-                          onChange={e => {
-                            const next = [...features];
-                            next[i] = e.target.value;
-                            setFeatures(next);
-                          }}
-                          className="rounded-none text-sm font-body"
-                          placeholder={`Feature ${i + 1}`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    size="sm"
-                    className="mt-2 rounded-none text-xs uppercase tracking-widest"
-                    disabled={updateFeatures.isPending}
-                    onClick={() => withFeedback(
-                      () => updateFeatures.mutateAsync(features.filter(f => f.trim() !== '')),
-                      setFeaturesStatus,
-                      setFeaturesErr
-                    )}
-                  >
-                    {updateFeatures.isPending ? 'Saving…' : 'Save'}
-                  </Button>
-                </div>
-
-                <Separator />
-
-                {/* Game Details */}
-                <div className="admin-field-group">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="font-heading text-base">Game Details</Label>
-                    <SaveFeedback status={detailsStatus} errorMsg={detailsErr} />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <Label className="text-xs font-body opacity-50 uppercase tracking-widest mb-1 block">Genre</Label>
-                      <Input value={genre} onChange={e => setGenre(e.target.value)} className="rounded-none text-sm" placeholder="e.g. Adventure" />
-                    </div>
-                    <div>
-                      <Label className="text-xs font-body opacity-50 uppercase tracking-widest mb-1 block">Platforms</Label>
-                      <Input value={platforms} onChange={e => setPlatforms(e.target.value)} className="rounded-none text-sm" placeholder="e.g. PC, Mac" />
-                    </div>
-                    <div>
-                      <Label className="text-xs font-body opacity-50 uppercase tracking-widest mb-1 block">Release Date</Label>
-                      <Input value={releaseDate} onChange={e => setReleaseDate(e.target.value)} className="rounded-none text-sm" placeholder="e.g. 2025" />
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    className="mt-2 rounded-none text-xs uppercase tracking-widest"
-                    disabled={updateGameDetails.isPending}
-                    onClick={() => withFeedback(
-                      () => updateGameDetails.mutateAsync({ genre, platforms, releaseDate }),
-                      setDetailsStatus,
-                      setDetailsErr
-                    )}
-                  >
-                    {updateGameDetails.isPending ? 'Saving…' : 'Save'}
-                  </Button>
-                </div>
-
-                <Separator />
-
-                {/* Instagram */}
-                <div className="admin-field-group">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="font-heading text-base">Instagram Link</Label>
-                    <SaveFeedback status={instagramStatus} errorMsg={instagramErr} />
-                  </div>
-                  <Input
-                    value={instagram}
-                    onChange={e => setInstagram(e.target.value)}
-                    className="rounded-none text-sm font-body"
-                    placeholder="https://instagram.com/yourhandle"
-                  />
-                  <Button
-                    size="sm"
-                    className="mt-2 rounded-none text-xs uppercase tracking-widest"
-                    disabled={updateInstagram.isPending}
-                    onClick={() => withFeedback(() => updateInstagram.mutateAsync(instagram), setInstagramStatus, setInstagramErr)}
-                  >
-                    {updateInstagram.isPending ? 'Saving…' : 'Save'}
-                  </Button>
-                </div>
-
-                <Separator />
-
-                {/* Developer Website */}
-                <div className="admin-field-group">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="font-heading text-base">Developer Website</Label>
-                    <SaveFeedback status={devStatus} errorMsg={devErr} />
-                  </div>
-                  <Input
-                    value={devWebsite}
-                    onChange={e => setDevWebsite(e.target.value)}
-                    className="rounded-none text-sm font-body"
-                    placeholder="https://yourstudio.com"
-                  />
-                  <Button
-                    size="sm"
-                    className="mt-2 rounded-none text-xs uppercase tracking-widest"
-                    disabled={updateDeveloperWebsite.isPending}
-                    onClick={() => withFeedback(() => updateDeveloperWebsite.mutateAsync(devWebsite), setDevStatus, setDevErr)}
-                  >
-                    {updateDeveloperWebsite.isPending ? 'Saving…' : 'Save'}
-                  </Button>
-                </div>
-
-                <Separator />
-
-                {/* Press Email */}
-                <div className="admin-field-group">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="font-heading text-base">Press &amp; Support Email</Label>
-                    <SaveFeedback status={emailStatus} errorMsg={emailErr} />
-                  </div>
-                  <Input
-                    value={pressEmail}
-                    onChange={e => setPressEmail(e.target.value)}
-                    className="rounded-none text-sm font-body"
-                    placeholder="press@yourstudio.com"
-                    type="email"
-                  />
-                  <Button
-                    size="sm"
-                    className="mt-2 rounded-none text-xs uppercase tracking-widest"
-                    disabled={updatePressEmail.isPending}
-                    onClick={() => withFeedback(() => updatePressEmail.mutateAsync(pressEmail), setEmailStatus, setEmailErr)}
-                  >
-                    {updatePressEmail.isPending ? 'Saving…' : 'Save'}
-                  </Button>
-                </div>
-
-                <Separator />
-
-                {/* Body Text Color */}
-                <div className="admin-field-group">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="font-heading text-base">
-                      Body Text Color{' '}
-                      <span className="text-xs font-body opacity-40">(Light Mode Only)</span>
-                    </Label>
-                    <SaveFeedback status={colorStatus} errorMsg={colorErr} />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="color"
-                      value={bodyColor}
-                      onChange={e => setBodyColor(e.target.value)}
-                      className="w-10 h-10 cursor-pointer border border-border rounded-none"
-                    />
-                    <Input
-                      value={bodyColor}
-                      onChange={e => setBodyColor(e.target.value)}
-                      className="rounded-none text-sm font-body w-32"
-                      placeholder="#111111"
-                    />
-                  </div>
-                  <Button
-                    size="sm"
-                    className="mt-2 rounded-none text-xs uppercase tracking-widest"
-                    disabled={updateBodyTextColor.isPending}
-                    onClick={() => withFeedback(() => updateBodyTextColor.mutateAsync(bodyColor), setColorStatus, setColorErr)}
-                  >
-                    {updateBodyTextColor.isPending ? 'Saving…' : 'Save'}
-                  </Button>
-                </div>
-
-                <Separator />
-
-                {/* Password Protection */}
-                <div className="admin-field-group">
-                  <Label className="font-heading text-base block mb-3">Password Protection</Label>
-
-                  <div className="flex items-center gap-3 mb-4 p-3 bg-muted/50">
-                    {content?.passwordEnabled ? (
-                      <>
-                        <Lock size={16} className="text-foreground" />
-                        <span className="font-body text-sm">
-                          Status: <strong>Enabled</strong>
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Unlock size={16} className="opacity-50" />
-                        <span className="font-body text-sm opacity-60">
-                          Status: <strong>Disabled</strong> — Press kit is publicly accessible
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  {content?.passwordEnabled ? (
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-xs font-body opacity-50 uppercase tracking-widest mb-1 block">
-                          Change Password
-                        </Label>
-                        <Input
-                          type="password"
-                          value={newPassword}
-                          onChange={e => setNewPassword(e.target.value)}
-                          className="rounded-none text-sm font-body"
-                          placeholder="New password"
-                        />
-                      </div>
-                      {pwStatus === 'error' && <p className="text-xs text-red-500">{pwError}</p>}
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="rounded-none text-xs uppercase tracking-widest"
-                          disabled={enablePassword.isPending || !newPassword}
-                          onClick={() => withFeedback(
-                            () => enablePassword.mutateAsync(newPassword).then(() => setNewPassword('')),
-                            setPwStatus,
-                            setPwError
-                          )}
-                        >
-                          {enablePassword.isPending ? 'Saving…' : 'Change Password'}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="rounded-none text-xs uppercase tracking-widest"
-                          disabled={disablePassword.isPending}
-                          onClick={() => withFeedback(
-                            () => disablePassword.mutateAsync(),
-                            setPwStatus,
-                            setPwError
-                          )}
-                        >
-                          {disablePassword.isPending ? 'Disabling…' : 'Disable Protection'}
-                        </Button>
-                      </div>
-                      {pwStatus === 'saved' && <p className="text-xs text-green-600 flex items-center gap-1"><Check size={12} /> Saved</p>}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-xs font-body opacity-50 uppercase tracking-widest mb-1 block">
-                          Set Password to Enable Protection
-                        </Label>
-                        <Input
-                          type="password"
-                          value={newPassword}
-                          onChange={e => setNewPassword(e.target.value)}
-                          className="rounded-none text-sm font-body"
-                          placeholder="Enter a password"
-                        />
-                      </div>
-                      {pwStatus === 'error' && <p className="text-xs text-red-500">{pwError}</p>}
-                      <Button
-                        size="sm"
-                        className="rounded-none text-xs uppercase tracking-widest"
-                        disabled={enablePassword.isPending || !newPassword}
-                        onClick={() => withFeedback(
-                          () => enablePassword.mutateAsync(newPassword).then(() => setNewPassword('')),
-                          setPwStatus,
-                          setPwError
-                        )}
-                      >
-                        {enablePassword.isPending ? 'Enabling…' : 'Enable Password Protection'}
-                      </Button>
-                      {pwStatus === 'saved' && <p className="text-xs text-green-600 flex items-center gap-1"><Check size={12} /> Saved</p>}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <footer className="py-4 px-6 text-center border-t border-border mt-8">
-        <p className="font-body text-xs opacity-30">
-          © {new Date().getFullYear()} Poke A Nose &mdash; Built with{' '}
-          <span className="text-red-400">♥</span> using{' '}
-          <a
-            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname || 'poke-a-nose-presskit')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:opacity-70"
+          <button
+            onClick={handleSaveGameDetails}
+            disabled={updateGameDetails.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
           >
-            caffeine.ai
-          </a>
-        </p>
-      </footer>
+            {updateGameDetails.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* Instagram */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">Instagram Link</h2>
+            {renderFeedback('instagram')}
+          </div>
+          <input
+            value={instagramLink}
+            onChange={e => setInstagramLink(e.target.value)}
+            className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+            placeholder="https://instagram.com/yourgame"
+          />
+          <button
+            onClick={handleSaveInstagram}
+            disabled={updateInstagram.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {updateInstagram.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* YouTube Link */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">YouTube Link</h2>
+            {renderFeedback('youtubeLink')}
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            The YouTube video shown in the press kit. Accepts youtu.be short links or full youtube.com/watch URLs.
+          </p>
+          <input
+            value={youtubeLink}
+            onChange={e => setYoutubeLink(e.target.value)}
+            className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+            placeholder="https://youtu.be/XXXXXXXXXXX"
+          />
+          <button
+            onClick={handleSaveYoutubeLink}
+            disabled={updateYoutubeLinkMutation.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {updateYoutubeLinkMutation.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* Developer Website */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">Developer Website</h2>
+            {renderFeedback('developerWebsite')}
+          </div>
+          <input
+            value={developerWebsite}
+            onChange={e => setDeveloperWebsite(e.target.value)}
+            className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+            placeholder="https://yourstudio.com"
+          />
+          <button
+            onClick={handleSaveDeveloperWebsite}
+            disabled={updateDeveloperWebsite.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {updateDeveloperWebsite.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* Press Email */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">Press Email</h2>
+            {renderFeedback('pressEmail')}
+          </div>
+          <input
+            value={pressEmail}
+            onChange={e => setPressEmail(e.target.value)}
+            type="email"
+            className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+            placeholder="press@yourstudio.com"
+          />
+          <button
+            onClick={handleSavePressEmail}
+            disabled={updatePressEmail.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {updatePressEmail.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* Body Text Color */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">Body Text Color</h2>
+            {renderFeedback('bodyTextColor')}
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              value={bodyTextColor}
+              onChange={e => setBodyTextColor(e.target.value)}
+              className="w-10 h-10 rounded border border-border cursor-pointer bg-background"
+            />
+            <input
+              value={bodyTextColor}
+              onChange={e => setBodyTextColor(e.target.value)}
+              className="flex-1 bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+              placeholder="#000000"
+            />
+          </div>
+          <button
+            onClick={handleSaveBodyTextColor}
+            disabled={updateBodyTextColor.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {updateBodyTextColor.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* Password Protection */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-heading font-semibold text-foreground">
+              Password Protection
+              <span className={`ml-2 text-xs font-normal px-2 py-0.5 rounded-full ${passwordEnabled ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-muted text-muted-foreground'}`}>
+                {passwordEnabled ? 'Enabled' : 'Disabled'}
+              </span>
+            </h2>
+            {renderFeedback('password')}
+          </div>
+
+          {passwordEnabled ? (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                The press kit is currently password protected. Disable it to allow public access.
+              </p>
+              <button
+                onClick={handleDisablePassword}
+                disabled={disablePassword.isPending}
+                className="bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+              >
+                {disablePassword.isPending ? 'Disabling…' : 'Disable Password Protection'}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Set a password to restrict access to the press kit.
+              </p>
+              <input
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                type="password"
+                className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                placeholder="Enter new password…"
+              />
+              <button
+                onClick={handleEnablePassword}
+                disabled={enablePassword.isPending || !newPassword.trim()}
+                className="bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+              >
+                {enablePassword.isPending ? 'Enabling…' : 'Enable Password Protection'}
+              </button>
+            </div>
+          )}
+        </section>
+
+      </main>
     </div>
   );
 }

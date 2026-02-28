@@ -24,6 +24,10 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const AdminStatus = IDL.Record({
+  'adminClaimed' : IDL.Bool,
+  'callerIsAdmin' : IDL.Bool,
+});
 export const UserProfile = IDL.Record({
   'principal' : IDL.Principal,
   'name' : IDL.Text,
@@ -36,6 +40,7 @@ export const GameDetails = IDL.Record({
 export const Content = IDL.Record({
   'features' : IDL.Vec(IDL.Text),
   'instagramLink' : IDL.Text,
+  'youtubeLink' : IDL.Text,
   'pressEmail' : IDL.Text,
   'bodyTextColorHex' : IDL.Text,
   'developerWebsite' : IDL.Text,
@@ -73,17 +78,10 @@ export const idlService = IDL.Service({
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'deleteCallerUserProfile' : IDL.Func([], [], []),
-  'disablePasswordProtection' : IDL.Func(
-      [],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
-  'enablePasswordProtection' : IDL.Func(
-      [IDL.Text],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
+  'claimAdmin' : IDL.Func([], [], []),
+  'disablePasswordProtection' : IDL.Func([], [], []),
+  'enablePasswordProtection' : IDL.Func([IDL.Text], [], []),
+  'getAdminStatus' : IDL.Func([], [AdminStatus], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getContent' : IDL.Func([], [Content], ['query']),
@@ -92,58 +90,17 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
-  'initializeAdmin' : IDL.Func(
-      [],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-  'updateAbout' : IDL.Func(
-      [IDL.Text],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
-  'updateBodyTextColor' : IDL.Func(
-      [IDL.Text],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
-  'updateDeveloperWebsite' : IDL.Func(
-      [IDL.Text],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
-  'updateFeatures' : IDL.Func(
-      [IDL.Vec(IDL.Text)],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
-  'updateGameDetails' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Text],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
-  'updateInstagram' : IDL.Func(
-      [IDL.Text],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
-  'updatePressEmail' : IDL.Func(
-      [IDL.Text],
-      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-      [],
-    ),
-  'verifyAdmin' : IDL.Func(
-      [],
-      [IDL.Variant({ 'ok' : IDL.Bool, 'err' : IDL.Text })],
-      ['query'],
-    ),
-  'verifyPassword' : IDL.Func(
-      [IDL.Text],
-      [IDL.Variant({ 'ok' : IDL.Bool, 'err' : IDL.Text })],
-      ['query'],
-    ),
+  'updateAbout' : IDL.Func([IDL.Text], [], []),
+  'updateBodyTextColor' : IDL.Func([IDL.Text], [], []),
+  'updateDeveloperWebsite' : IDL.Func([IDL.Text], [], []),
+  'updateFeatures' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
+  'updateGameDetails' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+  'updateInstagram' : IDL.Func([IDL.Text], [], []),
+  'updatePressEmail' : IDL.Func([IDL.Text], [], []),
+  'updateYoutubeLink' : IDL.Func([IDL.Text], [], []),
+  'verifyPassword' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
 });
 
 export const idlInitArgs = [];
@@ -165,6 +122,10 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const AdminStatus = IDL.Record({
+    'adminClaimed' : IDL.Bool,
+    'callerIsAdmin' : IDL.Bool,
+  });
   const UserProfile = IDL.Record({
     'principal' : IDL.Principal,
     'name' : IDL.Text,
@@ -177,6 +138,7 @@ export const idlFactory = ({ IDL }) => {
   const Content = IDL.Record({
     'features' : IDL.Vec(IDL.Text),
     'instagramLink' : IDL.Text,
+    'youtubeLink' : IDL.Text,
     'pressEmail' : IDL.Text,
     'bodyTextColorHex' : IDL.Text,
     'developerWebsite' : IDL.Text,
@@ -214,17 +176,10 @@ export const idlFactory = ({ IDL }) => {
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'deleteCallerUserProfile' : IDL.Func([], [], []),
-    'disablePasswordProtection' : IDL.Func(
-        [],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
-    'enablePasswordProtection' : IDL.Func(
-        [IDL.Text],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
+    'claimAdmin' : IDL.Func([], [], []),
+    'disablePasswordProtection' : IDL.Func([], [], []),
+    'enablePasswordProtection' : IDL.Func([IDL.Text], [], []),
+    'getAdminStatus' : IDL.Func([], [AdminStatus], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getContent' : IDL.Func([], [Content], ['query']),
@@ -233,58 +188,17 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
-    'initializeAdmin' : IDL.Func(
-        [],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-    'updateAbout' : IDL.Func(
-        [IDL.Text],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
-    'updateBodyTextColor' : IDL.Func(
-        [IDL.Text],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
-    'updateDeveloperWebsite' : IDL.Func(
-        [IDL.Text],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
-    'updateFeatures' : IDL.Func(
-        [IDL.Vec(IDL.Text)],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
-    'updateGameDetails' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Text],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
-    'updateInstagram' : IDL.Func(
-        [IDL.Text],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
-    'updatePressEmail' : IDL.Func(
-        [IDL.Text],
-        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
-        [],
-      ),
-    'verifyAdmin' : IDL.Func(
-        [],
-        [IDL.Variant({ 'ok' : IDL.Bool, 'err' : IDL.Text })],
-        ['query'],
-      ),
-    'verifyPassword' : IDL.Func(
-        [IDL.Text],
-        [IDL.Variant({ 'ok' : IDL.Bool, 'err' : IDL.Text })],
-        ['query'],
-      ),
+    'updateAbout' : IDL.Func([IDL.Text], [], []),
+    'updateBodyTextColor' : IDL.Func([IDL.Text], [], []),
+    'updateDeveloperWebsite' : IDL.Func([IDL.Text], [], []),
+    'updateFeatures' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
+    'updateGameDetails' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+    'updateInstagram' : IDL.Func([IDL.Text], [], []),
+    'updatePressEmail' : IDL.Func([IDL.Text], [], []),
+    'updateYoutubeLink' : IDL.Func([IDL.Text], [], []),
+    'verifyPassword' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   });
 };
 

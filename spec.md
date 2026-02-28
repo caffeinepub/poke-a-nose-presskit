@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the admin authentication pipeline so that authenticated Internet Identity principals are correctly wired through the frontend actor and properly verified in the backend authorization check.
+**Goal:** Reduce the landing page game logo size and add an admin-editable YouTube link field to the CMS, wiring it through to the press kit video section.
 
 **Planned changes:**
-- Update `useActor.ts` to always re-create the ICP actor with the authenticated identity after Internet Identity login, invalidating any cached anonymous-identity actor
-- Ensure all CMS mutation calls in `useQueries.ts` use the authenticated actor instance
-- Fix the `isAdmin()` function in `backend/main.mo` to correctly unwrap the `?Principal` option type before comparing to `msg.caller`
-- Verify all admin-only update methods (`updateAbout`, `updateFeatures`, `updateGameDetails`, `updateInstagram`, `updateDeveloperWebsite`, `updatePressEmail`, `updateBodyTextColor`, `enablePasswordProtection`, `disablePasswordProtection`) use the corrected authorization check
+- Reduce the game logo (`gamelogo.png`) max-width on desktop to the 480px–560px range on the landing page (`/`), while keeping it responsive with `max-width: 100%` and auto height on smaller screens; preserve the dark mode inversion filter
+- Add a stable `youtubeLink` variable to `backend/main.mo` initialized to `'https://youtu.be/5in-hIASH08'`, include it in `getContent()`, and add an admin-only `updateYoutubeLink(link: Text)` method
+- Add a `useUpdateYoutubeLink` mutation to `frontend/src/hooks/useQueries.ts`
+- Add a "YouTube Link" text input field with a Save button to the Admin Dashboard (`/admin`) CMS section, pre-populated from `getContent()`, calling `updateYoutubeLink()` on save and refetching content afterward with success/error feedback
+- Update the `VideoSection` component on `/press-kit` to use `youtubeLink` from the content query instead of a hardcoded URL, with a graceful fallback if the value is empty
 
-**User-visible outcome:** After logging in via Internet Identity on `/admin`, all CMS update actions succeed for the registered admin principal and are correctly rejected for non-admin principals.
+**User-visible outcome:** The landing page logo appears noticeably smaller on desktop. Admins can edit the YouTube video link via the CMS dashboard, and the press kit video section immediately reflects the updated link.

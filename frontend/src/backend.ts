@@ -94,9 +94,14 @@ export interface GameDetails {
     platforms: string;
     releaseDate: string;
 }
+export interface AdminStatus {
+    adminClaimed: boolean;
+    callerIsAdmin: boolean;
+}
 export interface Content {
     features: Array<string>;
     instagramLink: string;
+    youtubeLink: string;
     pressEmail: string;
     bodyTextColorHex: string;
     developerWebsite: string;
@@ -133,97 +138,25 @@ export interface backendInterface {
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    deleteCallerUserProfile(): Promise<void>;
-    disablePasswordProtection(): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    enablePasswordProtection(password: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
+    claimAdmin(): Promise<void>;
+    disablePasswordProtection(): Promise<void>;
+    enablePasswordProtection(password: string): Promise<void>;
+    getAdminStatus(): Promise<AdminStatus>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getContent(): Promise<Content>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
-    initializeAdmin(): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    updateAbout(text: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateBodyTextColor(colorHex: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateDeveloperWebsite(link: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateFeatures(newFeatures: Array<string>): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateGameDetails(genre: string, platforms: string, releaseDate: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updateInstagram(link: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    updatePressEmail(email: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    verifyAdmin(): Promise<{
-        __kind__: "ok";
-        ok: boolean;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
-    verifyPassword(password: string): Promise<{
-        __kind__: "ok";
-        ok: boolean;
-    } | {
-        __kind__: "err";
-        err: string;
-    }>;
+    updateAbout(text: string): Promise<void>;
+    updateBodyTextColor(colorHex: string): Promise<void>;
+    updateDeveloperWebsite(link: string): Promise<void>;
+    updateFeatures(newFeatures: Array<string>): Promise<void>;
+    updateGameDetails(genre: string, platforms: string, releaseDate: string): Promise<void>;
+    updateInstagram(link: string): Promise<void>;
+    updatePressEmail(email: string): Promise<void>;
+    updateYoutubeLink(link: string): Promise<void>;
+    verifyPassword(password: string): Promise<boolean>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -340,86 +273,88 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async deleteCallerUserProfile(): Promise<void> {
+    async claimAdmin(): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.deleteCallerUserProfile();
+                const result = await this.actor.claimAdmin();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.deleteCallerUserProfile();
+            const result = await this.actor.claimAdmin();
             return result;
         }
     }
-    async disablePasswordProtection(): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async disablePasswordProtection(): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.disablePasswordProtection();
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.disablePasswordProtection();
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
-    async enablePasswordProtection(arg0: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async enablePasswordProtection(arg0: string): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.enablePasswordProtection(arg0);
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.enablePasswordProtection(arg0);
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
+        }
+    }
+    async getAdminStatus(): Promise<AdminStatus> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAdminStatus();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAdminStatus();
+            return result;
         }
     }
     async getCallerUserProfile(): Promise<UserProfile | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserProfile();
-                return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserProfile();
-            return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
         }
     }
     async getCallerUserRole(): Promise<UserRole> {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserRole();
-                return from_candid_UserRole_n12(this._uploadFile, this._downloadFile, result);
+                return from_candid_UserRole_n11(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserRole();
-            return from_candid_UserRole_n12(this._uploadFile, this._downloadFile, result);
+            return from_candid_UserRole_n11(this._uploadFile, this._downloadFile, result);
         }
     }
     async getContent(): Promise<Content> {
@@ -440,34 +375,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getUserProfile(arg0);
-                return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getUserProfile(arg0);
-            return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async initializeAdmin(): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.initializeAdmin();
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.initializeAdmin();
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
         }
     }
     async isCallerAdmin(): Promise<boolean> {
@@ -498,194 +413,140 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async updateAbout(arg0: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async updateAbout(arg0: string): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.updateAbout(arg0);
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.updateAbout(arg0);
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
-    async updateBodyTextColor(arg0: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async updateBodyTextColor(arg0: string): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.updateBodyTextColor(arg0);
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.updateBodyTextColor(arg0);
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
-    async updateDeveloperWebsite(arg0: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async updateDeveloperWebsite(arg0: string): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.updateDeveloperWebsite(arg0);
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.updateDeveloperWebsite(arg0);
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
-    async updateFeatures(arg0: Array<string>): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async updateFeatures(arg0: Array<string>): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.updateFeatures(arg0);
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.updateFeatures(arg0);
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
-    async updateGameDetails(arg0: string, arg1: string, arg2: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async updateGameDetails(arg0: string, arg1: string, arg2: string): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.updateGameDetails(arg0, arg1, arg2);
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.updateGameDetails(arg0, arg1, arg2);
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
-    async updateInstagram(arg0: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async updateInstagram(arg0: string): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.updateInstagram(arg0);
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.updateInstagram(arg0);
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
-    async updatePressEmail(arg0: string): Promise<{
-        __kind__: "ok";
-        ok: null;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async updatePressEmail(arg0: string): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.updatePressEmail(arg0);
-                return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.updatePressEmail(arg0);
-            return from_candid_variant_n10(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
-    async verifyAdmin(): Promise<{
-        __kind__: "ok";
-        ok: boolean;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async updateYoutubeLink(arg0: string): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.verifyAdmin();
-                return from_candid_variant_n14(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.updateYoutubeLink(arg0);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.verifyAdmin();
-            return from_candid_variant_n14(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.updateYoutubeLink(arg0);
+            return result;
         }
     }
-    async verifyPassword(arg0: string): Promise<{
-        __kind__: "ok";
-        ok: boolean;
-    } | {
-        __kind__: "err";
-        err: string;
-    }> {
+    async verifyPassword(arg0: string): Promise<boolean> {
         if (this.processError) {
             try {
                 const result = await this.actor.verifyPassword(arg0);
-                return from_candid_variant_n14(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.verifyPassword(arg0);
-            return from_candid_variant_n14(this._uploadFile, this._downloadFile, result);
+            return result;
         }
     }
 }
-function from_candid_UserRole_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
-    return from_candid_variant_n13(_uploadFile, _downloadFile, value);
+function from_candid_UserRole_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n12(_uploadFile, _downloadFile, value);
 }
 function from_candid__CaffeineStorageRefillResult_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: __CaffeineStorageRefillResult): _CaffeineStorageRefillResult {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
+function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
     return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [boolean]): boolean | null {
@@ -706,26 +567,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         topped_up_amount: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.topped_up_amount))
     };
 }
-function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    ok: null;
-} | {
-    err: string;
-}): {
-    __kind__: "ok";
-    ok: null;
-} | {
-    __kind__: "err";
-    err: string;
-} {
-    return "ok" in value ? {
-        __kind__: "ok",
-        ok: value.ok
-    } : "err" in value ? {
-        __kind__: "err",
-        err: value.err
-    } : value;
-}
-function from_candid_variant_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     admin: null;
 } | {
     user: null;
@@ -733,25 +575,6 @@ function from_candid_variant_n13(_uploadFile: (file: ExternalBlob) => Promise<Ui
     guest: null;
 }): UserRole {
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
-}
-function from_candid_variant_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    ok: boolean;
-} | {
-    err: string;
-}): {
-    __kind__: "ok";
-    ok: boolean;
-} | {
-    __kind__: "err";
-    err: string;
-} {
-    return "ok" in value ? {
-        __kind__: "ok",
-        ok: value.ok
-    } : "err" in value ? {
-        __kind__: "err",
-        err: value.err
-    } : value;
 }
 function to_candid_UserRole_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n9(_uploadFile, _downloadFile, value);

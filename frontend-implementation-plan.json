@@ -1,27 +1,66 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix admin principal auth: correct actor identity wiring and backend isAdmin check",
+  "title": "Resize landing page logo and add YouTube link to CMS",
   "requirements": [
     {
-      "id": "REQ-21",
-      "summary": "Fix frontend actor instantiation to use authenticated identity after Internet Identity login",
+      "id": "REQ-34",
+      "summary": "Reduce the game logo size on the landing page so it no longer dominates the desktop viewport while maintaining responsive behavior",
       "acceptanceCriteria": [
-        "After II login on /admin, the actor held in React Query cache is created with the authenticated identity, not the anonymous identity",
-        "The actor is re-created and dependent query caches are invalidated when identity changes from anonymous to authenticated",
-        "All CMS mutation calls (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) use the authenticated actor",
-        "No anonymous-principal actor is used for any admin update call after login"
+        "On desktop, the game logo is visibly smaller than in the previous version and does not dominate the viewport",
+        "The logo scales down fluidly on mobile and tablet without cropping or overflow",
+        "max-width: 100% and auto height are still applied so the logo never breaks the layout on any screen size",
+        "Dark mode inversion (CSS filter invert) is preserved on the logo"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useActor.ts",
+          "path": "frontend/src/pages/LandingPage.tsx",
           "operation": "modify",
-          "description": "Modify the actor creation logic to always instantiate the ICP actor using the current identity from useInternetIdentity. When the identity transitions from anonymous to authenticated (or vice versa), invalidate the 'actor' query key and re-create the actor instance. Ensure that the authenticated identity object (not the anonymous identity) is passed to the actor factory after successful Internet Identity login. Add a dependency on the identity's principal string to trigger actor re-creation whenever authentication state changes."
-        },
+          "description": "Update the game logo image styling to reduce its desktop maximum width from full natural width to 480px–560px. Keep max-width: 100% and height: auto for responsive behavior. Preserve the dark mode invert filter. The logo should appear noticeably smaller on desktop while maintaining fluid scaling on smaller screens."
+        }
+      ]
+    },
+    {
+      "id": "REQ-36",
+      "summary": "Add a YouTube Link field to the Admin Dashboard CMS so admins can edit the video link used in the press kit",
+      "acceptanceCriteria": [
+        "The Admin Dashboard shows a clearly labelled 'YouTube Link' text input field in the CMS section",
+        "The input is pre-populated with the current youtubeLink value from the backend",
+        "Clicking Save calls updateYoutubeLink() with the new value",
+        "After a successful save, the content query is invalidated and refetched so the press kit reflects the updated link immediately",
+        "A success or error state is shown to the admin after saving"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Verify that all mutation hooks (useUpdateAbout, useUpdateFeatures, useUpdateGameDetails, useUpdateInstagram, useUpdateDeveloperWebsite, useUpdatePressEmail, useUpdateBodyTextColor, useEnablePasswordProtection, useDisablePasswordProtection) retrieve the actor from useActor and use it for backend calls. Ensure no mutation is using a stale or anonymous actor instance. Add error handling for cases where the actor is not available or the user is not authenticated."
+          "description": "Add a useUpdateYoutubeLink mutation hook that calls actor.updateYoutubeLink(link) and invalidates the 'content' query on success. Follow the existing mutation pattern used for updateAbout, updateFeatures, etc."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Add a YouTube Link text input field to the CMS form section. Pre-populate it with content.youtubeLink from the content query. Wire up a Save button that calls the useUpdateYoutubeLink mutation with the input value. Display success/error feedback using toast or inline messages after save. Ensure the field is clearly labeled and positioned logically with other CMS fields."
+        }
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "summary": "Update the VideoSection component to use the admin-editable youtubeLink from the CMS instead of a hardcoded URL",
+      "acceptanceCriteria": [
+        "The VideoSection component receives the youtubeLink from the CMS content query rather than a hardcoded string",
+        "Clicking the video thumbnail replaces it with a YouTube iframe using the admin-set youtubeLink",
+        "If youtubeLink is empty or not yet set, the component falls back gracefully (e.g., the play button does nothing or is hidden)"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/VideoSection.tsx",
+          "operation": "modify",
+          "description": "Update VideoSection to accept a youtubeLink prop. Replace any hardcoded YouTube URL with this prop value when constructing the iframe src. Add graceful fallback handling if youtubeLink is empty (disable the play button or hide the video section)."
+        },
+        {
+          "path": "frontend/src/pages/PressKitPage.tsx",
+          "operation": "modify",
+          "description": "Pass content.youtubeLink from the content query as a prop to the VideoSection component. Ensure the component receives the dynamic link so it updates when the admin changes it in the CMS."
         }
       ]
     }
