@@ -1,0 +1,64 @@
+{
+  "kind": "build_request",
+  "title": "Fix admin principal auth: correct actor identity wiring and backend isAdmin check",
+  "projectName": "PokeANose Press Kit",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-21",
+      "text": "Fix frontend actor instantiation in useActor.ts so that after Internet Identity authentication succeeds, the ICP actor is always re-created using the authenticated identity object (not the anonymous identity). The actor instance must be invalidated and re-created whenever the identity transitions from anonymous to authenticated. All mutation calls in useQueries.ts must use this authenticated actor so the backend receives the correct caller principal.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Option 1 fixes the frontend: makes sure the ICP actor is created with the authenticated II identity, not the default anonymous one",
+          "fix the frontend actor instantiation in useActor.ts to ensure that when a user is authenticated via Internet Identity, the actor is always created with the authenticated identity"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After II login on /admin, the actor held in React Query cache is created with the authenticated identity, not the anonymous identity",
+        "The actor is re-created and dependent query caches are invalidated when identity changes from anonymous to authenticated",
+        "All CMS mutation calls (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) use the authenticated actor",
+        "No anonymous-principal actor is used for any admin update call after login"
+      ]
+    },
+    {
+      "id": "REQ-22",
+      "text": "Fix the backend isAdmin authorization logic in backend/main.mo so that update methods correctly accept the authenticated admin principal. Audit the isAdmin() / caller verification function: ensure the stored adminPrincipal Option value is properly unwrapped before comparison, that no code path falls through to an anonymous-principal false-positive rejection, and that every admin-only update method (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) uses this corrected check.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Option 2 fixes the backend: makes sure the stored adminPrincipal (which is an ?Principal option type in Motoko) is unwrapped correctly before comparing to the caller",
+          "if adminPrincipal is stored as ?Principal (an Option), there could be an unwrapping bug where it always resolves to anonymous or null"
+        ]
+      },
+      "acceptanceCriteria": [
+        "isAdmin() correctly unwraps the ?Principal option and compares it to msg.caller without any false-positive anonymous rejections",
+        "Calling updateAbout (and all other admin update methods) with the registered admin principal returns #ok and persists the change",
+        "Calling any admin update method with a non-admin principal still returns an access-denied error",
+        "initializeAdmin() still works correctly: first caller sets the admin, subsequent calls from the same principal return #ok, different principal returns access-denied error"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not introduce any token-based or link-based authentication mechanism",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts or frontend/src/main.tsx",
+    "Keep all Motoko logic within the single backend/main.mo actor",
+    "Do not change the existing backend stable variable schema or CMS API surface"
+  ],
+  "nonGoals": [
+    "Adding any new CMS fields or admin UI features",
+    "Changing the Internet Identity login flow or UI",
+    "Adding a getCurrentAdmin() debug query to the public API",
+    "Any changes to public-facing pages (/, /press-kit)"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

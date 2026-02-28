@@ -1,0 +1,263 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "A minimal, responsive black-and-white game presskit website with ShadCN UI-inspired design. Features three routes: / (public landing), /press-kit (public or password-gated presskit), and /admin (Internet Identity-protected CMS dashboard). Internet Identity auth exists ONLY on /admin; first authenticated principal becomes permanent admin. Includes password protection system with SHA-256 hashing, dark/light mode toggle with background inversion, customizable body text color (admin-set, light mode only), and a full CMS for all presskit content stored in stable backend variables.",
+  "architectural_notes": [
+    "Internet Identity auth UI exists ONLY on /admin; no login UI on public pages",
+    "First Internet Identity principal to authenticate becomes permanent admin via initializeAdmin; stored in stable storage forever",
+    "All other principals rejected with 'Access denied: This press kit is owned by another admin principal'",
+    "Password hashed with SHA-256 in backend; frontend never stores plaintext",
+    "getContent() returns all content + passwordEnabled flag; content gating must prevent flash on load",
+    "Dark mode: body text forced white, background/logo/festival logo inverted via CSS filter; admin-selected body text color only applies in light mode",
+    "Fredoka One font used for all header text site-wide",
+    "ZIP file PokeANose_MediaImages.zip must be served with correct MIME type for direct download"
+  ],
+  "known_issues": [
+    "Admin sees CMS but gets 'Access denied: Only the admin can update content' when saving — backend update methods rejecting authenticated admin principal"
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-set-up-react-router-with-three-routes-landing-page-press-kit-press-kit-page-admin-admin-dashboard-no-authentication-ui-or-login-buttons-exist-on-or-press-kit-navigation-between-pages-uses-standard-router-links",
+      "title": "Set up React Router with three routes: / (Landing page), /press-kit (Press Kit page), /admin (Admin Dashboard). No authentication UI or login buttons exist on / or /press-kit. Navigation between pages uses standard router links.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-global-theme-context-react-context-localstorage-persistence-providing-dark-light-mode-toggle-a-toggle-switch-must-appear-in-the-header-navigation-bar-on-public-pages-and-press-kit-in-dark-mode-body-text-color-is-forced-to-white-ffffff-overriding-any-admin-set-color-background-image-gets-css-filter-invert-1-gamelogo-png-and-kaboom-2025-png-get-css-filter-invert-1-in-light-mode-background-image-is-normal-admin-set-bodytextcolorhex-applies-to-body-text-logos-display-normally-theme-transitions-must-be-smooth-with-css-transitions-and-no-flicker",
+      "title": "Implement a global theme context (React Context + localStorage persistence) providing dark/light mode toggle. A toggle switch must appear in the header/navigation bar on public pages (/ and /press-kit). In dark mode: body text color is forced to white (#FFFFFF) overriding any admin-set color; background image gets CSS filter invert(1); gamelogo.png and kaboom-2025.png get CSS filter invert(1). In light mode: background image is normal; admin-set bodyTextColorHex applies to body text; logos display normally. Theme transitions must be smooth with CSS transitions and no flicker.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-password-gate-modal-component-that-appears-on-press-kit-when-passwordenabled-is-true-on-app-load-only-the-background-image-and-the-password-modal-are-visible-all-press-kit-content-is-hidden-the-modal-contains-a-password-input-field-and-an-access-presskit-button-on-submit-call-verifypassword-on-the-backend-if-correct-hide-modal-and-reveal-content-if-incorrect-show-a-clear-inline-error-message-the-modal-must-be-theme-aware-light-mode-uses-white-background-with-dark-text-dark-mode-uses-dark-background-with-white-text-and-white-inputs-smooth-css-transitions-apply-when-toggling-theme-while-modal-is-open-once-password-is-verified-in-a-session-content-remains-accessible-without-re-entering",
+      "title": "Implement a password gate modal component that appears on /press-kit when passwordEnabled is true. On app load, only the background image and the password modal are visible; all press kit content is hidden. The modal contains a password input field and an 'Access Presskit' button. On submit, call verifyPassword on the backend; if correct, hide modal and reveal content. If incorrect, show a clear inline error message. The modal must be theme-aware: light mode uses white background with dark text; dark mode uses dark background with white text and white inputs. Smooth CSS transitions apply when toggling theme while modal is open. Once password is verified in a session, content remains accessible without re-entering.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-public-landing-page-layout-full-page-background-using-background-web-jpg-with-invert-in-dark-mode-center-aligned-editorial-layout-include-1-gamelogo-png-displayed-at-significantly-large-size-min-400px-wide-on-desktop-inverted-in-dark-mode-normal-in-light-mode-2-a-short-description-text-paragraph-3-a-modular-newsletter-placeholder-section-with-an-email-input-field-and-a-subscribe-button-non-functional-placeholder-designed-to-be-replaced-later-4-a-prominent-button-link-navigating-to-press-kit-use-fredoka-one-font-for-all-heading-display-text-minimize-vertical-gaps-between-sections-for-a-tight-editorial-feel",
+      "title": "Build the public Landing Page (/). Layout: full-page background using background_web.jpg (with invert in dark mode). Center-aligned editorial layout. Include: (1) gamelogo.png displayed at significantly large size (min 400px wide on desktop), inverted in dark mode, normal in light mode; (2) a short description text paragraph; (3) a modular newsletter placeholder section with an email input field and a Subscribe button (non-functional placeholder, designed to be replaced later); (4) a prominent button/link navigating to /press-kit. Use 'Fredoka One' font for all heading/display text. Minimize vertical gaps between sections for a tight editorial feel.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-press-kit-page-press-kit-with-the-following-sections-in-order-1-hero-game-title-in-very-large-fredoka-one-font-and-a-tagline-2-video-section-display-video-thumbnail-png-uncropped-with-a-centered-play-button-overlay-on-click-replace-the-image-with-an-embedded-youtube-iframe-for-https-youtu-be-5in-hiash08-3-about-the-game-editable-text-from-backend-4-features-up-to-4-editable-lines-from-backend-displayed-directly-under-about-5-game-details-genre-platforms-release-date-from-backend-6-media-section-screenshots-sub-divider-heading-a-download-button-labeled-download-all-screenshots-as-zip-6-6mb-that-triggers-direct-download-of-assets-pokeanose-mediaimages-zip-with-correct-application-zip-mime-type-and-a-6-image-grid-gallery-screen01-png-through-screen06-png-each-with-1px-solid-black-border-7-social-media-instagram-button-icon-only-using-assets-generated-instagram-icon-transparent-dim-64x64-png-left-aligned-shown-only-if-instagramlink-is-non-empty-opens-in-new-tab-light-mode-black-background-white-icon-dark-mode-white-background-black-icon-8-developer-section-developer-website-link-9-press-support-press-email-10-footer-kaboom-2025-png-at-increased-size-inverted-in-dark-mode-no-section-header-label",
+      "title": "Build the Press Kit Page (/press-kit) with the following sections in order: (1) Hero: game title in very large Fredoka One font and a tagline; (2) Video Section: display video_thumbnail.png uncropped with a centered play button overlay — on click, replace the image with an embedded YouTube iframe for https://youtu.be/5in-hIASH08; (3) About the Game: editable text from backend; (4) Features: up to 4 editable lines from backend, displayed directly under About; (5) Game Details: genre, platforms, release date from backend; (6) Media Section: 'Screenshots' sub-divider heading, a download button labeled 'Download all Screenshots as ZIP (6.6MB)' that triggers direct download of /assets/PokeANose_MediaImages.zip with correct application/zip MIME type, and a 6-image grid gallery (screen01.png through screen06.png) each with 1px solid black border; (7) Social Media: Instagram button (icon-only using /assets/generated/instagram-icon-transparent.dim_64x64.png), left-aligned, shown only if instagramLink is non-empty, opens in new tab, light mode = black background/white icon, dark mode = white background/black icon; (8) Developer section: developer website link; (9) Press & Support: press email; (10) Footer: kaboom-2025.png at increased size, inverted in dark mode, no section header label.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-fullscreen-screenshot-viewer-for-the-screenshots-gallery-on-press-kit-when-a-screenshot-is-clicked-it-expands-to-cover-the-full-viewport-with-all-other-ui-hidden-and-page-scrolling-disabled-clicking-the-fullscreen-image-again-exits-fullscreen-and-restores-normal-ui-and-scroll-the-viewer-must-work-reliably-on-tablets",
+      "title": "Implement a fullscreen screenshot viewer for the screenshots gallery on /press-kit. When a screenshot is clicked, it expands to cover the full viewport with all other UI hidden and page scrolling disabled. Clicking the fullscreen image again exits fullscreen and restores normal UI and scroll. The viewer must work reliably on tablets.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-admin-dashboard-admin-page-with-the-following-flow-1-show-an-internet-identity-login-button-using-useinternetidentity-hook-when-the-user-is-not-authenticated-2-after-ii-authentication-call-initializeadmin-if-it-returns-success-display-the-full-cms-editing-dashboard-if-it-returns-an-access-denied-error-display-the-error-message-and-no-cms-controls-3-the-cms-dashboard-must-contain-editable-fields-for-about-text-textarea-features-up-to-4-text-inputs-game-details-genre-platforms-release-date-text-inputs-instagram-link-text-input-developer-website-text-input-press-email-text-input-body-text-color-color-picker-input-labeled-as-light-mode-only-and-password-protection-controls-toggle-to-enable-disable-password-input-field-for-setting-changing-password-each-field-has-a-save-button-that-calls-the-corresponding-backend-update-method-immediately-password-protection-section-shows-current-status-enabled-disabled-and-allows-admin-to-set-change-remove-the-password",
+      "title": "Build the Admin Dashboard (/admin) page with the following flow: (1) Show an Internet Identity login button (using useInternetIdentity hook) when the user is not authenticated; (2) After II authentication, call initializeAdmin() — if it returns success, display the full CMS editing dashboard; if it returns an access-denied error, display the error message and no CMS controls; (3) The CMS dashboard must contain editable fields for: About text (textarea), Features (up to 4 text inputs), Game Details (genre, platforms, release date text inputs), Instagram link (text input), Developer website (text input), Press email (text input), Body text color (color picker input, labeled as light mode only), and Password protection controls (toggle to enable/disable, password input field for setting/changing password). Each field has a Save button that calls the corresponding backend update method immediately. Password protection section shows current status (enabled/disabled) and allows admin to set/change/remove the password.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-global-content-state-management-using-react-query-to-fetch-getcontent-on-app-load-and-share-it-across-all-pages-admin-saves-must-invalidate-and-refetch-the-content-query-so-public-pages-reflect-updates-without-requiring-a-manual-refresh-the-bodytextcolorhex-from-backend-must-be-applied-as-a-css-custom-property-on-the-document-root-in-light-mode-and-overridden-to-ffffff-in-dark-mode",
+      "title": "Apply global content state management using React Query to fetch getContent() on app load and share it across all pages. Admin saves must invalidate and refetch the content query so public pages reflect updates without requiring a manual refresh. The bodyTextColorHex from backend must be applied as a CSS custom property on the document root in light mode, and overridden to #FFFFFF in dark mode.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-consistent-minimalist-black-and-white-editorial-visual-theme-across-all-pages-use-fredoka-one-loaded-from-google-fonts-for-all-headings-and-display-text-body-font-is-a-clean-sans-serif-no-decorative-borders-except-the-1px-black-border-on-screenshots-reduced-vertical-spacing-between-major-sections-fully-responsive-layout-for-desktop-tablet-and-mobile-smooth-css-transitions-on-all-interactive-elements-robust-image-loading-with-fallback-placeholder-states-the-overall-aesthetic-is-inspired-by-shadcn-ui-clean-high-contrast-typographically-strong",
+      "title": "Apply a consistent minimalist black-and-white editorial visual theme across all pages. Use 'Fredoka One' (loaded from Google Fonts) for all headings and display text. Body font is a clean sans-serif. No decorative borders except the 1px black border on screenshots. Reduced vertical spacing between major sections. Fully responsive layout for desktop, tablet, and mobile. Smooth CSS transitions on all interactive elements. Robust image loading with fallback placeholder states. The overall aesthetic is inspired by ShadCN UI: clean, high-contrast, typographically strong.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-place-all-static-assets-in-frontend-public-assets-background-web-jpg-gamelogo-png-video-thumbnail-png-screen01-png-through-screen06-png-kaboom-2025-png-pokeanose-mediaimages-zip-place-the-generated-instagram-icon-at-frontend-public-assets-generated-instagram-icon-transparent-dim-64x64-png-reference-all-assets-using-absolute-public-paths-e-g-assets-gamelogo-png",
+      "title": "Place all static assets in frontend/public/assets/: background_web.jpg, gamelogo.png, video_thumbnail.png, screen01.png through screen06.png, kaboom-2025.png, PokeANose_MediaImages.zip. Place the generated Instagram icon at frontend/public/assets/generated/instagram-icon-transparent.dim_64x64.png. Reference all assets using absolute public paths (e.g., /assets/gamelogo.png).",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Internet Identity authentication on /admin only; first principal becomes permanent admin, all others rejected",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Password protection system: admin can enable/disable, SHA-256 hashed password stored in stable storage, password gate modal on /press-kit",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Dark/light mode toggle in header; dark mode inverts background image and logo/festival logo, forces white body text",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Admin-selectable body text color (light mode only) saved to backend stable storage and applied globally",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Public landing page (/) with large gamelogo.png, description text, newsletter placeholder, and link to /press-kit",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Press kit page (/press-kit) with hero, video section (YouTube embed on thumbnail click), About, Features, Game Details, Media/Screenshots, Social Media, Developer, Press/Support, and footer festival logo",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Screenshots gallery (screen01-screen06) with fullscreen viewer on click, 1px black border, and ZIP download button for PokeANose_MediaImages.zip",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Admin dashboard (/admin) CMS: edit About, Features (max 4), Game Details, Instagram link, Developer link, Press email, body text color, and password protection settings",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Backend stable storage and all required methods: initializeAdmin, verifyAdmin, enablePasswordProtection, disablePasswordProtection, verifyPassword, getContent, updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Instagram button shown only if valid link exists, left-aligned, icon-only (instagram-icon-transparent), theme-aware styling, opens in new tab",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Implement a Motoko backend actor with all required stable variables: adminPrincipal (Option<Principal>), passwordEnabled (Bool), passwordHash (Text), bodyTextColorHex (Text), aboutText (Text), features ([Text] max 4), gameDetails (genre/platforms/releaseDate as Text), instagramLink (Text), developerWebsite (Text), pressEmail (Text). All variables must persist across canister upgrades using stable storage.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement initializeAdmin() backend method: if no admin principal is stored, save the calling principal as the permanent admin and return #ok. If an admin already exists and the calling principal matches, return #ok (already admin). If an admin exists and calling principal does not match, return #err with message 'Access denied: This press kit is owned by another admin principal.'",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Implement verifyAdmin() backend query method: returns #ok(true) if the calling principal matches the stored admin principal, #ok(false) if no admin is set yet, and #err with denial message if a different principal is stored.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Implement enablePasswordProtection(password: Text) backend update method (admin only): hash the provided password using SHA-256, store the hash in stable passwordHash variable, set passwordEnabled to true. Reject with error if caller is not the admin.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Implement disablePasswordProtection() backend update method (admin only): set passwordEnabled to false and clear the stored passwordHash. Reject with error if caller is not the admin.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Implement verifyPassword(password: Text) backend query method: hash the provided password with SHA-256 and compare to the stored passwordHash. Return #ok(true) if match, #ok(false) if no match or protection is disabled.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Implement getContent() backend query method: return a record containing all content fields (aboutText, features, gameDetails, instagramLink, developerWebsite, pressEmail, bodyTextColorHex) plus the passwordEnabled flag. This method is publicly callable with no authentication required.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Implement all admin-only content update methods: updateAbout(text: Text), updateFeatures(features: [Text]) (reject if more than 4 items), updateGameDetails(genre: Text, platforms: Text, releaseDate: Text), updateInstagram(link: Text), updateDeveloperWebsite(link: Text), updatePressEmail(email: Text), updateBodyTextColor(colorHex: Text). Each method must verify the caller is the registered admin before persisting changes.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Fix the backend admin authorization check so that authenticated admin update calls are correctly accepted. The root cause is that the actor's update methods are rejecting the authenticated principal even though it matches the stored adminPrincipal. Audit the isAdmin() / caller verification logic in backend/main.mo: ensure that the caller principal passed to each update method (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) is compared correctly against the stored adminPrincipal option value, with no anonymous-principal false-positive rejections.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Fix the frontend actor instantiation in useActor.ts to ensure that when a user is authenticated via Internet Identity, the actor is always created with the authenticated identity (not the anonymous identity). The actor used for all CMS mutation calls in useQueries.ts must carry the authenticated principal so the backend receives the correct caller. Verify that the actor is re-created and query cache is invalidated whenever the identity changes from anonymous to authenticated.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Fix frontend actor instantiation in useActor.ts so that after Internet Identity authentication succeeds, the ICP actor is always re-created using the authenticated identity object (not the anonymous identity). The actor instance must be invalidated and re-created whenever the identity transitions from anonymous to authenticated. All mutation calls in useQueries.ts must use this authenticated actor so the backend receives the correct caller principal.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Fix the backend isAdmin authorization logic in backend/main.mo so that update methods correctly accept the authenticated admin principal. Audit the isAdmin() / caller verification function: ensure the stored adminPrincipal Option value is properly unwrapped before comparison, that no code path falls through to an anonymous-principal false-positive rejection, and that every admin-only update method (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) uses this corrected check.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Poke A Nose Presskit",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

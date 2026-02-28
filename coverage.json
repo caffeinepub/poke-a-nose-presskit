@@ -1,0 +1,43 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-28T07:51:27.949Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 2,
+    "implemented": 0,
+    "items": [
+      {
+        "id": "REQ-21",
+        "summary": "Fix frontend actor instantiation in useActor.ts so that after Internet Identity authentication succeeds, the ICP actor is always re-created using the authenticated identity object (not the anonymous identity). The actor instance must be invalidated and re-created whenever the identity transitions from anonymous to authenticated. All mutation calls in useQueries.ts must use this authenticated actor so the backend receives the correct caller principal.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/hooks/useActor.ts",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-22",
+        "summary": "Fix the backend isAdmin authorization logic in backend/main.mo so that update methods correctly accept the authenticated admin principal. Audit the isAdmin() / caller verification function: ensure the stored adminPrincipal Option value is properly unwrapped before comparison, that no code path falls through to an anonymous-principal false-positive rejection, and that every admin-only update method (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) uses this corrected check.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

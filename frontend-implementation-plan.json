@@ -1,0 +1,29 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix admin principal auth: correct actor identity wiring and backend isAdmin check",
+  "requirements": [
+    {
+      "id": "REQ-21",
+      "summary": "Fix frontend actor instantiation to use authenticated identity after Internet Identity login",
+      "acceptanceCriteria": [
+        "After II login on /admin, the actor held in React Query cache is created with the authenticated identity, not the anonymous identity",
+        "The actor is re-created and dependent query caches are invalidated when identity changes from anonymous to authenticated",
+        "All CMS mutation calls (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, enablePasswordProtection, disablePasswordProtection) use the authenticated actor",
+        "No anonymous-principal actor is used for any admin update call after login"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Modify the actor creation logic to always instantiate the ICP actor using the current identity from useInternetIdentity. When the identity transitions from anonymous to authenticated (or vice versa), invalidate the 'actor' query key and re-create the actor instance. Ensure that the authenticated identity object (not the anonymous identity) is passed to the actor factory after successful Internet Identity login. Add a dependency on the identity's principal string to trigger actor re-creation whenever authentication state changes."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Verify that all mutation hooks (useUpdateAbout, useUpdateFeatures, useUpdateGameDetails, useUpdateInstagram, useUpdateDeveloperWebsite, useUpdatePressEmail, useUpdateBodyTextColor, useEnablePasswordProtection, useDisablePasswordProtection) retrieve the actor from useActor and use it for backend calls. Ensure no mutation is using a stale or anonymous actor instance. Add error handling for cases where the actor is not available or the user is not authenticated."
+        }
+      ]
+    }
+  ]
+}

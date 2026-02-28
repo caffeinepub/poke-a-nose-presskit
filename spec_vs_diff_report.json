@@ -1,0 +1,40 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-28T07:51:27.945Z",
+  "summary": "The diff modifies backend/main.mo and frontend files. The backend now uses an AccessControl module with proper isAdmin checks and principal unwrapping. The frontend useActor.ts description mentions creating authenticated vs anonymous actors. However, there are gaps: the backend changes appear to use a new AccessControl abstraction rather than fixing the original isAdmin() ?Principal unwrapping as specified, and the frontend actor re-creation/cache invalidation on identity transition is not clearly evidenced.",
+  "missing_requirements": [
+    {
+      "id": "REQ-21",
+      "requirement": "The actor must be invalidated and re-created whenever the identity transitions from anonymous to authenticated; all mutation calls in useQueries.ts must use this authenticated actor.",
+      "reason": "The frontend-file-summaries.txt describes useActor.ts as 'creates an anonymous actor when unauthenticated, or an authenticated actor using the Internet Identity when logged in' and mentions removing a non-existent call, but there is no evidence of React Query cache invalidation on identity transition or that useQueries.ts mutation hooks were updated to use the authenticated actor from useActor.ts. The summary for useQueries.ts only mentions fixing __kind__ discriminated union checks, not actor wiring.",
+      "evidence": [
+        "frontend-file-summaries.txt",
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Introduction of an AccessControl module (authorization/access-control) and MixinAuthorization/MixinStorage mixins in the backend actor, replacing the original simple isAdmin() ?Principal pattern with a role-based permission system.",
+      "reason": "The build request required fixing the existing isAdmin() ?Principal unwrapping within backend/main.mo and explicitly stated 'Keep all Motoko logic within the single backend/main.mo actor' and 'Do not change the existing backend stable variable schema or CMS API surface'. The diff introduces new external modules (AccessControl, MixinAuthorization, MixinStorage) and a fundamentally different authorization architecture not requested.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "User profile management functions (getCallerUserProfile, getUserProfile, saveCallerUserProfile, deleteCallerUserProfile) and a userProfiles Map added to the backend actor.",
+      "reason": "The build request made no mention of user profiles or profile management. These are new CMS features not requested, violating the non-goal of not adding any new CMS fields or admin UI features.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.72,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "project_state.json"
+  ]
+}
