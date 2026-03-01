@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
-  "summary": "A minimal, responsive black-and-white game presskit website with ShadCN UI-inspired design. Features three routes: / (public landing), /press-kit (public or password-gated presskit), and /admin (Internet Identity-protected CMS dashboard). Internet Identity auth exists ONLY on /admin. The first person to log in with Internet Identity on /admin automatically becomes the permanent admin via claimAdmin() — their principal is stored in stable storage and cannot be changed unless the canister is reset. Only the claimed admin principal can edit/save CMS content. Includes password protection system with SHA-256 hashing, dark/light mode toggle with background inversion, customizable body text color (admin-set, light mode only), and a full CMS for all presskit content stored in stable backend variables.",
+  "projectStateVersion": 23,
+  "summary": "A minimal, responsive black-and-white game presskit website with ShadCN UI-inspired design. Features three routes: / (public landing), /press-kit (public or password-gated presskit), and /admin (Internet Identity-protected CMS dashboard). Internet Identity auth exists ONLY on /admin. The admin principal has been identified as r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe and will be hardcoded as the permanent admin in the backend. The temporarily open CMS will be locked down to only this principal.",
   "architectural_notes": [
     "Internet Identity auth UI exists ONLY on /admin; no login UI on public pages",
     "Password hashed with SHA-256 in backend; frontend never stores plaintext",
@@ -10,9 +10,8 @@
     "Fredoka One font used for all header text site-wide",
     "ZIP file PokeANose_MediaImages.zip must be served with correct MIME type for direct download",
     "createActor must not receive both agent and agentOptions simultaneously; pass only the authenticated agent, never agentOptions alongside it",
-    "First II-authenticated visitor to /admin claims permanent admin role via claimAdmin(); stored in stable storage, cannot be changed without canister reset",
-    "Only the claimed admin principal can call CMS update methods; all others receive access denied",
-    "YouTube video URL stored in backend stable storage as a CMS field; press kit video section reads it from getContent()"
+    "YouTube video URL stored in backend stable storage as a CMS field; press kit video section reads it from getContent()",
+    "Admin principal is permanently set to r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe; hardcoded in backend stable storage"
   ],
   "known_issues": [],
   "isFixRequest": false,
@@ -174,6 +173,38 @@
       "title": "Update the VideoSection component on /press-kit to use the youtubeLink value from the global content query (returned by getContent()) instead of a hardcoded YouTube URL. When the user clicks the video thumbnail play button, the embedded YouTube iframe must use this admin-editable link.",
       "reqIds": [
         "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-dashboard-admin-frontend-so-that-after-internet-identity-login-the-cms-dashboard-is-shown-immediately-to-any-authenticated-user-without-any-admin-claim-or-access-denied-gating-prominently-display-the-authenticated-caller-s-principal-id-as-a-text-string-at-the-top-of-the-cms-dashboard-labeled-clearly-as-your-principal-id-styled-so-it-is-easy-to-read-and-copy",
+      "title": "Update the Admin Dashboard (/admin) frontend so that after Internet Identity login, the CMS dashboard is shown immediately to any authenticated user without any admin-claim or access-denied gating. Prominently display the authenticated caller's principal ID (as a text string) at the top of the CMS dashboard, labeled clearly as 'Your Principal ID', styled so it is easy to read and copy.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-frontend-admindashboard-tsx-so-that-after-internet-identity-login-the-app-checks-whether-the-authenticated-principal-equals-r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe-if-it-matches-display-the-full-cms-dashboard-if-it-does-not-match-display-an-access-denied-message-with-no-cms-controls-visible-remove-any-claimadmin-calls-getadminstatus-calls-and-the-your-principal-id-display-block-the-page-flow-must-be-1-not-authenticated-show-ii-login-button-2-authenticated-and-principal-matches-hardcoded-admin-show-full-cms-dashboard-3-authenticated-but-principal-does-not-match-show-access-denied-message",
+      "title": "Update the /admin frontend (AdminDashboard.tsx) so that after Internet Identity login, the app checks whether the authenticated principal equals `r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe`. If it matches, display the full CMS dashboard. If it does not match, display an 'Access Denied' message with no CMS controls visible. Remove any claimAdmin() calls, getAdminStatus() calls, and the 'Your Principal ID' display block. The page flow must be: (1) not authenticated → show II login button; (2) authenticated and principal matches hardcoded admin → show full CMS dashboard; (3) authenticated but principal does not match → show Access Denied message.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-iframe-url-field-to-the-admin-dashboard-admin-cms-panel-it-must-be-a-text-input-pre-populated-with-the-current-iframesrc-value-from-getcontent-with-a-save-button-that-calls-updateiframesrc-and-then-invalidates-refetches-the-content-query-add-the-corresponding-useupdateiframesrc-mutation-to-frontend-src-hooks-usequeries-ts",
+      "title": "Add an Iframe URL field to the Admin Dashboard (/admin) CMS panel. It must be a text input pre-populated with the current `iframeSrc` value from `getContent()`, with a Save button that calls `updateIframeSrc()` and then invalidates/refetches the content query. Add the corresponding `useUpdateIframeSrc` mutation to `frontend/src/hooks/useQueries.ts`.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-press-kit-page-press-kit-render-an-iframe-using-the-iframesrc-value-from-the-global-content-query-the-iframe-must-only-be-rendered-when-iframesrc-is-a-non-empty-string-it-must-be-displayed-as-a-distinct-section-between-the-video-section-and-the-about-the-game-section-the-iframe-must-be-fully-responsive-100-width-with-a-fixed-aspect-ratio-such-as-16-9-have-no-visible-border-and-respect-the-page-s-light-dark-theme-styling",
+      "title": "On the Press Kit page (/press-kit), render an `<iframe>` using the `iframeSrc` value from the global content query. The iframe must only be rendered when `iframeSrc` is a non-empty string. It must be displayed as a distinct section between the Video Section and the About the Game section. The iframe must be fully responsive (100% width, with a fixed aspect ratio such as 16:9), have no visible border, and respect the page's light/dark theme styling.",
+      "reqIds": [
+        "REQ-44"
       ],
       "version": 1
     }
@@ -340,6 +371,34 @@
       "summary": "Add a stable text variable `youtubeLink` to the backend actor in backend/main.mo, initialized to 'https://youtu.be/5in-hIASH08'. Include it in the record returned by getContent(). Add an admin-only update method updateYoutubeLink(link: Text) that verifies the caller is the registered admin before persisting the new value. Reject with 'Access denied' otherwise.",
       "reqIds": [
         "REQ-35"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Hardcode the admin principal r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe in the backend. Restore admin-only authorization on all CMS update methods so only this principal can call them. Update the /admin frontend to show the CMS dashboard only to this principal and show 'Access Denied' to all others.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-39",
+      "summary": "In backend/main.mo, hardcode the admin principal `r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe` as a compile-time constant (using `Principal.fromText(\"r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe\")`). Remove any dynamic claimAdmin / getAdminStatus logic. The stable adminPrincipal variable should be initialized to `?Principal.fromText(\"r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe\")` so it persists across upgrades. All CMS update methods (updateAbout, updateFeatures, updateGameDetails, updateInstagram, updateDeveloperWebsite, updatePressEmail, updateBodyTextColor, updateYoutubeLink, enablePasswordProtection, disablePasswordProtection) must enforce that `msg.caller == hardcodedAdmin` and reject with `#err(\"Access denied\")` for any other caller.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Add an iframe to the site (location and content/URL not yet specified by user)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Add an iframe field to the backend CMS: add a stable text variable `iframeSrc` (initialized to an empty string `\"\"`) in backend/main.mo. Include `iframeSrc` in the record returned by `getContent()`. Add an admin-only update method `updateIframeSrc(src: Text)` that verifies the caller equals the hardcoded admin principal before persisting the new value, and rejects with `#err(\"Access denied\")` otherwise.",
+      "reqIds": [
+        "REQ-42"
       ],
       "status": "pending"
     }

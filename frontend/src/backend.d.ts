@@ -12,10 +12,6 @@ export interface GameDetails {
     platforms: string;
     releaseDate: string;
 }
-export interface AdminStatus {
-    adminClaimed: boolean;
-    callerIsAdmin: boolean;
-}
 export interface Content {
     features: Array<string>;
     instagramLink: string;
@@ -24,6 +20,7 @@ export interface Content {
     bodyTextColorHex: string;
     developerWebsite: string;
     gameDetails: GameDetails;
+    iframeSrc: string;
     aboutText: string;
     passwordEnabled: boolean;
 }
@@ -38,14 +35,22 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    claimAdmin(): Promise<void>;
     disablePasswordProtection(): Promise<void>;
     enablePasswordProtection(password: string): Promise<void>;
-    getAdminStatus(): Promise<AdminStatus>;
+    getAboutText(): Promise<string>;
+    getAllUserProfiles(): Promise<Array<UserProfile>>;
+    getBodyTextColor(): Promise<string>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getContent(): Promise<Content>;
+    getDeveloperWebsite(): Promise<string>;
+    getFeatures(): Promise<Array<string>>;
+    getGameDetails(): Promise<GameDetails>;
+    getInstagramLink(): Promise<string>;
+    getPasswordProtectionStatus(): Promise<boolean>;
+    getPressEmail(): Promise<string>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getYoutubeLink(): Promise<string>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateAbout(text: string): Promise<void>;
@@ -53,6 +58,7 @@ export interface backendInterface {
     updateDeveloperWebsite(link: string): Promise<void>;
     updateFeatures(newFeatures: Array<string>): Promise<void>;
     updateGameDetails(genre: string, platforms: string, releaseDate: string): Promise<void>;
+    updateIframeSrc(src: string): Promise<void>;
     updateInstagram(link: string): Promise<void>;
     updatePressEmail(email: string): Promise<void>;
     updateYoutubeLink(link: string): Promise<void>;

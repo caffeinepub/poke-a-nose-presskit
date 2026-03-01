@@ -3,8 +3,6 @@ import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useContent,
-  useGetAdminStatus,
-  useClaimAdmin,
   useUpdateAbout,
   useUpdateFeatures,
   useUpdateGameDetails,
@@ -15,8 +13,11 @@ import {
   useUpdateBodyTextColor,
   useEnablePasswordProtection,
   useDisablePasswordProtection,
+  useUpdateIframeSrc,
 } from '../hooks/useQueries';
 import { useTheme } from '../contexts/ThemeContext';
+
+const ADMIN_PRINCIPAL = 'r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe';
 
 interface SaveFeedback {
   field: string;
@@ -31,6 +32,9 @@ export default function AdminDashboard() {
 
   const isAuthenticated = !!identity;
   const isLoggingIn = loginStatus === 'logging-in';
+
+  const callerPrincipal = identity?.getPrincipal().toString() ?? '';
+  const isAdmin = isAuthenticated && callerPrincipal === ADMIN_PRINCIPAL;
 
   const [saveFeedback, setSaveFeedback] = useState<SaveFeedback | null>(null);
 
@@ -47,18 +51,10 @@ export default function AdminDashboard() {
   const [bodyTextColor, setBodyTextColor] = useState('#000000');
   const [passwordEnabled, setPasswordEnabled] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [iframeSrc, setIframeSrc] = useState('');
   const [contentLoaded, setContentLoaded] = useState(false);
 
   const { data: content } = useContent();
-
-  // Admin status — only fetch when authenticated
-  const {
-    data: adminStatus,
-    isLoading: adminStatusLoading,
-    isFetched: adminStatusFetched,
-  } = useGetAdminStatus();
-
-  const claimAdmin = useClaimAdmin();
 
   const updateAbout = useUpdateAbout();
   const updateFeatures = useUpdateFeatures();
@@ -70,25 +66,11 @@ export default function AdminDashboard() {
   const updateBodyTextColor = useUpdateBodyTextColor();
   const enablePassword = useEnablePasswordProtection();
   const disablePassword = useDisablePasswordProtection();
-
-  // Auto-claim admin if no admin has been claimed yet
-  useEffect(() => {
-    if (
-      isAuthenticated &&
-      adminStatusFetched &&
-      adminStatus &&
-      !adminStatus.adminClaimed &&
-      !claimAdmin.isPending &&
-      !claimAdmin.isSuccess &&
-      !claimAdmin.isError
-    ) {
-      claimAdmin.mutate();
-    }
-  }, [isAuthenticated, adminStatusFetched, adminStatus, claimAdmin]);
+  const updateIframeSrc = useUpdateIframeSrc();
 
   // Load content into form when available
   useEffect(() => {
-    if (content && !contentLoaded) {
+    if (content && !contentLoaded && isAdmin) {
       setAboutText(content.aboutText || '');
       const featureArr = [...(content.features || [])];
       while (featureArr.length < 4) featureArr.push('');
@@ -102,9 +84,10 @@ export default function AdminDashboard() {
       setPressEmail(content.pressEmail || '');
       setBodyTextColor(content.bodyTextColorHex || '#000000');
       setPasswordEnabled(content.passwordEnabled || false);
+      setIframeSrc(content.iframeSrc || '');
       setContentLoaded(true);
     }
-  }, [content, contentLoaded]);
+  }, [content, contentLoaded, isAdmin]);
 
   // Reset content loaded flag when user logs out so it reloads on next login
   useEffect(() => {
@@ -246,6 +229,16 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSaveIframeSrc = async () => {
+    showFeedback('iframeSrc', 'saving');
+    try {
+      await updateIframeSrc.mutateAsync(iframeSrc);
+      showFeedback('iframeSrc', 'saved');
+    } catch (err: unknown) {
+      showFeedback('iframeSrc', 'error', err instanceof Error ? err.message : 'Failed to save');
+    }
+  };
+
   const renderFeedback = (field: string) => {
     if (!saveFeedback || saveFeedback.field !== field) return null;
     const { status, errorMsg } = saveFeedback;
@@ -276,45 +269,15 @@ export default function AdminDashboard() {
     );
   }
 
-  // ── Checking admin status / claiming admin ────────────────────────────────
-  const isCheckingAdmin = adminStatusLoading || !adminStatusFetched || claimAdmin.isPending;
-
-  if (isCheckingAdmin) {
+  // ── Access Denied screen ──────────────────────────────────────────────────
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="bg-card border border-border rounded-lg p-8 max-w-sm w-full mx-4 shadow-lg text-center">
-          <div className="flex justify-center mb-4">
-            <svg
-              className="animate-spin h-8 w-8 text-foreground"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            {claimAdmin.isPending ? 'Registering you as admin…' : 'Checking admin status…'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Access denied — another principal is already admin ────────────────────
-  if (adminStatus && adminStatus.adminClaimed && !adminStatus.callerIsAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="bg-card border border-border rounded-lg p-8 max-w-sm w-full mx-4 shadow-lg text-center">
-          <div className="text-4xl mb-4">🔒</div>
-          <h1 className="text-xl font-heading font-bold text-foreground mb-2">Access Denied</h1>
+          <div className="text-4xl mb-4">🚫</div>
+          <h1 className="text-2xl font-heading font-bold text-foreground mb-2">Access Denied</h1>
           <p className="text-muted-foreground text-sm mb-6">
-            This CMS is already claimed by another administrator. Only the registered admin can access the dashboard.
+            You do not have permission to access the CMS dashboard.
           </p>
           <button
             onClick={handleLogout}
@@ -327,28 +290,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // ── claimAdmin error (race condition — re-check showed we're not admin) ───
-  if (claimAdmin.isError && adminStatus && !adminStatus.callerIsAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="bg-card border border-border rounded-lg p-8 max-w-sm w-full mx-4 shadow-lg text-center">
-          <div className="text-4xl mb-4">🔒</div>
-          <h1 className="text-xl font-heading font-bold text-foreground mb-2">Access Denied</h1>
-          <p className="text-muted-foreground text-sm mb-6">
-            Another user claimed admin access just before you. Only the first registered admin can access the dashboard.
-          </p>
-          <button
-            onClick={handleLogout}
-            className="w-full bg-foreground text-background py-2.5 px-4 rounded font-medium hover:opacity-80 transition-opacity"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Dashboard (shown to the registered admin) ─────────────────────────────
+  // ── Dashboard (admin only) ────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -363,9 +305,6 @@ export default function AdminDashboard() {
             >
               {isDark ? '☀️' : '🌙'}
             </button>
-            <span className="text-xs text-muted-foreground hidden sm:block">
-              {identity?.getPrincipal().toString().slice(0, 12)}…
-            </span>
             <button
               onClick={handleLogout}
               className="text-sm text-muted-foreground hover:text-foreground underline transition-colors"
@@ -463,7 +402,7 @@ export default function AdminDashboard() {
                 value={releaseDate}
                 onChange={e => setReleaseDate(e.target.value)}
                 className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
-                placeholder="e.g. Q2 2025"
+                placeholder="e.g. Q4 2025"
               />
             </div>
           </div>
@@ -503,14 +442,11 @@ export default function AdminDashboard() {
             <h2 className="text-base font-heading font-semibold text-foreground">YouTube Link</h2>
             {renderFeedback('youtubeLink')}
           </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            The YouTube video shown in the press kit. Accepts youtu.be short links or full youtube.com/watch URLs.
-          </p>
           <input
             value={youtubeLink}
             onChange={e => setYoutubeLink(e.target.value)}
             className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
-            placeholder="https://youtu.be/XXXXXXXXXXX"
+            placeholder="https://youtu.be/..."
           />
           <button
             onClick={handleSaveYoutubeLink}
@@ -518,6 +454,32 @@ export default function AdminDashboard() {
             className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
           >
             {updateYoutubeLinkMutation.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </section>
+
+        {/* Iframe URL */}
+        <section className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-heading font-semibold text-foreground">Iframe URL</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Embed an external page on the Press Kit (e.g. a game demo or store page). Leave blank to hide.
+              </p>
+            </div>
+            {renderFeedback('iframeSrc')}
+          </div>
+          <input
+            value={iframeSrc}
+            onChange={e => setIframeSrc(e.target.value)}
+            className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+            placeholder="https://example.com/embed"
+          />
+          <button
+            onClick={handleSaveIframeSrc}
+            disabled={updateIframeSrc.isPending}
+            className="mt-3 bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {updateIframeSrc.isPending ? 'Saving…' : 'Save'}
           </button>
         </section>
 
@@ -551,7 +513,6 @@ export default function AdminDashboard() {
           <input
             value={pressEmail}
             onChange={e => setPressEmail(e.target.value)}
-            type="email"
             className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
             placeholder="press@yourstudio.com"
           />
@@ -578,6 +539,7 @@ export default function AdminDashboard() {
               className="w-10 h-10 rounded border border-border cursor-pointer bg-background"
             />
             <input
+              type="text"
               value={bodyTextColor}
               onChange={e => setBodyTextColor(e.target.value)}
               className="flex-1 bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
@@ -596,46 +558,39 @@ export default function AdminDashboard() {
         {/* Password Protection */}
         <section className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-heading font-semibold text-foreground">
-              Password Protection
-              <span className={`ml-2 text-xs font-normal px-2 py-0.5 rounded-full ${passwordEnabled ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-muted text-muted-foreground'}`}>
-                {passwordEnabled ? 'Enabled' : 'Disabled'}
-              </span>
-            </h2>
+            <div>
+              <h2 className="text-base font-heading font-semibold text-foreground">Password Protection</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Status: <span className={passwordEnabled ? 'text-green-600' : 'text-muted-foreground'}>
+                  {passwordEnabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </p>
+            </div>
             {renderFeedback('password')}
           </div>
-
           {passwordEnabled ? (
-            <div className="space-y-3">
-              <p className="text-xs text-muted-foreground">
-                The press kit is currently password protected. Disable it to allow public access.
-              </p>
-              <button
-                onClick={handleDisablePassword}
-                disabled={disablePassword.isPending}
-                className="bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
-              >
-                {disablePassword.isPending ? 'Disabling…' : 'Disable Password Protection'}
-              </button>
-            </div>
+            <button
+              onClick={handleDisablePassword}
+              disabled={disablePassword.isPending}
+              className="bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
+            >
+              {disablePassword.isPending ? 'Disabling…' : 'Disable Password'}
+            </button>
           ) : (
-            <div className="space-y-3">
-              <p className="text-xs text-muted-foreground">
-                Set a password to restrict access to the press kit.
-              </p>
+            <div className="flex gap-2">
               <input
+                type="password"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
-                type="password"
-                className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
-                placeholder="Enter new password…"
+                className="flex-1 bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground"
+                placeholder="Set a password…"
               />
               <button
                 onClick={handleEnablePassword}
                 disabled={enablePassword.isPending || !newPassword.trim()}
                 className="bg-foreground text-background text-sm py-1.5 px-4 rounded hover:opacity-80 transition-opacity disabled:opacity-50"
               >
-                {enablePassword.isPending ? 'Enabling…' : 'Enable Password Protection'}
+                {enablePassword.isPending ? 'Saving…' : 'Enable'}
               </button>
             </div>
           )}

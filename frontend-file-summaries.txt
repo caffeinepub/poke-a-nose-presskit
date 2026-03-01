@@ -3,7 +3,7 @@
   "frontend/src/index.css": "Global styles with OKLCH black-and-white design system, page background image handling with dark mode inversion, game/festival logo inversion classes, body text color CSS variable, screenshot borders, and smooth theme transitions.",
   "frontend/tailwind.config.js": "Tailwind config extended with Fredoka One heading font, Inter body font, compact border radius, and all OKLCH color tokens.",
   "frontend/src/contexts/ThemeContext.tsx": "React context providing dark/light theme state with localStorage persistence, toggle function, and automatic HTML class management.",
-  "frontend/src/hooks/useQueries.ts": "All React Query hooks for backend integration, now including `useUpdateYoutubeLink()` mutation that calls `actor.updateYoutubeLink(link)` and invalidates the `content` query on success.",
+  "frontend/src/hooks/useQueries.ts": "All React Query hooks for backend integration, including all CMS mutation hooks and the new `useUpdateIframeSrc` mutation that calls `actor.updateIframeSrc(src)` and invalidates the `content` query on success.",
   "frontend/src/App.tsx": "Main app with TanStack Router setup for three routes (/, /press-kit, /admin), ThemeProvider wrapper, and global body text color applier that reads from backend content.",
   "frontend/src/components/Header.tsx": "Minimal header with only the Press Kit navigation link and dark/light mode toggle; the \"Poke A Nose\" title text has been removed and the layout is right-aligned. Hidden on the /admin route.",
   "frontend/src/components/NewsletterPlaceholder.tsx": "Modular non-functional newsletter signup component with email input and subscribe button.",
@@ -15,7 +15,7 @@
   "frontend/src/components/PasswordGateModal.tsx": "Theme-aware password gate modal with backend verification, inline error display, and session persistence after successful entry.",
   "frontend/src/components/ImageWithFallback.tsx": "Reusable image component with loading skeleton and error fallback states.",
   "frontend/src/pages/LandingPage.tsx": "Landing page showing the game logo (now capped at 480px width on desktop for a smaller appearance) and a \"View Press Kit\" button; dark-mode invert filter and responsive scaling are preserved.",
-  "frontend/src/pages/PressKitPage.tsx": "Full press kit page that now passes `content.youtubeLink` from the CMS content query as a prop to the VideoSection component so the video updates dynamically when the admin changes it.",
-  "frontend/src/pages/AdminDashboard.tsx": "CMS dashboard with all existing fields plus a new \"YouTube Link\" section that pre-populates from the backend, saves via `useUpdateYoutubeLink`, and shows inline saving/saved/error feedback.",
+  "frontend/src/pages/PressKitPage.tsx": "Full press kit page that conditionally renders a responsive 16:9 iframe (no border) between the Video section and the About section when `content.iframeSrc` is non-empty, driven by the CMS content query.",
+  "frontend/src/pages/AdminDashboard.tsx": "CMS dashboard with hardcoded admin principal check; includes all existing CMS fields plus a new \"Iframe URL\" section with a text input pre-populated from `content.iframeSrc`, a Save button wired to `useUpdateIframeSrc`, and inline save/error feedback.",
   "frontend/src/hooks/useActor.ts": "Initializes the backend actor — creates an authenticated actor using HttpAgent.create with the II identity (passing only `agent` to createActorWithConfig) or an anonymous actor (passing only `agentOptions`), eliminating the duplicate agent/agentOptions warning and the disallowed-origin errors."
 }

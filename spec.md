@@ -1,13 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Reduce the landing page game logo size and add an admin-editable YouTube link field to the CMS, wiring it through to the press kit video section.
+**Goal:** Add an embeddable iframe feature to the PokeANose Press Kit site, managed via the admin CMS and displayed on the press kit page.
 
 **Planned changes:**
-- Reduce the game logo (`gamelogo.png`) max-width on desktop to the 480px–560px range on the landing page (`/`), while keeping it responsive with `max-width: 100%` and auto height on smaller screens; preserve the dark mode inversion filter
-- Add a stable `youtubeLink` variable to `backend/main.mo` initialized to `'https://youtu.be/5in-hIASH08'`, include it in `getContent()`, and add an admin-only `updateYoutubeLink(link: Text)` method
-- Add a `useUpdateYoutubeLink` mutation to `frontend/src/hooks/useQueries.ts`
-- Add a "YouTube Link" text input field with a Save button to the Admin Dashboard (`/admin`) CMS section, pre-populated from `getContent()`, calling `updateYoutubeLink()` on save and refetching content afterward with success/error feedback
-- Update the `VideoSection` component on `/press-kit` to use `youtubeLink` from the content query instead of a hardcoded URL, with a graceful fallback if the value is empty
+- Add a `iframeSrc` stable variable to the backend, include it in `getContent()`, and add an admin-only `updateIframeSrc(src: Text)` method
+- Add an "Iframe URL" text input with a Save button to the Admin Dashboard CMS panel, backed by a `useUpdateIframeSrc` mutation hook
+- Render a responsive 16:9 borderless `<iframe>` on the Press Kit page between the Video Section and the About the Game section, only when `iframeSrc` is non-empty
 
-**User-visible outcome:** The landing page logo appears noticeably smaller on desktop. Admins can edit the YouTube video link via the CMS dashboard, and the press kit video section immediately reflects the updated link.
+**User-visible outcome:** Admins can set an iframe URL from the admin dashboard, and visitors to the press kit page will see the embedded iframe displayed between the video and about sections.

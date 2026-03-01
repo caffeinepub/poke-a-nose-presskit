@@ -1,28 +1,34 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T14:53:07.901Z",
-  "summary": "All four requirements are implemented in the diff. REQ-34 reduces the landing page logo to max 480px on desktop with responsive scaling and preserves dark mode inversion. REQ-35 adds the stable youtubeLink variable, includes it in getContent(), and adds updateYoutubeLink() with admin guard. REQ-36 adds the YouTube Link field to AdminDashboard with pre-population, save button, mutation, and feedback. REQ-37 updates VideoSection to accept youtubeLink as a prop from the CMS content query with graceful fallback. All acceptance criteria appear to be met.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-28T16:15:02.331Z",
+  "summary": "All three requirements (REQ-42, REQ-43, REQ-44) appear to be implemented in the diff. The backend adds the iframeSrc stable variable, includes it in getContent(), and adds updateIframeSrc. The frontend adds the useUpdateIframeSrc mutation hook, the admin dashboard UI field, and the Press Kit iframe rendering. However, the backend/main.mo diff is truncated before the updateIframeSrc method body is visible, so the exact error return type and principal check cannot be fully confirmed.",
+  "missing_requirements": [
     {
-      "description": "A backend/migration.mo module was added to handle migration of the youtubeLink field during canister upgrades.",
-      "reason": "The build request does not mention adding a migration module or file. The requirement only specifies adding a stable variable in main.mo. The migration.mo file and its wiring via 'with migration = Migration.run' were not requested.",
+      "id": "REQ-42",
+      "requirement": "updateIframeSrc(src: Text) rejects callers other than the hardcoded admin with #err(\"Access denied\")",
+      "reason": "The backend/main.mo diff is truncated before the updateIframeSrc method body is visible. It cannot be confirmed from the diff that the method returns #err(\"Access denied\") for unauthorized callers. Other update methods in the visible portion use Runtime.trap() rather than returning #err, suggesting a possible inconsistency.",
       "evidence": [
-        "backend/migration.mo",
         "backend/main.mo"
       ]
     }
   ],
-  "confidence": 0.87,
+  "hallucinated_features": [
+    {
+      "description": "A backend/migration.mo module was added to handle canister upgrade migration from the old schema to the new schema including iframeSrc.",
+      "reason": "The build request does not mention or require a migration module. The requirement only specifies that iframeSrc should be a stable variable that survives upgrades, not that a separate migration file should be created.",
+      "evidence": [
+        "backend/migration.mo"
+      ]
+    }
+  ],
+  "confidence": 0.72,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/VideoSection.tsx",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/AdminDashboard.tsx",
-    "frontend/src/pages/LandingPage.tsx",
     "frontend/src/pages/PressKitPage.tsx",
     "project_state.json"
   ]

@@ -1,66 +1,46 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Resize landing page logo and add YouTube link to CMS",
+  "title": "Add embeddable iframe to the site",
   "requirements": [
     {
-      "id": "REQ-34",
-      "summary": "Reduce the game logo size on the landing page so it no longer dominates the desktop viewport while maintaining responsive behavior",
+      "id": "REQ-43",
+      "summary": "Add Iframe URL field to Admin Dashboard CMS panel with mutation hook",
       "acceptanceCriteria": [
-        "On desktop, the game logo is visibly smaller than in the previous version and does not dominate the viewport",
-        "The logo scales down fluidly on mobile and tablet without cropping or overflow",
-        "max-width: 100% and auto height are still applied so the logo never breaks the layout on any screen size",
-        "Dark mode inversion (CSS filter invert) is preserved on the logo"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/LandingPage.tsx",
-          "operation": "modify",
-          "description": "Update the game logo image styling to reduce its desktop maximum width from full natural width to 480px–560px. Keep max-width: 100% and height: auto for responsive behavior. Preserve the dark mode invert filter. The logo should appear noticeably smaller on desktop while maintaining fluid scaling on smaller screens."
-        }
-      ]
-    },
-    {
-      "id": "REQ-36",
-      "summary": "Add a YouTube Link field to the Admin Dashboard CMS so admins can edit the video link used in the press kit",
-      "acceptanceCriteria": [
-        "The Admin Dashboard shows a clearly labelled 'YouTube Link' text input field in the CMS section",
-        "The input is pre-populated with the current youtubeLink value from the backend",
-        "Clicking Save calls updateYoutubeLink() with the new value",
-        "After a successful save, the content query is invalidated and refetched so the press kit reflects the updated link immediately",
-        "A success or error state is shown to the admin after saving"
+        "Admin dashboard has a clearly labeled 'Iframe URL' text input field",
+        "The input is pre-populated with the current `iframeSrc` from `getContent()`",
+        "A Save button triggers `updateIframeSrc()` with the input value",
+        "After a successful save, the content query is invalidated and refetched",
+        "`useUpdateIframeSrc` mutation hook exists in `frontend/src/hooks/useQueries.ts`"
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add a useUpdateYoutubeLink mutation hook that calls actor.updateYoutubeLink(link) and invalidates the 'content' query on success. Follow the existing mutation pattern used for updateAbout, updateFeatures, etc."
+          "description": "Add useUpdateIframeSrc mutation hook that calls actor.updateIframeSrc(src) and invalidates the 'content' query key on success, following the same pattern as existing mutations like useUpdateAboutText"
         },
         {
           "path": "frontend/src/pages/AdminDashboard.tsx",
           "operation": "modify",
-          "description": "Add a YouTube Link text input field to the CMS form section. Pre-populate it with content.youtubeLink from the content query. Wire up a Save button that calls the useUpdateYoutubeLink mutation with the input value. Display success/error feedback using toast or inline messages after save. Ensure the field is clearly labeled and positioned logically with other CMS fields."
+          "description": "Add an 'Iframe URL' section to the admin CMS panel with a text input pre-populated from content.iframeSrc, a Save button that triggers the useUpdateIframeSrc mutation, and error/success feedback following the same UI pattern as existing CMS fields"
         }
       ]
     },
     {
-      "id": "REQ-37",
-      "summary": "Update the VideoSection component to use the admin-editable youtubeLink from the CMS instead of a hardcoded URL",
+      "id": "REQ-44",
+      "summary": "Render responsive iframe on Press Kit page between Video and About sections",
       "acceptanceCriteria": [
-        "The VideoSection component receives the youtubeLink from the CMS content query rather than a hardcoded string",
-        "Clicking the video thumbnail replaces it with a YouTube iframe using the admin-set youtubeLink",
-        "If youtubeLink is empty or not yet set, the component falls back gracefully (e.g., the play button does nothing or is hidden)"
+        "The iframe section is not rendered when `iframeSrc` is empty",
+        "The iframe is rendered between the Video Section and the About the Game section when `iframeSrc` is non-empty",
+        "The iframe is 100% width and maintains a 16:9 aspect ratio on all screen sizes",
+        "The iframe has no visible border",
+        "The iframe src is driven by the `iframeSrc` value from the content query"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/VideoSection.tsx",
-          "operation": "modify",
-          "description": "Update VideoSection to accept a youtubeLink prop. Replace any hardcoded YouTube URL with this prop value when constructing the iframe src. Add graceful fallback handling if youtubeLink is empty (disable the play button or hide the video section)."
-        },
-        {
           "path": "frontend/src/pages/PressKitPage.tsx",
           "operation": "modify",
-          "description": "Pass content.youtubeLink from the content query as a prop to the VideoSection component. Ensure the component receives the dynamic link so it updates when the admin changes it in the CMS."
+          "description": "Add a conditional iframe section between VideoSection and the About section that renders only when content.iframeSrc is non-empty. The iframe must be wrapped in a responsive container with 100% width and 16:9 aspect ratio (using padding-bottom: 56.25% technique), have no border, and respect light/dark theme styling with appropriate wrapper classes"
         }
       ]
     }

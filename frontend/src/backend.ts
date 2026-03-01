@@ -94,10 +94,6 @@ export interface GameDetails {
     platforms: string;
     releaseDate: string;
 }
-export interface AdminStatus {
-    adminClaimed: boolean;
-    callerIsAdmin: boolean;
-}
 export interface Content {
     features: Array<string>;
     instagramLink: string;
@@ -106,6 +102,7 @@ export interface Content {
     bodyTextColorHex: string;
     developerWebsite: string;
     gameDetails: GameDetails;
+    iframeSrc: string;
     aboutText: string;
     passwordEnabled: boolean;
 }
@@ -138,14 +135,22 @@ export interface backendInterface {
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    claimAdmin(): Promise<void>;
     disablePasswordProtection(): Promise<void>;
     enablePasswordProtection(password: string): Promise<void>;
-    getAdminStatus(): Promise<AdminStatus>;
+    getAboutText(): Promise<string>;
+    getAllUserProfiles(): Promise<Array<UserProfile>>;
+    getBodyTextColor(): Promise<string>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getContent(): Promise<Content>;
+    getDeveloperWebsite(): Promise<string>;
+    getFeatures(): Promise<Array<string>>;
+    getGameDetails(): Promise<GameDetails>;
+    getInstagramLink(): Promise<string>;
+    getPasswordProtectionStatus(): Promise<boolean>;
+    getPressEmail(): Promise<string>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getYoutubeLink(): Promise<string>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateAbout(text: string): Promise<void>;
@@ -153,6 +158,7 @@ export interface backendInterface {
     updateDeveloperWebsite(link: string): Promise<void>;
     updateFeatures(newFeatures: Array<string>): Promise<void>;
     updateGameDetails(genre: string, platforms: string, releaseDate: string): Promise<void>;
+    updateIframeSrc(src: string): Promise<void>;
     updateInstagram(link: string): Promise<void>;
     updatePressEmail(email: string): Promise<void>;
     updateYoutubeLink(link: string): Promise<void>;
@@ -273,20 +279,6 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async claimAdmin(): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.claimAdmin();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.claimAdmin();
-            return result;
-        }
-    }
     async disablePasswordProtection(): Promise<void> {
         if (this.processError) {
             try {
@@ -315,17 +307,45 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getAdminStatus(): Promise<AdminStatus> {
+    async getAboutText(): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.getAdminStatus();
+                const result = await this.actor.getAboutText();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getAdminStatus();
+            const result = await this.actor.getAboutText();
+            return result;
+        }
+    }
+    async getAllUserProfiles(): Promise<Array<UserProfile>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllUserProfiles();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllUserProfiles();
+            return result;
+        }
+    }
+    async getBodyTextColor(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBodyTextColor();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBodyTextColor();
             return result;
         }
     }
@@ -371,6 +391,90 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getDeveloperWebsite(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getDeveloperWebsite();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getDeveloperWebsite();
+            return result;
+        }
+    }
+    async getFeatures(): Promise<Array<string>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getFeatures();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getFeatures();
+            return result;
+        }
+    }
+    async getGameDetails(): Promise<GameDetails> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getGameDetails();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getGameDetails();
+            return result;
+        }
+    }
+    async getInstagramLink(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getInstagramLink();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getInstagramLink();
+            return result;
+        }
+    }
+    async getPasswordProtectionStatus(): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getPasswordProtectionStatus();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getPasswordProtectionStatus();
+            return result;
+        }
+    }
+    async getPressEmail(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getPressEmail();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getPressEmail();
+            return result;
+        }
+    }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
         if (this.processError) {
             try {
@@ -383,6 +487,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getUserProfile(arg0);
             return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getYoutubeLink(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getYoutubeLink();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getYoutubeLink();
+            return result;
         }
     }
     async isCallerAdmin(): Promise<boolean> {
@@ -480,6 +598,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateGameDetails(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async updateIframeSrc(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateIframeSrc(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateIframeSrc(arg0);
             return result;
         }
     }

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Content, AdminStatus } from '../backend';
+import type { Content } from '../backend';
 
 // ─── Content ────────────────────────────────────────────────────────────────
 
@@ -15,38 +15,6 @@ export function useContent() {
     },
     enabled: !!actor && !actorFetching,
     staleTime: 30_000,
-  });
-}
-
-// ─── Admin Status ────────────────────────────────────────────────────────────
-
-export function useGetAdminStatus() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<AdminStatus>({
-    queryKey: ['adminStatus'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getAdminStatus();
-    },
-    enabled: !!actor && !actorFetching,
-    retry: false,
-  });
-}
-
-// ─── Claim Admin ─────────────────────────────────────────────────────────────
-
-export function useClaimAdmin() {
-  const { actor } = useActor();
-  const qc = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      await actor.claimAdmin();
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['adminStatus'] }),
-    onError: () => qc.invalidateQueries({ queryKey: ['adminStatus'] }),
   });
 }
 
@@ -180,6 +148,18 @@ export function useDisablePasswordProtection() {
     mutationFn: async () => {
       if (!actor) throw new Error('Actor not available');
       await actor.disablePasswordProtection();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['content'] }),
+  });
+}
+
+export function useUpdateIframeSrc() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (src: string) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.updateIframeSrc(src);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['content'] }),
   });

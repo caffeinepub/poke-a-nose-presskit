@@ -10,10 +10,6 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface AdminStatus {
-  'adminClaimed' : boolean,
-  'callerIsAdmin' : boolean,
-}
 export interface Content {
   'features' : Array<string>,
   'instagramLink' : string,
@@ -22,6 +18,7 @@ export interface Content {
   'bodyTextColorHex' : string,
   'developerWebsite' : string,
   'gameDetails' : GameDetails,
+  'iframeSrc' : string,
   'aboutText' : string,
   'passwordEnabled' : boolean,
 }
@@ -63,14 +60,22 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'claimAdmin' : ActorMethod<[], undefined>,
   'disablePasswordProtection' : ActorMethod<[], undefined>,
   'enablePasswordProtection' : ActorMethod<[string], undefined>,
-  'getAdminStatus' : ActorMethod<[], AdminStatus>,
+  'getAboutText' : ActorMethod<[], string>,
+  'getAllUserProfiles' : ActorMethod<[], Array<UserProfile>>,
+  'getBodyTextColor' : ActorMethod<[], string>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getContent' : ActorMethod<[], Content>,
+  'getDeveloperWebsite' : ActorMethod<[], string>,
+  'getFeatures' : ActorMethod<[], Array<string>>,
+  'getGameDetails' : ActorMethod<[], GameDetails>,
+  'getInstagramLink' : ActorMethod<[], string>,
+  'getPasswordProtectionStatus' : ActorMethod<[], boolean>,
+  'getPressEmail' : ActorMethod<[], string>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getYoutubeLink' : ActorMethod<[], string>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateAbout' : ActorMethod<[string], undefined>,
@@ -78,6 +83,7 @@ export interface _SERVICE {
   'updateDeveloperWebsite' : ActorMethod<[string], undefined>,
   'updateFeatures' : ActorMethod<[Array<string>], undefined>,
   'updateGameDetails' : ActorMethod<[string, string, string], undefined>,
+  'updateIframeSrc' : ActorMethod<[string], undefined>,
   'updateInstagram' : ActorMethod<[string], undefined>,
   'updatePressEmail' : ActorMethod<[string], undefined>,
   'updateYoutubeLink' : ActorMethod<[string], undefined>,

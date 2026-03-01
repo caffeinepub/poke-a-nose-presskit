@@ -74,6 +74,21 @@ export default function PressKitPage() {
                 <VideoSection youtubeLink={content.youtubeLink} />
               </section>
 
+              {/* ── 2b. Iframe (between Video and About) ── */}
+              {content.iframeSrc && content.iframeSrc.trim() !== '' && (
+                <section className="press-section">
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      src={content.iframeSrc}
+                      title="Embedded content"
+                      className="absolute inset-0 w-full h-full"
+                      style={{ border: 'none' }}
+                      allowFullScreen
+                    />
+                  </div>
+                </section>
+              )}
+
               {/* ── 3. About ── */}
               {content.aboutText && (
                 <section className="press-section">

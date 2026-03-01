@@ -1,98 +1,79 @@
 {
   "kind": "build_request",
-  "title": "Resize landing page logo and add YouTube link to CMS",
+  "title": "Add embeddable iframe to the site",
   "projectName": "PokeANose Presskit",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-34",
-      "text": "On the landing page (/), reduce the game logo (gamelogo.png) size so it appears noticeably smaller than its current size on desktop. It should still be responsive (scaling down on mobile/tablet with max-width: 100% and auto height), but the desktop maximum size must be reduced — use a max-width in the range of 480px–560px (down from the current full natural width) so it no longer dominates the viewport.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "the Logo is now too big make it a bit smaller"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On desktop, the game logo is visibly smaller than in the previous version and does not dominate the viewport",
-        "The logo scales down fluidly on mobile and tablet without cropping or overflow",
-        "max-width: 100% and auto height are still applied so the logo never breaks the layout on any screen size",
-        "Dark mode inversion (CSS filter invert) is preserved on the logo"
-      ]
-    },
-    {
-      "id": "REQ-35",
-      "text": "Add a stable text variable `youtubeLink` to the backend actor in backend/main.mo, initialized to 'https://youtu.be/5in-hIASH08'. Include it in the record returned by getContent(). Add an admin-only update method updateYoutubeLink(link: Text) that verifies the caller is the registered admin before persisting the new value. Reject with 'Access denied' otherwise.",
+      "id": "REQ-42",
+      "text": "Add an iframe field to the backend CMS: add a stable text variable `iframeSrc` (initialized to an empty string `\"\"`) in backend/main.mo. Include `iframeSrc` in the record returned by `getContent()`. Add an admin-only update method `updateIframeSrc(src: Text)` that verifies the caller equals the hardcoded admin principal before persisting the new value, and rejects with `#err(\"Access denied\")` otherwise.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-6"
         ],
         "quotes": [
-          "add an entry for the youtube link",
-          "make it so the admin can edit the youtube video link in the cms"
+          "can you add an iframe?"
         ]
       },
       "acceptanceCriteria": [
-        "A stable variable `youtubeLink: Text` exists in main.mo and persists across upgrades",
-        "getContent() returns the youtubeLink field",
-        "updateYoutubeLink(link: Text) is an admin-only update method that rejects non-admin callers with 'Access denied'",
-        "The default value 'https://youtu.be/5in-hIASH08' is set so existing behaviour is unchanged before any admin edit"
+        "`iframeSrc` stable variable is declared and initialized to `\"\"` in main.mo",
+        "`getContent()` return record includes the `iframeSrc` field",
+        "`updateIframeSrc(src: Text)` rejects callers other than the hardcoded admin with `#err(\"Access denied\")`",
+        "`updateIframeSrc` persists the new value in stable storage and it survives canister upgrades"
       ]
     },
     {
-      "id": "REQ-36",
-      "text": "Add a YouTube Link field to the Admin Dashboard (/admin) CMS. It must be a text input pre-populated with the current youtubeLink value from getContent(), with a Save button that calls updateYoutubeLink() and then invalidates/refetches the content query. Add the corresponding useUpdateYoutubeLink mutation to frontend/src/hooks/useQueries.ts.",
+      "id": "REQ-43",
+      "text": "Add an Iframe URL field to the Admin Dashboard (/admin) CMS panel. It must be a text input pre-populated with the current `iframeSrc` value from `getContent()`, with a Save button that calls `updateIframeSrc()` and then invalidates/refetches the content query. Add the corresponding `useUpdateIframeSrc` mutation to `frontend/src/hooks/useQueries.ts`.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-6"
         ],
         "quotes": [
-          "add in the CMS system and add an entry for the youtube link",
-          "make it so the admin can edit the youtube video link in the cms"
+          "can you add an iframe?"
         ]
       },
       "acceptanceCriteria": [
-        "The Admin Dashboard shows a clearly labelled 'YouTube Link' text input field in the CMS section",
-        "The input is pre-populated with the current youtubeLink value from the backend",
-        "Clicking Save calls updateYoutubeLink() with the new value",
-        "After a successful save, the content query is invalidated and refetched so the press kit reflects the updated link immediately",
-        "A success or error state is shown to the admin after saving"
+        "Admin dashboard has a clearly labeled 'Iframe URL' text input field",
+        "The input is pre-populated with the current `iframeSrc` from `getContent()`",
+        "A Save button triggers `updateIframeSrc()` with the input value",
+        "After a successful save, the content query is invalidated and refetched",
+        "`useUpdateIframeSrc` mutation hook exists in `frontend/src/hooks/useQueries.ts`"
       ]
     },
     {
-      "id": "REQ-37",
-      "text": "Update the VideoSection component on /press-kit to use the youtubeLink value from the global content query (returned by getContent()) instead of a hardcoded YouTube URL. When the user clicks the video thumbnail play button, the embedded YouTube iframe must use this admin-editable link.",
+      "id": "REQ-44",
+      "text": "On the Press Kit page (/press-kit), render an `<iframe>` using the `iframeSrc` value from the global content query. The iframe must only be rendered when `iframeSrc` is a non-empty string. It must be displayed as a distinct section between the Video Section and the About the Game section. The iframe must be fully responsive (100% width, with a fixed aspect ratio such as 16:9), have no visible border, and respect the page's light/dark theme styling.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-6"
         ],
         "quotes": [
-          "currently we have a youtube video in the presskit but make it so the admin can edit the youtube video link in the cms"
+          "can you add an iframe?"
         ]
       },
       "acceptanceCriteria": [
-        "The VideoSection component receives the youtubeLink from the CMS content query rather than a hardcoded string",
-        "Clicking the video thumbnail replaces it with a YouTube iframe using the admin-set youtubeLink",
-        "If youtubeLink is empty or not yet set, the component falls back gracefully (e.g., the play button does nothing or is hidden)"
+        "The iframe section is not rendered when `iframeSrc` is empty",
+        "The iframe is rendered between the Video Section and the About the Game section when `iframeSrc` is non-empty",
+        "The iframe is 100% width and maintains a 16:9 aspect ratio on all screen sizes",
+        "The iframe has no visible border",
+        "The iframe src is driven by the `iframeSrc` value from the content query"
       ]
     }
   ],
   "constraints": [
-    "Do not modify any file under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "All backend logic must remain in the single actor in backend/main.mo",
-    "The youtubeLink default value must be 'https://youtu.be/5in-hIASH08' to preserve existing press kit behaviour"
+    "Do not change the hardcoded admin principal `r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe`",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "All Motoko logic must remain in the single backend/main.mo actor file"
   ],
   "nonGoals": [
-    "Changing any other CMS fields or backend methods beyond youtubeLink",
-    "Modifying the press kit page layout beyond wiring up the dynamic YouTube link",
-    "Changing the logo size on the press kit page — only the landing page logo is being resized",
-    "Adding YouTube video preview or validation logic"
+    "Changing the iframe URL from the public press kit page (admin-only edit)",
+    "Adding the iframe to the landing page (/)",
+    "Adding the iframe to the admin dashboard itself",
+    "Supporting multiple iframes"
   ],
   "imageRequirements": {
     "required": [],

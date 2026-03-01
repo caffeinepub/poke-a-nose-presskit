@@ -1,36 +1,25 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T14:53:07.906Z",
+  "generatedAt": "2026-02-28T16:15:02.335Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 3,
+    "total": 3,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-34",
-        "summary": "On the landing page (/), reduce the game logo (gamelogo.png) size so it appears noticeably smaller than its current size on desktop. It should still be responsive (scaling down on mobile/tablet with max-width: 100% and auto height), but the desktop maximum size must be reduced — use a max-width in the range of 480px–560px (down from the current full natural width) so it no longer dominates the viewport.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/LandingPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/LandingPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-35",
-        "summary": "Add a stable text variable `youtubeLink` to the backend actor in backend/main.mo, initialized to 'https://youtu.be/5in-hIASH08'. Include it in the record returned by getContent(). Add an admin-only update method updateYoutubeLink(link: Text) that verifies the caller is the registered admin before persisting the new value. Reject with 'Access denied' otherwise.",
+        "id": "REQ-42",
+        "summary": "Add an iframe field to the backend CMS: add a stable text variable `iframeSrc` (initialized to an empty string `\"\"`) in backend/main.mo. Include `iframeSrc` in the record returned by `getContent()`. Add an admin-only update method `updateIframeSrc(src: Text)` that verifies the caller equals the hardcoded admin principal before persisting the new value, and rejects with `#err(\"Access denied\")` otherwise.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-36",
-        "summary": "Add a YouTube Link field to the Admin Dashboard (/admin) CMS. It must be a text input pre-populated with the current youtubeLink value from getContent(), with a Save button that calls updateYoutubeLink() and then invalidates/refetches the content query. Add the corresponding useUpdateYoutubeLink mutation to frontend/src/hooks/useQueries.ts.",
+        "id": "REQ-43",
+        "summary": "Add an Iframe URL field to the Admin Dashboard (/admin) CMS panel. It must be a text input pre-populated with the current `iframeSrc` value from `getContent()`, with a Save button that calls `updateIframeSrc()` and then invalidates/refetches the content query. Add the corresponding `useUpdateIframeSrc` mutation to `frontend/src/hooks/useQueries.ts`.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/hooks/useQueries.ts",
@@ -42,15 +31,13 @@
         ]
       },
       {
-        "id": "REQ-37",
-        "summary": "Update the VideoSection component on /press-kit to use the youtubeLink value from the global content query (returned by getContent()) instead of a hardcoded YouTube URL. When the user clicks the video thumbnail play button, the embedded YouTube iframe must use this admin-editable link.",
+        "id": "REQ-44",
+        "summary": "On the Press Kit page (/press-kit), render an `<iframe>` using the `iframeSrc` value from the global content query. The iframe must only be rendered when `iframeSrc` is a non-empty string. It must be displayed as a distinct section between the Video Section and the About the Game section. The iframe must be fully responsive (100% width, with a fixed aspect ratio such as 16:9), have no visible border, and respect the page's light/dark theme styling.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/VideoSection.tsx",
           "frontend/src/pages/PressKitPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/VideoSection.tsx",
           "frontend/src/pages/PressKitPage.tsx"
         ]
       }
@@ -65,12 +52,10 @@
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/VideoSection.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/AdminDashboard.tsx",
-    "frontend/src/pages/LandingPage.tsx",
     "frontend/src/pages/PressKitPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

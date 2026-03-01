@@ -1,16 +1,18 @@
 import Map "mo:core/Map";
 import Principal "mo:core/Principal";
-import Runtime "mo:core/Runtime";
 import Iter "mo:core/Iter";
-import Nat "mo:core/Nat";
-import Array "mo:core/Array";
-import MixinStorage "blob-storage/Mixin";
-import AccessControl "authorization/access-control";
+import Runtime "mo:core/Runtime";
 import MixinAuthorization "authorization/MixinAuthorization";
+import AccessControl "authorization/access-control";
+import MixinStorage "blob-storage/Mixin";
 import Migration "migration";
 
 (with migration = Migration.run)
 actor {
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
+  include MixinStorage();
+
   public type GameDetails = {
     genre : Text;
     platforms : Text;
@@ -27,21 +29,13 @@ actor {
     pressEmail : Text;
     bodyTextColorHex : Text;
     passwordEnabled : Bool;
+    iframeSrc : Text;
   };
 
   public type UserProfile = {
     name : Text;
     principal : Principal;
   };
-
-  public type AdminStatus = {
-    adminClaimed : Bool;
-    callerIsAdmin : Bool;
-  };
-
-  // Initialize access control state
-  let accessControlState = AccessControl.initState();
-  include MixinAuthorization(accessControlState);
 
   let userProfiles = Map.empty<Principal, UserProfile>();
 
@@ -59,22 +53,19 @@ actor {
   var youtubeLink = "https://youtu.be/5in-hIASH08";
   var developerWebsite = "";
   var pressEmail = "";
-
-  var adminPrincipal : ?Principal = null;
-
-  include MixinStorage();
+  var iframeSrc = "";
 
   // ── User Profile Management ──────────────────────────────────────────────
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only authenticated users can get their profile");
+      Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not (AccessControl.isAdmin(accessControlState, caller))) {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
@@ -82,90 +73,43 @@ actor {
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only authenticated users can save profiles");
+      Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
-  };
-
-  // ── Admin Claim ──────────────────────────────────────────────────────────
-
-  public shared ({ caller }) func claimAdmin() : async () {
-    // Reject anonymous principals
-    if (caller.isAnonymous()) {
-      Runtime.trap("Anonymous principals cannot claim admin");
-    };
-    switch (adminPrincipal) {
-      case (null) {
-        // First authenticated caller becomes admin
-        adminPrincipal := ?caller;
-        // Also register in the access control system
-        let adminToken = "presetAdminToken";
-        let userProvidedToken = "presetUserToken";
-        AccessControl.initialize(accessControlState, caller, adminToken, userProvidedToken);
-      };
-      case (?existingAdmin) {
-        if (caller != existingAdmin) {
-          Runtime.trap("Admin already claimed");
-        };
-        // Idempotent: caller is already the admin, succeed silently
-      };
-    };
-  };
-
-  public query ({ caller }) func getAdminStatus() : async AdminStatus {
-    let claimed = switch (adminPrincipal) {
-      case (null) { false };
-      case (?_admin) { true };
-    };
-    let callerIsAdmin = switch (adminPrincipal) {
-      case (null) { false };
-      case (?admin) { caller == admin };
-    };
-    {
-      adminClaimed = claimed;
-      callerIsAdmin = callerIsAdmin;
-    };
-  };
-
-  // ── Internal Admin Guard ─────────────────────────────────────────────────
-
-  func requireAdmin(caller : Principal) {
-    switch (adminPrincipal) {
-      case (null) {
-        Runtime.trap("No admin has claimed control yet");
-      };
-      case (?admin) {
-        if (caller != admin) {
-          Runtime.trap("Access denied: Only admin can perform this action");
-        };
-      };
-    };
   };
 
   // ── Password Protection ──────────────────────────────────────────────────
 
   public shared ({ caller }) func enablePasswordProtection(password : Text) : async () {
-    requireAdmin(caller);
-    passwordHash := password;
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can enable password protection");
+    };
+    passwordHash := password; // TODO hash
     passwordEnabled := true;
   };
 
   public shared ({ caller }) func disablePasswordProtection() : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can disable password protection");
+    };
     passwordEnabled := false;
     passwordHash := "";
   };
 
-  public query func verifyPassword(password : Text) : async Bool {
+  public query ({ caller }) func verifyPassword(password : Text) : async Bool {
     if (not passwordEnabled) {
-      return false;
+      return true;
     };
     password == passwordHash;
   };
 
+  public query ({ caller }) func getPasswordProtectionStatus() : async Bool {
+    passwordEnabled;
+  };
+
   // ── Content Queries ──────────────────────────────────────────────────────
 
-  public query func getContent() : async Content {
+  public query ({ caller }) func getContent() : async Content {
     {
       aboutText;
       features;
@@ -176,27 +120,66 @@ actor {
       pressEmail;
       bodyTextColorHex;
       passwordEnabled;
+      iframeSrc;
     };
   };
 
-  // ── Content Management Methods (Admin Only) ──────────────────────────────
+  public query ({ caller }) func getAboutText() : async Text {
+    aboutText;
+  };
+
+  public query ({ caller }) func getFeatures() : async [Text] {
+    features;
+  };
+
+  public query ({ caller }) func getGameDetails() : async GameDetails {
+    gameDetails;
+  };
+
+  public query ({ caller }) func getInstagramLink() : async Text {
+    instagramLink;
+  };
+
+  public query ({ caller }) func getDeveloperWebsite() : async Text {
+    developerWebsite;
+  };
+
+  public query ({ caller }) func getPressEmail() : async Text {
+    pressEmail;
+  };
+
+  public query ({ caller }) func getBodyTextColor() : async Text {
+    bodyTextColorHex;
+  };
+
+  public query ({ caller }) func getYoutubeLink() : async Text {
+    youtubeLink;
+  };
+
+  // ── Content Management Methods ───────────────────────────────────────────
 
   public shared ({ caller }) func updateAbout(text : Text) : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
     aboutText := text;
   };
 
   public shared ({ caller }) func updateFeatures(newFeatures : [Text]) : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
     let maxFeatures = 4;
     if (newFeatures.size() > maxFeatures) {
-      Runtime.trap("Please keep features list to 4 items or less.");
+      Runtime.trap("Please keep features list to 4 items or less. Avoid overloading users.");
     };
     features := newFeatures;
   };
 
   public shared ({ caller }) func updateGameDetails(genre : Text, platforms : Text, releaseDate : Text) : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
     gameDetails := {
       genre;
       platforms;
@@ -205,27 +188,48 @@ actor {
   };
 
   public shared ({ caller }) func updateInstagram(link : Text) : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
     instagramLink := link;
   };
 
   public shared ({ caller }) func updateYoutubeLink(link : Text) : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
     youtubeLink := link;
   };
 
   public shared ({ caller }) func updateDeveloperWebsite(link : Text) : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
     developerWebsite := link;
   };
 
   public shared ({ caller }) func updatePressEmail(email : Text) : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
     pressEmail := email;
   };
 
   public shared ({ caller }) func updateBodyTextColor(colorHex : Text) : async () {
-    requireAdmin(caller);
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
     bodyTextColorHex := colorHex;
+  };
+
+  public shared ({ caller }) func updateIframeSrc(src : Text) : async () {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update the iframe source");
+    };
+    iframeSrc := src;
+  };
+
+  public query ({ caller }) func getAllUserProfiles() : async [UserProfile] {
+    userProfiles.values().toArray();
   };
 };
