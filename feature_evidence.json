@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-duplicate-header-issue-where-the-site-header-with-the-press-kit-navigation-link-and-dark-light-mode-toggle-appears-twice-on-the-page-audit-all-layout-components-route-wrappers-and-the-app-tsx-root-component-to-ensure-the-header-component-is-rendered-exactly-once-per-page-view",
-      "featureTitle": "Fix the duplicate header issue where the site header (with the Press Kit navigation link and dark/light mode toggle) appears twice on the page. Audit all layout components, route wrappers, and the App.tsx root component to ensure the Header component is rendered exactly once per page view.",
+      "featureId": "feature-on-the-press-kit-page-display-the-game-logo-at-the-same-width-as-the-content-container-preserving-its-original-aspect-ratio-the-logo-must-remain-fully-responsive-across-all-screen-sizes",
+      "featureTitle": "On the Press Kit page, display the game logo at the same width as the content container, preserving its original aspect ratio. The logo must remain fully responsive across all screen sizes.",
       "files": [
-        "frontend/src/pages/LandingPage.tsx"
+        "frontend/src/pages/PressKitPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,6 +18,46 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-the-same-custom-background-image-used-on-the-landing-page-to-the-press-kit-page-the-background-should-render-identically-same-positioning-sizing-and-overlay-behavior-as-on-the-landing-page",
+      "featureTitle": "Apply the same custom background image used on the Landing page to the Press Kit page. The background should render identically (same positioning, sizing, and overlay behavior) as on the landing page.",
+      "files": [
+        "frontend/src/pages/PressKitPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-restructure-the-press-kit-page-content-to-display-sections-in-the-following-strict-order-1-game-logo-2-youtube-video-3-about-4-game-details-5-features-6-screenshots-7-download-all-screenshots-button-8-socials-9-press-email-do-not-remove-any-existing-content-or-functionality",
+      "featureTitle": "Restructure the Press Kit page content to display sections in the following strict order: (1) Game Logo, (2) YouTube Video, (3) About, (4) Game Details, (5) Features, (6) Screenshots, (7) Download All Screenshots button, (8) Socials, (9) Press Email. Do not remove any existing content or functionality.",
+      "files": [
+        "frontend/src/pages/PressKitPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

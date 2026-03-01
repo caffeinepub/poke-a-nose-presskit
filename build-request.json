@@ -1,36 +1,84 @@
 {
   "kind": "build_request",
-  "title": "Fix duplicate header rendering",
-  "priority": "high",
+  "title": "Press Kit Layout & Content Order Overhaul",
+  "projectName": "PokeANose Press Kit",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the duplicate header issue where the site header (with the Press Kit navigation link and dark/light mode toggle) appears twice on the page. Audit all layout components, route wrappers, and the App.tsx root component to ensure the Header component is rendered exactly once per page view.",
+      "text": "On the Press Kit page, display the game logo at the same width as the content container, preserving its original aspect ratio. The logo must remain fully responsive across all screen sizes.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-5"
         ],
         "quotes": [
-          "the header is now double?"
+          "Game logo keep same aspect ratio but same width as content. Keep responsive in mind."
         ]
       },
       "acceptanceCriteria": [
-        "Only one header is visible on the landing page (/)",
-        "Only one header is visible on the press kit page (/press-kit)",
-        "The header remains hidden on the /admin route as per existing behavior",
-        "No duplicate Header component instances exist in the rendered DOM"
+        "Game logo width matches the content container width on all screen sizes",
+        "Game logo aspect ratio is not distorted",
+        "Logo scales down correctly on mobile viewports"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Apply the same custom background image used on the Landing page to the Press Kit page. The background should render identically (same positioning, sizing, and overlay behavior) as on the landing page.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "Now the custom background that works in the first page is not there add the same background image to the presskit page."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Press Kit page displays the same custom background image as the Landing page",
+        "Background image positioning and sizing matches the Landing page",
+        "Background is visible behind all Press Kit content"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Restructure the Press Kit page content to display sections in the following strict order: (1) Game Logo, (2) YouTube Video, (3) About, (4) Game Details, (5) Features, (6) Screenshots, (7) Download All Screenshots button, (8) Socials, (9) Press Email. Do not remove any existing content or functionality.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "Display content in press kit: 1. Game logo 2. Youtube video 3. About 4. Game Details 5. Features 6. Screenshots 7. Download all screenshots 8. Socials 9. Press email"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Game Logo appears first in the Press Kit page",
+        "YouTube Video section appears second",
+        "About section appears third",
+        "Game Details section appears fourth",
+        "Features section appears fifth",
+        "Screenshots gallery appears sixth",
+        "Download All Screenshots button appears immediately after the screenshots gallery",
+        "Socials section appears eighth",
+        "Press Email appears last",
+        "No existing content or functionality is removed"
       ]
     }
   ],
   "constraints": [
-    "Do not alter the admin principal ID or access control logic",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
+    "Do not modify the Landing page in any way",
+    "Do not change any admin login, authentication, or password protection logic",
+    "Do not modify any files under frontend/src/hooks/ (immutable paths)",
+    "Do not modify frontend/src/components/ui/ components",
+    "Do not modify frontend/src/main.tsx"
   ],
   "nonGoals": [
-    "Redesigning or restyling the header",
-    "Adding new navigation items to the header",
-    "Changing header behavior on any route beyond fixing the duplication"
+    "Changes to the Landing page design or layout",
+    "Changes to the Admin Dashboard",
+    "Adding new backend fields or data models",
+    "Modifying the newsletter signup functionality",
+    "Changing authentication or password gate behavior"
   ],
   "imageRequirements": {
     "required": [],

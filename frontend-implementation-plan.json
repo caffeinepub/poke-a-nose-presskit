@@ -1,32 +1,60 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix duplicate header rendering",
+  "title": "Press Kit Layout & Content Order Overhaul",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Fix the duplicate header issue where the site header appears twice on the page by auditing all layout components, route wrappers, and the App.tsx root component to ensure the Header component is rendered exactly once per page view",
+      "summary": "Display the game logo at full content-container width while preserving aspect ratio and ensuring responsive behavior across all screen sizes",
       "acceptanceCriteria": [
-        "Only one header is visible on the landing page (/)",
-        "Only one header is visible on the press kit page (/press-kit)",
-        "The header remains hidden on the /admin route as per existing behavior",
-        "No duplicate Header component instances exist in the rendered DOM"
+        "Game logo width matches the content container width on all screen sizes",
+        "Game logo aspect ratio is not distorted",
+        "Logo scales down correctly on mobile viewports"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/pages/PressKitPage.tsx",
           "operation": "modify",
-          "description": "Review the App.tsx root component to identify if the Header component is being rendered at the app level. If the Header is rendered here alongside route-specific Header instances, remove one of the duplicate renderings to ensure the Header appears exactly once per page view. Verify that the Header remains hidden on the /admin route as per existing behavior."
-        },
-        {
-          "path": "frontend/src/pages/LandingPage.tsx",
-          "operation": "modify",
-          "description": "Audit the LandingPage component to check if it renders the Header component locally. If both App.tsx and LandingPage.tsx are rendering the Header, remove the duplicate instance from one of these locations to ensure only one header is visible on the landing page (/)."
-        },
+          "description": "Update the game logo rendering to use w-full class and object-contain to match content container width while preserving aspect ratio. Ensure the logo img element uses responsive Tailwind classes (w-full, h-auto) and is wrapped in a container that matches the content width. Remove any fixed width constraints on the logo."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Apply the same custom background image used on the Landing page to the Press Kit page with identical positioning, sizing, and overlay behavior",
+      "acceptanceCriteria": [
+        "Press Kit page displays the same custom background image as the Landing page",
+        "Background image positioning and sizing matches the Landing page",
+        "Background is visible behind all Press Kit content"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/pages/PressKitPage.tsx",
           "operation": "modify",
-          "description": "Audit the PressKitPage component to check if it renders the Header component locally. If both App.tsx and PressKitPage.tsx are rendering the Header, remove the duplicate instance from one of these locations to ensure only one header is visible on the press kit page (/press-kit)."
+          "description": "Add the custom-background CSS class to the root container element of PressKitPage to match the background styling used on LandingPage. Ensure the page container has the same structure that allows the background_web.jpg image (defined in frontend/src/index.css) to render with proper positioning and overlay."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Restructure Press Kit page content to display sections in strict order: Game Logo, YouTube Video, About, Game Details, Features, Screenshots, Download All Screenshots button, Socials, Press Email",
+      "acceptanceCriteria": [
+        "Game Logo appears first in the Press Kit page",
+        "YouTube Video section appears second",
+        "About section appears third",
+        "Game Details section appears fourth",
+        "Features section appears fifth",
+        "Screenshots gallery appears sixth",
+        "Download All Screenshots button appears immediately after the screenshots gallery",
+        "Socials section appears eighth",
+        "Press Email appears last",
+        "No existing content or functionality is removed"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PressKitPage.tsx",
+          "operation": "modify",
+          "description": "Reorder all content sections in the PressKitPage component JSX to match the required sequence: (1) Game Logo (gamelogo.png), (2) VideoSection component with youtubeLink, (3) About text section, (4) Game Details section (genre, platforms, releaseDate), (5) Features list, (6) ScreenshotsGallery component, (7) MediaDownloadButton component, (8) SocialMediaSection component with instagramLink, (9) Press Email display. Preserve all existing rendering logic, conditional checks, styling classes, and component props while reorganizing the JSX structure."
         }
       ]
     }

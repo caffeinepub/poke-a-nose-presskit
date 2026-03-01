@@ -1,24 +1,63 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
-  "known_issues": [
-    "Header appears duplicated (double header) after recent deployment"
+  "summary": "Game press kit website with landing page and press kit page. Admin login is functional. Press kit page needs layout updates including responsive game logo, background image matching landing page, and ordered content sections.",
+  "architectural_notes": [
+    "Landing page layout must not be changed — only press kit page is being updated",
+    "Admin login functionality is working and must not be modified"
   ],
-  "isFixRequest": true,
+  "known_issues": [
+    "Press kit page is missing the custom background image that exists on the landing page"
+  ],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-fix-the-duplicate-header-issue-where-the-site-header-with-the-press-kit-navigation-link-and-dark-light-mode-toggle-appears-twice-on-the-page-audit-all-layout-components-route-wrappers-and-the-app-tsx-root-component-to-ensure-the-header-component-is-rendered-exactly-once-per-page-view",
-      "title": "Fix the duplicate header issue where the site header (with the Press Kit navigation link and dark/light mode toggle) appears twice on the page. Audit all layout components, route wrappers, and the App.tsx root component to ensure the Header component is rendered exactly once per page view.",
+      "id": "feature-on-the-press-kit-page-display-the-game-logo-at-the-same-width-as-the-content-container-preserving-its-original-aspect-ratio-the-logo-must-remain-fully-responsive-across-all-screen-sizes",
+      "title": "On the Press Kit page, display the game logo at the same width as the content container, preserving its original aspect ratio. The logo must remain fully responsive across all screen sizes.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-apply-the-same-custom-background-image-used-on-the-landing-page-to-the-press-kit-page-the-background-should-render-identically-same-positioning-sizing-and-overlay-behavior-as-on-the-landing-page",
+      "title": "Apply the same custom background image used on the Landing page to the Press Kit page. The background should render identically (same positioning, sizing, and overlay behavior) as on the landing page.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restructure-the-press-kit-page-content-to-display-sections-in-the-following-strict-order-1-game-logo-2-youtube-video-3-about-4-game-details-5-features-6-screenshots-7-download-all-screenshots-button-8-socials-9-press-email-do-not-remove-any-existing-content-or-functionality",
+      "title": "Restructure the Press Kit page content to display sections in the following strict order: (1) Game Logo, (2) YouTube Video, (3) About, (4) Game Details, (5) Features, (6) Screenshots, (7) Download All Screenshots button, (8) Socials, (9) Press Email. Do not remove any existing content or functionality.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix duplicate header rendering",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Press kit: game logo responsive with same width as content and same aspect ratio",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Press kit: add same custom background image as landing page",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Press kit: display content in order — logo, YouTube video, about, game details, features, screenshots, download all screenshots, socials, press email",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "2d",
+  "projectName": "PokeANose Press Kit",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
