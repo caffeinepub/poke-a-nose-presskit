@@ -1,79 +1,36 @@
 {
   "kind": "build_request",
-  "title": "Add embeddable iframe to the site",
-  "projectName": "PokeANose Presskit",
-  "priority": "normal",
+  "title": "Fix duplicate header rendering",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-42",
-      "text": "Add an iframe field to the backend CMS: add a stable text variable `iframeSrc` (initialized to an empty string `\"\"`) in backend/main.mo. Include `iframeSrc` in the record returned by `getContent()`. Add an admin-only update method `updateIframeSrc(src: Text)` that verifies the caller equals the hardcoded admin principal before persisting the new value, and rejects with `#err(\"Access denied\")` otherwise.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "can you add an iframe?"
-        ]
-      },
-      "acceptanceCriteria": [
-        "`iframeSrc` stable variable is declared and initialized to `\"\"` in main.mo",
-        "`getContent()` return record includes the `iframeSrc` field",
-        "`updateIframeSrc(src: Text)` rejects callers other than the hardcoded admin with `#err(\"Access denied\")`",
-        "`updateIframeSrc` persists the new value in stable storage and it survives canister upgrades"
-      ]
-    },
-    {
-      "id": "REQ-43",
-      "text": "Add an Iframe URL field to the Admin Dashboard (/admin) CMS panel. It must be a text input pre-populated with the current `iframeSrc` value from `getContent()`, with a Save button that calls `updateIframeSrc()` and then invalidates/refetches the content query. Add the corresponding `useUpdateIframeSrc` mutation to `frontend/src/hooks/useQueries.ts`.",
+      "id": "REQ-1",
+      "text": "Fix the duplicate header issue where the site header (with the Press Kit navigation link and dark/light mode toggle) appears twice on the page. Audit all layout components, route wrappers, and the App.tsx root component to ensure the Header component is rendered exactly once per page view.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "can you add an iframe?"
+          "the header is now double?"
         ]
       },
       "acceptanceCriteria": [
-        "Admin dashboard has a clearly labeled 'Iframe URL' text input field",
-        "The input is pre-populated with the current `iframeSrc` from `getContent()`",
-        "A Save button triggers `updateIframeSrc()` with the input value",
-        "After a successful save, the content query is invalidated and refetched",
-        "`useUpdateIframeSrc` mutation hook exists in `frontend/src/hooks/useQueries.ts`"
-      ]
-    },
-    {
-      "id": "REQ-44",
-      "text": "On the Press Kit page (/press-kit), render an `<iframe>` using the `iframeSrc` value from the global content query. The iframe must only be rendered when `iframeSrc` is a non-empty string. It must be displayed as a distinct section between the Video Section and the About the Game section. The iframe must be fully responsive (100% width, with a fixed aspect ratio such as 16:9), have no visible border, and respect the page's light/dark theme styling.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "can you add an iframe?"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The iframe section is not rendered when `iframeSrc` is empty",
-        "The iframe is rendered between the Video Section and the About the Game section when `iframeSrc` is non-empty",
-        "The iframe is 100% width and maintains a 16:9 aspect ratio on all screen sizes",
-        "The iframe has no visible border",
-        "The iframe src is driven by the `iframeSrc` value from the content query"
+        "Only one header is visible on the landing page (/)",
+        "Only one header is visible on the press kit page (/press-kit)",
+        "The header remains hidden on the /admin route as per existing behavior",
+        "No duplicate Header component instances exist in the rendered DOM"
       ]
     }
   ],
   "constraints": [
-    "Do not change the hardcoded admin principal `r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe`",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "All Motoko logic must remain in the single backend/main.mo actor file"
+    "Do not alter the admin principal ID or access control logic",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
   ],
   "nonGoals": [
-    "Changing the iframe URL from the public press kit page (admin-only edit)",
-    "Adding the iframe to the landing page (/)",
-    "Adding the iframe to the admin dashboard itself",
-    "Supporting multiple iframes"
+    "Redesigning or restyling the header",
+    "Adding new navigation items to the header",
+    "Changing header behavior on any route beyond fixing the duplication"
   ],
   "imageRequirements": {
     "required": [],

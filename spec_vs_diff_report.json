@@ -1,35 +1,14 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T16:15:02.331Z",
-  "summary": "All three requirements (REQ-42, REQ-43, REQ-44) appear to be implemented in the diff. The backend adds the iframeSrc stable variable, includes it in getContent(), and adds updateIframeSrc. The frontend adds the useUpdateIframeSrc mutation hook, the admin dashboard UI field, and the Press Kit iframe rendering. However, the backend/main.mo diff is truncated before the updateIframeSrc method body is visible, so the exact error return type and principal check cannot be fully confirmed.",
-  "missing_requirements": [
-    {
-      "id": "REQ-42",
-      "requirement": "updateIframeSrc(src: Text) rejects callers other than the hardcoded admin with #err(\"Access denied\")",
-      "reason": "The backend/main.mo diff is truncated before the updateIframeSrc method body is visible. It cannot be confirmed from the diff that the method returns #err(\"Access denied\") for unauthorized callers. Other update methods in the visible portion use Runtime.trap() rather than returning #err, suggesting a possible inconsistency.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    }
-  ],
-  "hallucinated_features": [
-    {
-      "description": "A backend/migration.mo module was added to handle canister upgrade migration from the old schema to the new schema including iframeSrc.",
-      "reason": "The build request does not mention or require a migration module. The requirement only specifies that iframeSrc should be a stable variable that survives upgrades, not that a separate migration file should be created.",
-      "evidence": [
-        "backend/migration.mo"
-      ]
-    }
-  ],
-  "confidence": 0.72,
+  "generatedAt": "2026-03-01T12:51:06.316Z",
+  "summary": "The diff addresses REQ-1 by removing a duplicate local Header import/render from LandingPage.tsx, relying on the root layout in App.tsx to provide the single Header instance. The file-diff summary confirms this change. All acceptance criteria appear to be satisfied by this targeted fix.",
+  "missing_requirements": [],
+  "hallucinated_features": [],
+  "confidence": 0.92,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminDashboard.tsx",
-    "frontend/src/pages/PressKitPage.tsx",
+    "frontend/src/pages/LandingPage.tsx",
     "project_state.json"
   ]
 }

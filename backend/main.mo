@@ -5,9 +5,7 @@ import Runtime "mo:core/Runtime";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -29,7 +27,6 @@ actor {
     pressEmail : Text;
     bodyTextColorHex : Text;
     passwordEnabled : Bool;
-    iframeSrc : Text;
   };
 
   public type UserProfile = {
@@ -53,7 +50,6 @@ actor {
   var youtubeLink = "https://youtu.be/5in-hIASH08";
   var developerWebsite = "";
   var pressEmail = "";
-  var iframeSrc = "";
 
   // ── User Profile Management ──────────────────────────────────────────────
 
@@ -120,7 +116,6 @@ actor {
       pressEmail;
       bodyTextColorHex;
       passwordEnabled;
-      iframeSrc;
     };
   };
 
@@ -222,14 +217,10 @@ actor {
     bodyTextColorHex := colorHex;
   };
 
-  public shared ({ caller }) func updateIframeSrc(src : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update the iframe source");
-    };
-    iframeSrc := src;
-  };
-
   public query ({ caller }) func getAllUserProfiles() : async [UserProfile] {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can view all user profiles");
+    };
     userProfiles.values().toArray();
   };
 };

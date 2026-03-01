@@ -1,86 +1,83 @@
-import { useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useVerifyPassword } from '../hooks/useQueries';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { useActor } from '../hooks/useActor';
+import { Loader2, Lock } from 'lucide-react';
 
 interface PasswordGateModalProps {
   onVerified: () => void;
 }
 
 export default function PasswordGateModal({ onVerified }: PasswordGateModalProps) {
-  const { isDark } = useTheme();
+  const { actor } = useActor();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const verifyMutation = useVerifyPassword();
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!actor) {
+      setError('Connection not ready. Please wait a moment and try again.');
+      return;
+    }
+    setIsVerifying(true);
     setError('');
     try {
-      const ok = await verifyMutation.mutateAsync(password);
-      if (ok) {
-        try { sessionStorage.setItem('presskit-verified', '1'); } catch {}
+      const isValid = await actor.verifyPassword(password);
+      if (isValid) {
+        sessionStorage.setItem('presskit_verified', 'true');
         onVerified();
       } else {
         setError('Incorrect password. Please try again.');
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Verification failed.');
+    } catch (err) {
+      setError('Verification failed. Please try again.');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-
-      {/* Modal */}
-      <div
-        className="password-modal relative z-10 w-full max-w-sm p-8 shadow-2xl"
-        style={{
-          backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
-          color: isDark ? '#ffffff' : '#111111',
-          transition: 'background-color 0.3s ease, color 0.3s ease',
-        }}
-      >
-        <div className="flex flex-col items-center gap-4 mb-6">
-          <Lock size={28} />
-          <h2 className="font-heading text-2xl text-center">Press Kit Access</h2>
-          <p className="text-sm text-center opacity-60 font-body">
+    // Full-screen fixed overlay — rendered at the top of the DOM via the page component
+    <div
+      style={{ zIndex: 9999 }}
+      className="fixed inset-0 bg-black/70 flex items-center justify-center p-4"
+    >
+      <div className="bg-background border border-border rounded-lg shadow-2xl w-full max-w-sm p-8 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-foreground/10 mb-2">
+            <Lock className="w-6 h-6 text-foreground" />
+          </div>
+          <h2 className="font-heading text-2xl font-bold text-foreground">Press Kit Access</h2>
+          <p className="text-sm text-muted-foreground">
             This press kit is password protected. Enter the password to continue.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <Input
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
             type="password"
-            placeholder="Enter password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            placeholder="Enter password"
             autoFocus
-            className="rounded-none text-sm"
-            style={{
-              backgroundColor: isDark ? '#2a2a2a' : '#f5f5f5',
-              color: isDark ? '#ffffff' : '#111111',
-              borderColor: isDark ? '#444' : '#ccc',
-            }}
+            className="w-full border border-border rounded p-3 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground/30"
           />
           {error && (
-            <p className="text-xs text-red-500 font-body">{error}</p>
+            <p className="text-sm text-red-500 text-center">{error}</p>
           )}
-          <Button
+          <button
             type="submit"
-            disabled={verifyMutation.isPending || !password}
-            className="rounded-none uppercase tracking-widest text-xs mt-1"
-            style={{
-              backgroundColor: isDark ? '#ffffff' : '#111111',
-              color: isDark ? '#111111' : '#ffffff',
-            }}
+            disabled={isVerifying || !password.trim()}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-foreground text-background rounded font-medium hover:opacity-80 disabled:opacity-50 transition-opacity"
           >
-            {verifyMutation.isPending ? 'Verifying...' : 'Access Presskit'}
-          </Button>
+            {isVerifying ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Verifying…
+              </>
+            ) : (
+              'Enter Press Kit'
+            )}
+          </button>
         </form>
       </div>
     </div>

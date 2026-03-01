@@ -1,62 +1,36 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T16:15:02.335Z",
+  "generatedAt": "2026-03-01T12:51:06.318Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 2,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-42",
-        "summary": "Add an iframe field to the backend CMS: add a stable text variable `iframeSrc` (initialized to an empty string `\"\"`) in backend/main.mo. Include `iframeSrc` in the record returned by `getContent()`. Add an admin-only update method `updateIframeSrc(src: Text)` that verifies the caller equals the hardcoded admin principal before persisting the new value, and rejects with `#err(\"Access denied\")` otherwise.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-43",
-        "summary": "Add an Iframe URL field to the Admin Dashboard (/admin) CMS panel. It must be a text input pre-populated with the current `iframeSrc` value from `getContent()`, with a Save button that calls `updateIframeSrc()` and then invalidates/refetches the content query. Add the corresponding `useUpdateIframeSrc` mutation to `frontend/src/hooks/useQueries.ts`.",
+        "id": "REQ-1",
+        "summary": "Fix the duplicate header issue where the site header (with the Press Kit navigation link and dark/light mode toggle) appears twice on the page. Audit all layout components, route wrappers, and the App.tsx root component to ensure the Header component is rendered exactly once per page view.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/AdminDashboard.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/AdminDashboard.tsx"
-        ]
-      },
-      {
-        "id": "REQ-44",
-        "summary": "On the Press Kit page (/press-kit), render an `<iframe>` using the `iframeSrc` value from the global content query. The iframe must only be rendered when `iframeSrc` is a non-empty string. It must be displayed as a distinct section between the Video Section and the About the Game section. The iframe must be fully responsive (100% width, with a fixed aspect ratio such as 16:9), have no visible border, and respect the page's light/dark theme styling.",
-        "status": "implemented",
-        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/pages/LandingPage.tsx",
           "frontend/src/pages/PressKitPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/PressKitPage.tsx"
+          "frontend/src/pages/LandingPage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminDashboard.tsx",
-    "frontend/src/pages/PressKitPage.tsx",
+    "frontend/src/pages/LandingPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

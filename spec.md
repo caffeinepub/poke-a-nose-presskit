@@ -1,11 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Add an embeddable iframe feature to the PokeANose Press Kit site, managed via the admin CMS and displayed on the press kit page.
+**Goal:** Fix the duplicate header rendering so the Header component appears exactly once per page view.
 
 **Planned changes:**
-- Add a `iframeSrc` stable variable to the backend, include it in `getContent()`, and add an admin-only `updateIframeSrc(src: Text)` method
-- Add an "Iframe URL" text input with a Save button to the Admin Dashboard CMS panel, backed by a `useUpdateIframeSrc` mutation hook
-- Render a responsive 16:9 borderless `<iframe>` on the Press Kit page between the Video Section and the About the Game section, only when `iframeSrc` is non-empty
+- Audit all layout components, route wrappers, and `App.tsx` to identify where the Header component is being rendered more than once
+- Remove the duplicate Header instance so it renders exactly once on `/` and `/press-kit`, while remaining hidden on `/admin`
 
-**User-visible outcome:** Admins can set an iframe URL from the admin dashboard, and visitors to the press kit page will see the embedded iframe displayed between the video and about sections.
+**User-visible outcome:** The site header (with the Press Kit navigation link and dark/light mode toggle) appears only once on every page.

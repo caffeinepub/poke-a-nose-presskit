@@ -102,7 +102,6 @@ export interface Content {
     bodyTextColorHex: string;
     developerWebsite: string;
     gameDetails: GameDetails;
-    iframeSrc: string;
     aboutText: string;
     passwordEnabled: boolean;
 }
@@ -158,7 +157,6 @@ export interface backendInterface {
     updateDeveloperWebsite(link: string): Promise<void>;
     updateFeatures(newFeatures: Array<string>): Promise<void>;
     updateGameDetails(genre: string, platforms: string, releaseDate: string): Promise<void>;
-    updateIframeSrc(src: string): Promise<void>;
     updateInstagram(link: string): Promise<void>;
     updatePressEmail(email: string): Promise<void>;
     updateYoutubeLink(link: string): Promise<void>;
@@ -598,20 +596,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateGameDetails(arg0, arg1, arg2);
-            return result;
-        }
-    }
-    async updateIframeSrc(arg0: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.updateIframeSrc(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.updateIframeSrc(arg0);
             return result;
         }
     }

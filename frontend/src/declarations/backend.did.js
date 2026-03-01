@@ -41,7 +41,6 @@ export const Content = IDL.Record({
   'bodyTextColorHex' : IDL.Text,
   'developerWebsite' : IDL.Text,
   'gameDetails' : GameDetails,
-  'iframeSrc' : IDL.Text,
   'aboutText' : IDL.Text,
   'passwordEnabled' : IDL.Bool,
 });
@@ -102,7 +101,6 @@ export const idlService = IDL.Service({
   'updateDeveloperWebsite' : IDL.Func([IDL.Text], [], []),
   'updateFeatures' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
   'updateGameDetails' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
-  'updateIframeSrc' : IDL.Func([IDL.Text], [], []),
   'updateInstagram' : IDL.Func([IDL.Text], [], []),
   'updatePressEmail' : IDL.Func([IDL.Text], [], []),
   'updateYoutubeLink' : IDL.Func([IDL.Text], [], []),
@@ -145,7 +143,6 @@ export const idlFactory = ({ IDL }) => {
     'bodyTextColorHex' : IDL.Text,
     'developerWebsite' : IDL.Text,
     'gameDetails' : GameDetails,
-    'iframeSrc' : IDL.Text,
     'aboutText' : IDL.Text,
     'passwordEnabled' : IDL.Bool,
   });
@@ -206,7 +203,6 @@ export const idlFactory = ({ IDL }) => {
     'updateDeveloperWebsite' : IDL.Func([IDL.Text], [], []),
     'updateFeatures' : IDL.Func([IDL.Vec(IDL.Text)], [], []),
     'updateGameDetails' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
-    'updateIframeSrc' : IDL.Func([IDL.Text], [], []),
     'updateInstagram' : IDL.Func([IDL.Text], [], []),
     'updatePressEmail' : IDL.Func([IDL.Text], [], []),
     'updateYoutubeLink' : IDL.Func([IDL.Text], [], []),

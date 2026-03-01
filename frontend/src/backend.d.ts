@@ -20,7 +20,6 @@ export interface Content {
     bodyTextColorHex: string;
     developerWebsite: string;
     gameDetails: GameDetails;
-    iframeSrc: string;
     aboutText: string;
     passwordEnabled: boolean;
 }
@@ -58,7 +57,6 @@ export interface backendInterface {
     updateDeveloperWebsite(link: string): Promise<void>;
     updateFeatures(newFeatures: Array<string>): Promise<void>;
     updateGameDetails(genre: string, platforms: string, releaseDate: string): Promise<void>;
-    updateIframeSrc(src: string): Promise<void>;
     updateInstagram(link: string): Promise<void>;
     updatePressEmail(email: string): Promise<void>;
     updateYoutubeLink(link: string): Promise<void>;

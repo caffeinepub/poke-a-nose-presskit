@@ -18,7 +18,6 @@ export interface Content {
   'bodyTextColorHex' : string,
   'developerWebsite' : string,
   'gameDetails' : GameDetails,
-  'iframeSrc' : string,
   'aboutText' : string,
   'passwordEnabled' : boolean,
 }
@@ -83,7 +82,6 @@ export interface _SERVICE {
   'updateDeveloperWebsite' : ActorMethod<[string], undefined>,
   'updateFeatures' : ActorMethod<[Array<string>], undefined>,
   'updateGameDetails' : ActorMethod<[string, string, string], undefined>,
-  'updateIframeSrc' : ActorMethod<[string], undefined>,
   'updateInstagram' : ActorMethod<[string], undefined>,
   'updatePressEmail' : ActorMethod<[string], undefined>,
   'updateYoutubeLink' : ActorMethod<[string], undefined>,

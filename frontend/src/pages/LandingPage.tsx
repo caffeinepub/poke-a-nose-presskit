@@ -1,8 +1,3 @@
-import { Link } from '@tanstack/react-router';
-import Header from '../components/Header';
-import { ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
 export default function LandingPage() {
   return (
     <div className="min-h-screen relative">
@@ -11,31 +6,31 @@ export default function LandingPage() {
 
       {/* Content */}
       <div className="page-content min-h-screen flex flex-col">
-        <Header />
-
         <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
           <div className="w-full flex flex-col items-center gap-8 text-center">
 
-            {/* Game Logo — reduced size on desktop, responsive */}
+            {/* Game Logo — enlarged, static (no navigation) */}
             <div className="w-full flex justify-center">
               <img
                 src="/assets/gamelogo.png"
                 alt="Poke A Nose"
                 className="game-logo h-auto"
-                style={{ maxWidth: '100%', width: 'min(480px, 100%)' }}
+                style={{ maxWidth: '100%', width: 'min(640px, 100%)' }}
               />
             </div>
 
-            {/* Press Kit Link */}
-            <Link to="/press-kit">
-              <Button
-                variant="default"
-                className="rounded-none uppercase tracking-widest text-xs px-8 py-5 gap-2"
-              >
-                View Press Kit
-                <ArrowRight size={14} />
-              </Button>
-            </Link>
+            {/* Newsletter Signup iframe */}
+            <div className="w-full flex justify-center">
+              <iframe
+                width="540"
+                height="305"
+                src="https://93131207.sibforms.com/serve/MUIFABVezFOY1nHR9ltGQqaDwJ10Fg-HcQoqGQe4GpZ-B0vvFqzsFHVBqIiBEIlFLJO0vlTclMExp7C7Gk2pTqwlo2lXjvlK72Lm8DoYlw_mrgeja6z6ZBDk40pGyPmJmufxw6b_qtJB1hU2OuLrowtJ4nq0OeADNzvc8aTH6olP6VtzI7s0SNckw0ch_WtAL7d3aChZ_s6pTSzYag=="
+                frameBorder={0}
+                scrolling="no"
+                allowFullScreen
+                style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto', maxWidth: '100%', overflow: 'hidden' }}
+              />
+            </div>
 
           </div>
         </main>

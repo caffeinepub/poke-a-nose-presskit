@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-an-iframe-url-field-to-the-admin-dashboard-admin-cms-panel-it-must-be-a-text-input-pre-populated-with-the-current-iframesrc-value-from-getcontent-with-a-save-button-that-calls-updateiframesrc-and-then-invalidates-refetches-the-content-query-add-the-corresponding-useupdateiframesrc-mutation-to-frontend-src-hooks-usequeries-ts",
-      "featureTitle": "Add an Iframe URL field to the Admin Dashboard (/admin) CMS panel. It must be a text input pre-populated with the current `iframeSrc` value from `getContent()`, with a Save button that calls `updateIframeSrc()` and then invalidates/refetches the content query. Add the corresponding `useUpdateIframeSrc` mutation to `frontend/src/hooks/useQueries.ts`.",
+      "featureId": "feature-fix-the-duplicate-header-issue-where-the-site-header-with-the-press-kit-navigation-link-and-dark-light-mode-toggle-appears-twice-on-the-page-audit-all-layout-components-route-wrappers-and-the-app-tsx-root-component-to-ensure-the-header-component-is-rendered-exactly-once-per-page-view",
+      "featureTitle": "Fix the duplicate header issue where the site header (with the Press Kit navigation link and dark/light mode toggle) appears twice on the page. Audit all layout components, route wrappers, and the App.tsx root component to ensure the Header component is rendered exactly once per page view.",
       "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/AdminDashboard.tsx"
+        "frontend/src/pages/LandingPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,27 +17,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-43"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-on-the-press-kit-page-press-kit-render-an-iframe-using-the-iframesrc-value-from-the-global-content-query-the-iframe-must-only-be-rendered-when-iframesrc-is-a-non-empty-string-it-must-be-displayed-as-a-distinct-section-between-the-video-section-and-the-about-the-game-section-the-iframe-must-be-fully-responsive-100-width-with-a-fixed-aspect-ratio-such-as-16-9-have-no-visible-border-and-respect-the-page-s-light-dark-theme-styling",
-      "featureTitle": "On the Press Kit page (/press-kit), render an `<iframe>` using the `iframeSrc` value from the global content query. The iframe must only be rendered when `iframeSrc` is a non-empty string. It must be displayed as a distinct section between the Video Section and the About the Game section. The iframe must be fully responsive (100% width, with a fixed aspect ratio such as 16:9), have no visible border, and respect the page's light/dark theme styling.",
-      "files": [
-        "frontend/src/pages/PressKitPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-44"
+        "REQ-1"
       ],
       "confidence": "high"
     }

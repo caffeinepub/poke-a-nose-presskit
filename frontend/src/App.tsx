@@ -1,36 +1,48 @@
+import React, { useEffect } from 'react';
 import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } from '@tanstack/react-router';
-import { useEffect } from 'react';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
-import { useContent } from './hooks/useQueries';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from './contexts/ThemeContext';
+import Header from './components/Header';
 import LandingPage from './pages/LandingPage';
 import PressKitPage from './pages/PressKitPage';
 import AdminDashboard from './pages/AdminDashboard';
+import { useContent } from './hooks/useQueries';
 
-// Apply body text color globally
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 30_000,
+    },
+  },
+});
+
+// Body text color applier — reads from backend content
 function BodyTextColorApplier() {
   const { data: content } = useContent();
-  const { isDark } = useTheme();
-
   useEffect(() => {
-    const color = isDark ? '#ffffff' : (content?.bodyTextColorHex || '#111111');
-    document.documentElement.style.setProperty('--body-text-color', color);
-  }, [content?.bodyTextColorHex, isDark]);
-
+    if (content?.bodyTextColorHex) {
+      document.documentElement.style.setProperty('--body-text-color', content.bodyTextColorHex);
+    }
+  }, [content?.bodyTextColorHex]);
   return null;
 }
 
+// Layout with header (hidden on /admin)
 function Layout() {
   return (
     <>
       <BodyTextColorApplier />
+      <Header />
       <Outlet />
     </>
   );
 }
 
+// Routes
 const rootRoute = createRootRoute({ component: Layout });
 
-const landingRoute = createRoute({
+const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: LandingPage,
@@ -48,7 +60,7 @@ const adminRoute = createRoute({
   component: AdminDashboard,
 });
 
-const routeTree = rootRoute.addChildren([landingRoute, pressKitRoute, adminRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, pressKitRoute, adminRoute]);
 
 const router = createRouter({ routeTree });
 
@@ -60,8 +72,10 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

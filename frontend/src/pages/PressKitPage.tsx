@@ -1,221 +1,170 @@
-import { useState, useEffect } from 'react';
-import Header from '../components/Header';
+import React, { useState, useEffect } from 'react';
+import { useContent } from '../hooks/useQueries';
+import { useActor } from '../hooks/useActor';
 import PasswordGateModal from '../components/PasswordGateModal';
-import VideoSection from '../components/VideoSection';
 import ScreenshotsGallery from '../components/ScreenshotsGallery';
+import VideoSection from '../components/VideoSection';
 import MediaDownloadButton from '../components/MediaDownloadButton';
 import SocialMediaSection from '../components/SocialMediaSection';
-import { useContent } from '../hooks/useQueries';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, Mail } from 'lucide-react';
-
-function isVerifiedInSession(): boolean {
-  try {
-    return sessionStorage.getItem('presskit-verified') === '1';
-  } catch {
-    return false;
-  }
-}
+import { Loader2 } from 'lucide-react';
 
 export default function PressKitPage() {
-  const { data: content, isLoading } = useContent();
-  const [verified, setVerified] = useState(isVerifiedInSession);
+  const { actor, isFetching: actorFetching } = useActor();
+  const { data: content, isLoading: contentLoading } = useContent();
 
-  // Reset verification if password protection is disabled
-  useEffect(() => {
-    if (content && !content.passwordEnabled) {
-      setVerified(true);
-    }
-  }, [content?.passwordEnabled]);
+  // Password gate state
+  const [isVerified, setIsVerified] = useState(() => {
+    return sessionStorage.getItem('presskit_verified') === 'true';
+  });
 
-  const showPasswordGate = !isLoading && content?.passwordEnabled && !verified;
-  const showContent = !isLoading && (!content?.passwordEnabled || verified);
+  // Determine if we need to show the password gate
+  // We only show it once we know: actor is ready AND content is loaded AND passwordEnabled is true
+  const isReady = !actorFetching && !contentLoading && !!content;
+  const needsPassword = isReady && content.passwordEnabled && !isVerified;
+
+  // Show loading while actor or content is initializing
+  if (actorFetching || contentLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-foreground" />
+          <p className="text-muted-foreground text-sm">Loading press kit…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show password gate if needed
+  if (needsPassword) {
+    return <PasswordGateModal onVerified={() => setIsVerified(true)} />;
+  }
+
+  // Press kit content
+  const gameDetails = content?.gameDetails;
+  const features = content?.features ?? [];
+  const aboutText = content?.aboutText ?? '';
+  const instagramLink = content?.instagramLink ?? '';
+  const youtubeLink = content?.youtubeLink ?? '';
+  const developerWebsite = content?.developerWebsite ?? '';
+  const pressEmail = content?.pressEmail ?? '';
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background */}
-      <div className="page-bg" />
+    <div className="page-content min-h-screen">
+      {/* Hero / Logo */}
+      <section className="flex flex-col items-center justify-center pt-16 pb-8 px-4">
+        <img
+          src="/assets/gamelogo.png"
+          alt="Poke A Nose"
+          className="game-logo max-w-xs w-full object-contain"
+        />
+      </section>
 
-      {/* Password Gate */}
-      {showPasswordGate && (
-        <PasswordGateModal onVerified={() => setVerified(true)} />
+      {/* About */}
+      {aboutText && (
+        <section className="max-w-2xl mx-auto px-6 py-6">
+          <h2 className="font-heading text-2xl font-bold mb-3">About</h2>
+          <p className="leading-relaxed whitespace-pre-wrap">{aboutText}</p>
+        </section>
       )}
 
-      {/* Page Content */}
-      <div className="page-content min-h-screen flex flex-col">
-        <Header />
+      {/* Game Details */}
+      {gameDetails && (gameDetails.genre || gameDetails.platforms || gameDetails.releaseDate) && (
+        <section className="max-w-2xl mx-auto px-6 py-6">
+          <h2 className="font-heading text-2xl font-bold mb-3">Game Details</h2>
+          <dl className="space-y-2">
+            {gameDetails.genre && (
+              <div className="flex gap-3">
+                <dt className="font-semibold w-32 shrink-0">Genre</dt>
+                <dd>{gameDetails.genre}</dd>
+              </div>
+            )}
+            {gameDetails.platforms && (
+              <div className="flex gap-3">
+                <dt className="font-semibold w-32 shrink-0">Platforms</dt>
+                <dd>{gameDetails.platforms}</dd>
+              </div>
+            )}
+            {gameDetails.releaseDate && (
+              <div className="flex gap-3">
+                <dt className="font-semibold w-32 shrink-0">Release Date</dt>
+                <dd>{gameDetails.releaseDate}</dd>
+              </div>
+            )}
+          </dl>
+        </section>
+      )}
 
-        {isLoading && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="space-y-4 w-full max-w-2xl px-6">
-              <Skeleton className="h-16 w-3/4" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-            </div>
+      {/* Features */}
+      {features.length > 0 && (
+        <section className="max-w-2xl mx-auto px-6 py-6">
+          <h2 className="font-heading text-2xl font-bold mb-3">Features</h2>
+          <ul className="list-disc list-inside space-y-1">
+            {features.map((f, i) => (
+              <li key={i}>{f}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Video */}
+      <section className="max-w-2xl mx-auto px-6 py-6">
+        <VideoSection youtubeLink={youtubeLink} />
+      </section>
+
+      {/* Screenshots */}
+      <section className="max-w-4xl mx-auto px-6 py-6">
+        <h2 className="font-heading text-2xl font-bold mb-4">Screenshots</h2>
+        <ScreenshotsGallery />
+      </section>
+
+      {/* Media Download */}
+      <section className="max-w-2xl mx-auto px-6 py-6">
+        <MediaDownloadButton />
+      </section>
+
+      {/* Social */}
+      <section className="max-w-2xl mx-auto px-6 py-6">
+        <SocialMediaSection instagramLink={instagramLink} />
+      </section>
+
+      {/* Contact */}
+      {(pressEmail || developerWebsite) && (
+        <section className="max-w-2xl mx-auto px-6 py-6">
+          <h2 className="font-heading text-2xl font-bold mb-3">Contact</h2>
+          <div className="space-y-2">
+            {pressEmail && (
+              <p>
+                <span className="font-semibold">Press Email: </span>
+                <a href={`mailto:${pressEmail}`} className="underline hover:opacity-70">
+                  {pressEmail}
+                </a>
+              </p>
+            )}
+            {developerWebsite && (
+              <p>
+                <span className="font-semibold">Website: </span>
+                <a href={developerWebsite} target="_blank" rel="noopener noreferrer" className="underline hover:opacity-70">
+                  {developerWebsite}
+                </a>
+              </p>
+            )}
           </div>
-        )}
+        </section>
+      )}
 
-        {showContent && content && (
-          <main className="flex-1 px-6 pb-12">
-            <div className="max-w-3xl mx-auto">
-
-              {/* ── 1. Hero — Game Logo ── */}
-              <section className="press-section flex justify-center">
-                <img
-                  src="/assets/gamelogo.png"
-                  alt="Poke A Nose"
-                  className="game-logo w-full h-auto"
-                  style={{ maxWidth: '100%', minWidth: 'min(400px, 100%)' }}
-                />
-              </section>
-
-              {/* ── 2. Video ── */}
-              <section className="press-section">
-                <VideoSection youtubeLink={content.youtubeLink} />
-              </section>
-
-              {/* ── 2b. Iframe (between Video and About) ── */}
-              {content.iframeSrc && content.iframeSrc.trim() !== '' && (
-                <section className="press-section">
-                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                    <iframe
-                      src={content.iframeSrc}
-                      title="Embedded content"
-                      className="absolute inset-0 w-full h-full"
-                      style={{ border: 'none' }}
-                      allowFullScreen
-                    />
-                  </div>
-                </section>
-              )}
-
-              {/* ── 3. About ── */}
-              {content.aboutText && (
-                <section className="press-section">
-                  <h2 className="font-heading text-2xl body-text mb-3">About the Game</h2>
-                  <p className="font-body text-sm leading-relaxed body-text opacity-80 whitespace-pre-wrap">
-                    {content.aboutText}
-                  </p>
-                </section>
-              )}
-
-              {/* ── 4. Features ── */}
-              {content.features && content.features.length > 0 && (
-                <section className="press-section">
-                  <h2 className="font-heading text-2xl body-text mb-3">Features</h2>
-                  <ul className="space-y-1">
-                    {content.features.map((f, i) => (
-                      <li key={i} className="font-body text-sm body-text opacity-80 flex items-start gap-2">
-                        <span className="mt-1 w-1 h-1 rounded-full bg-current flex-shrink-0 opacity-60" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-
-              {/* ── 5. Game Details ── */}
-              {(content.gameDetails.genre || content.gameDetails.platforms || content.gameDetails.releaseDate) && (
-                <section className="press-section">
-                  <h2 className="font-heading text-2xl body-text mb-3">Game Details</h2>
-                  <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {content.gameDetails.genre && (
-                      <div>
-                        <dt className="font-body text-xs uppercase tracking-widest opacity-40 body-text mb-1">Genre</dt>
-                        <dd className="font-body text-sm body-text">{content.gameDetails.genre}</dd>
-                      </div>
-                    )}
-                    {content.gameDetails.platforms && (
-                      <div>
-                        <dt className="font-body text-xs uppercase tracking-widest opacity-40 body-text mb-1">Platforms</dt>
-                        <dd className="font-body text-sm body-text">{content.gameDetails.platforms}</dd>
-                      </div>
-                    )}
-                    {content.gameDetails.releaseDate && (
-                      <div>
-                        <dt className="font-body text-xs uppercase tracking-widest opacity-40 body-text mb-1">Release Date</dt>
-                        <dd className="font-body text-sm body-text">{content.gameDetails.releaseDate}</dd>
-                      </div>
-                    )}
-                  </dl>
-                </section>
-              )}
-
-              {/* ── 6. Media / Screenshots ── */}
-              <section className="press-section">
-                <h2 className="font-heading text-2xl body-text mb-1">Media</h2>
-                <p className="font-body text-xs uppercase tracking-widest opacity-40 body-text mb-3">Screenshots</p>
-                <div className="mb-4">
-                  <MediaDownloadButton />
-                </div>
-                <ScreenshotsGallery />
-              </section>
-
-              {/* ── 7. Social Media ── */}
-              <section className="press-section">
-                <SocialMediaSection instagramLink={content.instagramLink} />
-              </section>
-
-              {/* ── 8. Developer ── */}
-              {content.developerWebsite && (
-                <section className="press-section">
-                  <h2 className="font-heading text-2xl body-text mb-2">Developer</h2>
-                  <a
-                    href={content.developerWebsite}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-body text-sm body-text opacity-70 hover:opacity-100 transition-opacity flex items-center gap-1"
-                  >
-                    <ExternalLink size={13} />
-                    {content.developerWebsite}
-                  </a>
-                </section>
-              )}
-
-              {/* ── 9. Press & Support ── */}
-              {content.pressEmail && (
-                <section className="press-section">
-                  <h2 className="font-heading text-2xl body-text mb-2">Press &amp; Support</h2>
-                  <a
-                    href={`mailto:${content.pressEmail}`}
-                    className="font-body text-sm body-text opacity-70 hover:opacity-100 transition-opacity flex items-center gap-1"
-                  >
-                    <Mail size={13} />
-                    {content.pressEmail}
-                  </a>
-                </section>
-              )}
-
-              {/* ── 10. Footer Festival Logo ── */}
-              <section className="press-section flex justify-center pt-4 pb-2">
-                <img
-                  src="/assets/kaboom-2025.png"
-                  alt="Kaboom Animation Festival 2025"
-                  className="festival-logo"
-                  style={{ width: '220px', maxWidth: '100%' }}
-                />
-              </section>
-
-            </div>
-          </main>
-        )}
-
-        {/* Footer */}
-        <footer className="relative z-10 py-4 px-6 text-center">
-          <p className="font-body text-xs opacity-40 body-text">
-            © {new Date().getFullYear()} Poke A Nose &mdash; Built with{' '}
-            <span className="text-red-500">♥</span> using{' '}
-            <a
-              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname || 'poke-a-nose-presskit')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:opacity-70"
-            >
-              caffeine.ai
-            </a>
-          </p>
-        </footer>
-      </div>
+      {/* Footer */}
+      <footer className="mt-16 py-8 text-center text-xs text-muted-foreground border-t border-border">
+        © {new Date().getFullYear()} Poke A Nose — Built with{' '}
+        <span className="text-red-500">♥</span> using{' '}
+        <a
+          href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-foreground"
+        >
+          caffeine.ai
+        </a>
+      </footer>
     </div>
   );
 }
