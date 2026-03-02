@@ -24,7 +24,6 @@ export interface Content {
     passwordEnabled: boolean;
 }
 export interface UserProfile {
-    principal: Principal;
     name: string;
 }
 export enum UserRole {
@@ -36,22 +35,12 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     disablePasswordProtection(): Promise<void>;
     enablePasswordProtection(password: string): Promise<void>;
-    getAboutText(): Promise<string>;
     getAllUserProfiles(): Promise<Array<UserProfile>>;
-    getBodyTextColor(): Promise<string>;
-    getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getContent(): Promise<Content>;
-    getDeveloperWebsite(): Promise<string>;
-    getFeatures(): Promise<Array<string>>;
-    getGameDetails(): Promise<GameDetails>;
-    getInstagramLink(): Promise<string>;
-    getPasswordProtectionStatus(): Promise<boolean>;
-    getPressEmail(): Promise<string>;
-    getUserProfile(user: Principal): Promise<UserProfile | null>;
-    getYoutubeLink(): Promise<string>;
+    getUserProfile(user: Principal): Promise<UserProfile>;
     isCallerAdmin(): Promise<boolean>;
-    saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    saveUserProfile(profile: UserProfile): Promise<void>;
     updateAbout(text: string): Promise<void>;
     updateBodyTextColor(colorHex: string): Promise<void>;
     updateDeveloperWebsite(link: string): Promise<void>;

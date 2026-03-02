@@ -39,135 +39,126 @@ export function useIsAdmin() {
 }
 
 export function useGetPasswordProtectionStatus() {
-  const { actor, isFetching } = useActor();
+  const { data: content, isLoading, error } = useGetContent();
 
   return useQuery<boolean>({
     queryKey: ['passwordProtectionStatus'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getPasswordProtectionStatus();
+      return content?.passwordEnabled ?? false;
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });
 }
 
 export function useGetAboutText() {
-  const { actor, isFetching } = useActor();
+  const { data: content, isLoading, error } = useGetContent();
 
   return useQuery<string>({
     queryKey: ['aboutText'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getAboutText();
+      return content?.aboutText ?? '';
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });
 }
 
 export function useGetFeatures() {
-  const { actor, isFetching } = useActor();
+  const { data: content } = useGetContent();
 
   return useQuery<string[]>({
     queryKey: ['features'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getFeatures();
+      return content?.features ?? [];
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });
 }
 
 export function useGetGameDetails() {
-  const { actor, isFetching } = useActor();
+  const { data: content } = useGetContent();
 
   return useQuery<GameDetails>({
     queryKey: ['gameDetails'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getGameDetails();
+      return content?.gameDetails ?? { genre: '', platforms: '', releaseDate: '' };
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });
 }
 
 export function useGetInstagramLink() {
-  const { actor, isFetching } = useActor();
+  const { data: content } = useGetContent();
 
   return useQuery<string>({
     queryKey: ['instagramLink'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getInstagramLink();
+      return content?.instagramLink ?? '';
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });
 }
 
 export function useGetYoutubeLink() {
-  const { actor, isFetching } = useActor();
+  const { data: content } = useGetContent();
 
   return useQuery<string>({
     queryKey: ['youtubeLink'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getYoutubeLink();
+      return content?.youtubeLink ?? '';
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });
 }
 
 export function useGetDeveloperWebsite() {
-  const { actor, isFetching } = useActor();
+  const { data: content } = useGetContent();
 
   return useQuery<string>({
     queryKey: ['developerWebsite'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getDeveloperWebsite();
+      return content?.developerWebsite ?? '';
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });
 }
 
 export function useGetPressEmail() {
-  const { actor, isFetching } = useActor();
+  const { data: content } = useGetContent();
 
   return useQuery<string>({
     queryKey: ['pressEmail'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getPressEmail();
+      return content?.pressEmail ?? '';
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });
 }
 
 export function useGetBodyTextColor() {
-  const { actor, isFetching } = useActor();
+  const { data: content } = useGetContent();
 
   return useQuery<string>({
     queryKey: ['bodyTextColor'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getBodyTextColor();
+      return content?.bodyTextColorHex ?? '#000000';
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!content,
     staleTime: 1000 * 60,
     retry: 2,
   });

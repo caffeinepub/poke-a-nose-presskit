@@ -113,7 +113,6 @@ export interface _CaffeineStorageCreateCertificateResult {
     blob_hash: string;
 }
 export interface UserProfile {
-    principal: Principal;
     name: string;
 }
 export interface _CaffeineStorageRefillResult {
@@ -136,22 +135,12 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     disablePasswordProtection(): Promise<void>;
     enablePasswordProtection(password: string): Promise<void>;
-    getAboutText(): Promise<string>;
     getAllUserProfiles(): Promise<Array<UserProfile>>;
-    getBodyTextColor(): Promise<string>;
-    getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getContent(): Promise<Content>;
-    getDeveloperWebsite(): Promise<string>;
-    getFeatures(): Promise<Array<string>>;
-    getGameDetails(): Promise<GameDetails>;
-    getInstagramLink(): Promise<string>;
-    getPasswordProtectionStatus(): Promise<boolean>;
-    getPressEmail(): Promise<string>;
-    getUserProfile(user: Principal): Promise<UserProfile | null>;
-    getYoutubeLink(): Promise<string>;
+    getUserProfile(user: Principal): Promise<UserProfile>;
     isCallerAdmin(): Promise<boolean>;
-    saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    saveUserProfile(profile: UserProfile): Promise<void>;
     updateAbout(text: string): Promise<void>;
     updateBodyTextColor(colorHex: string): Promise<void>;
     updateDeveloperWebsite(link: string): Promise<void>;
@@ -162,7 +151,7 @@ export interface backendInterface {
     updateYoutubeLink(link: string): Promise<void>;
     verifyPassword(password: string): Promise<boolean>;
 }
-import type { UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
+import type { UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _caffeineStorageBlobIsLive(arg0: Uint8Array): Promise<boolean> {
@@ -305,20 +294,6 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getAboutText(): Promise<string> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getAboutText();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getAboutText();
-            return result;
-        }
-    }
     async getAllUserProfiles(): Promise<Array<UserProfile>> {
         if (this.processError) {
             try {
@@ -333,46 +308,18 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getBodyTextColor(): Promise<string> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getBodyTextColor();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getBodyTextColor();
-            return result;
-        }
-    }
-    async getCallerUserProfile(): Promise<UserProfile | null> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getCallerUserProfile();
-                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getCallerUserProfile();
-            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
-        }
-    }
     async getCallerUserRole(): Promise<UserRole> {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserRole();
-                return from_candid_UserRole_n11(this._uploadFile, this._downloadFile, result);
+                return from_candid_UserRole_n10(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserRole();
-            return from_candid_UserRole_n11(this._uploadFile, this._downloadFile, result);
+            return from_candid_UserRole_n10(this._uploadFile, this._downloadFile, result);
         }
     }
     async getContent(): Promise<Content> {
@@ -389,115 +336,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getDeveloperWebsite(): Promise<string> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getDeveloperWebsite();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getDeveloperWebsite();
-            return result;
-        }
-    }
-    async getFeatures(): Promise<Array<string>> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getFeatures();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getFeatures();
-            return result;
-        }
-    }
-    async getGameDetails(): Promise<GameDetails> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getGameDetails();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getGameDetails();
-            return result;
-        }
-    }
-    async getInstagramLink(): Promise<string> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getInstagramLink();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getInstagramLink();
-            return result;
-        }
-    }
-    async getPasswordProtectionStatus(): Promise<boolean> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getPasswordProtectionStatus();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getPasswordProtectionStatus();
-            return result;
-        }
-    }
-    async getPressEmail(): Promise<string> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getPressEmail();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getPressEmail();
-            return result;
-        }
-    }
-    async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
+    async getUserProfile(arg0: Principal): Promise<UserProfile> {
         if (this.processError) {
             try {
                 const result = await this.actor.getUserProfile(arg0);
-                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getUserProfile(arg0);
-            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async getYoutubeLink(): Promise<string> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getYoutubeLink();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getYoutubeLink();
             return result;
         }
     }
@@ -515,17 +364,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
+    async saveUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.saveCallerUserProfile(arg0);
+                const result = await this.actor.saveUserProfile(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.saveCallerUserProfile(arg0);
+            const result = await this.actor.saveUserProfile(arg0);
             return result;
         }
     }
@@ -656,14 +505,11 @@ export class Backend implements backendInterface {
         }
     }
 }
-function from_candid_UserRole_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
-    return from_candid_variant_n12(_uploadFile, _downloadFile, value);
+function from_candid_UserRole_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n11(_uploadFile, _downloadFile, value);
 }
 function from_candid__CaffeineStorageRefillResult_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: __CaffeineStorageRefillResult): _CaffeineStorageRefillResult {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
-}
-function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
-    return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [boolean]): boolean | null {
     return value.length === 0 ? null : value[0];
@@ -683,7 +529,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         topped_up_amount: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.topped_up_amount))
     };
 }
-function from_candid_variant_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     admin: null;
 } | {
     user: null;

@@ -1,8 +1,47 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { useGetContent } from '../hooks/useQueries';
+import PasswordGateModal from '../components/PasswordGateModal';
+
+const VERIFIED_SESSION_KEY = 'presskit_verified';
+
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const { data: content, isLoading: contentLoading } = useGetContent();
+
+  const [isVerified, setIsVerified] = useState<boolean>(() => {
+    return sessionStorage.getItem(VERIFIED_SESSION_KEY) === 'true';
+  });
+
+  const passwordEnabled = content?.passwordEnabled ?? false;
+
+  // If password is disabled, mark as verified automatically
+  useEffect(() => {
+    if (!contentLoading && passwordEnabled === false) {
+      setIsVerified(true);
+    }
+  }, [passwordEnabled, contentLoading]);
+
+  const showPasswordGate =
+    !contentLoading &&
+    passwordEnabled === true &&
+    !isVerified;
+
+  const handleVerified = () => {
+    sessionStorage.setItem(VERIFIED_SESSION_KEY, 'true');
+    setIsVerified(true);
+    navigate({ to: '/press-kit' });
+  };
+
   return (
     <div className="min-h-screen relative">
       {/* Background */}
       <div className="page-bg" />
+
+      {/* Password Gate Modal — shown on landing page when password protection is enabled */}
+      {showPasswordGate && (
+        <PasswordGateModal onVerified={handleVerified} />
+      )}
 
       {/* Content */}
       <div className="page-content min-h-screen flex flex-col">

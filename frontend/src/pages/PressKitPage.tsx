@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useGetContent, useGetPasswordProtectionStatus } from '../hooks/useQueries';
-import PasswordGateModal from '../components/PasswordGateModal';
+import React, { useEffect } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { useGetContent } from '../hooks/useQueries';
 import VideoSection from '../components/VideoSection';
 import ScreenshotsGallery from '../components/ScreenshotsGallery';
 import SocialMediaSection from '../components/SocialMediaSection';
@@ -9,29 +9,18 @@ import MediaDownloadButton from '../components/MediaDownloadButton';
 const VERIFIED_SESSION_KEY = 'presskit_verified';
 
 export default function PressKitPage() {
+  const navigate = useNavigate();
   const { data: content, isLoading: contentLoading } = useGetContent();
-  const { data: passwordEnabled, isLoading: passwordStatusLoading } = useGetPasswordProtectionStatus();
 
-  const [isVerified, setIsVerified] = useState<boolean>(() => {
-    return sessionStorage.getItem(VERIFIED_SESSION_KEY) === 'true';
-  });
+  const passwordEnabled = content?.passwordEnabled ?? false;
+  const isVerified = sessionStorage.getItem(VERIFIED_SESSION_KEY) === 'true';
 
-  // If password is disabled, mark as verified automatically
+  // If password is enabled and user hasn't verified, redirect to landing page
   useEffect(() => {
-    if (passwordEnabled === false) {
-      setIsVerified(true);
+    if (!contentLoading && passwordEnabled === true && !isVerified) {
+      navigate({ to: '/' });
     }
-  }, [passwordEnabled]);
-
-  const handleVerified = () => {
-    sessionStorage.setItem(VERIFIED_SESSION_KEY, 'true');
-    setIsVerified(true);
-  };
-
-  const showPasswordGate =
-    !passwordStatusLoading &&
-    passwordEnabled === true &&
-    !isVerified;
+  }, [contentLoading, passwordEnabled, isVerified, navigate]);
 
   // Extract content fields with safe defaults
   const aboutText = content?.aboutText ?? '';
@@ -45,13 +34,9 @@ export default function PressKitPage() {
   return (
     <div className="page-bg">
       <div className="page-content">
-        {/* Password Gate Modal */}
-        {showPasswordGate && (
-          <PasswordGateModal onVerified={handleVerified} />
-        )}
-
         <main className="max-w-4xl mx-auto px-4 py-8 space-y-12">
-          {/* Game Logo */}
+
+          {/* 1. Game Logo */}
           <section className="flex justify-center">
             <img
               src="/assets/gamelogo.png"
@@ -60,7 +45,12 @@ export default function PressKitPage() {
             />
           </section>
 
-          {/* About */}
+          {/* 2. YouTube Video (no heading) */}
+          <section>
+            <VideoSection youtubeLink={youtubeLink} />
+          </section>
+
+          {/* 3. About */}
           <section>
             <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
               About
@@ -78,36 +68,7 @@ export default function PressKitPage() {
             )}
           </section>
 
-          {/* Features */}
-          {(contentLoading || features.length > 0) && (
-            <section>
-              <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
-                Features
-              </h2>
-              {contentLoading ? (
-                <div className="space-y-2">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="h-6 bg-muted animate-pulse rounded" />
-                  ))}
-                </div>
-              ) : (
-                <ul className="space-y-2">
-                  {features.map((feature, index) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-2 text-base"
-                      style={{ color: 'var(--body-text-color)' }}
-                    >
-                      <span className="mt-1 text-primary">•</span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          )}
-
-          {/* Game Details */}
+          {/* 4. Game Details */}
           {(contentLoading || gameDetails.genre || gameDetails.platforms || gameDetails.releaseDate) && (
             <section>
               <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
@@ -150,15 +111,36 @@ export default function PressKitPage() {
             </section>
           )}
 
-          {/* Video */}
-          <section>
-            <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
-              Trailer
-            </h2>
-            <VideoSection youtubeLink={youtubeLink} />
-          </section>
+          {/* 5. Features */}
+          {(contentLoading || features.length > 0) && (
+            <section>
+              <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+                Features
+              </h2>
+              {contentLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-6 bg-muted animate-pulse rounded" />
+                  ))}
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {features.map((feature, index) => (
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 text-base"
+                      style={{ color: 'var(--body-text-color)' }}
+                    >
+                      <span className="mt-1 text-primary">•</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
 
-          {/* Screenshots */}
+          {/* 6. Screenshots */}
           <section>
             <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
               Screenshots
@@ -166,15 +148,12 @@ export default function PressKitPage() {
             <ScreenshotsGallery />
           </section>
 
-          {/* Media Download */}
+          {/* 7. Download all screenshots */}
           <section>
-            <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
-              Media Kit
-            </h2>
             <MediaDownloadButton />
           </section>
 
-          {/* Social Media */}
+          {/* 8. Socials */}
           {instagramLink && (
             <section>
               <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
@@ -184,7 +163,7 @@ export default function PressKitPage() {
             </section>
           )}
 
-          {/* Contact */}
+          {/* 9. Press Email */}
           {(developerWebsite || pressEmail) && (
             <section>
               <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>

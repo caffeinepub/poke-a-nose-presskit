@@ -6,6 +6,8 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
 
+
+
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -31,7 +33,6 @@ actor {
 
   public type UserProfile = {
     name : Text;
-    principal : Principal;
   };
 
   let userProfiles = Map.empty<Principal, UserProfile>();
@@ -47,40 +48,33 @@ actor {
     releaseDate = "";
   };
   var instagramLink = "";
-  var youtubeLink = "https://youtu.be/5in-hIASH08";
+  var youtubeLink = "";
   var developerWebsite = "";
   var pressEmail = "";
 
-  // ── User Profile Management ──────────────────────────────────────────────
-
-  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+  public query ({ caller }) func getUserProfile(user : Principal) : async UserProfile {
+    switch (userProfiles.get(user)) {
+      case (null) { Runtime.trap("User not found") };
+      case (?profile) { profile };
     };
-    userProfiles.get(caller);
   };
 
-  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
-    };
-    userProfiles.get(user);
-  };
-
-  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
+  public shared ({ caller }) func saveUserProfile(profile : UserProfile) : async () {
     userProfiles.add(caller, profile);
   };
 
-  // ── Password Protection ──────────────────────────────────────────────────
+  public query ({ caller }) func getAllUserProfiles() : async [UserProfile] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view all user profiles");
+    };
+    userProfiles.values().toArray();
+  };
 
   public shared ({ caller }) func enablePasswordProtection(password : Text) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can enable password protection");
     };
-    passwordHash := password; // TODO hash
+    passwordHash := password;
     passwordEnabled := true;
   };
 
@@ -99,11 +93,69 @@ actor {
     password == passwordHash;
   };
 
-  public query ({ caller }) func getPasswordProtectionStatus() : async Bool {
-    passwordEnabled;
+  public shared ({ caller }) func updateAbout(text : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
+    aboutText := text;
   };
 
-  // ── Content Queries ──────────────────────────────────────────────────────
+  public shared ({ caller }) func updateFeatures(newFeatures : [Text]) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
+    let maxFeatures = 4;
+    if (newFeatures.size() > maxFeatures) {
+      Runtime.trap("Please keep features list to 4 items or less. Avoid overloading users.");
+    };
+    features := newFeatures;
+  };
+
+  public shared ({ caller }) func updateGameDetails(genre : Text, platforms : Text, releaseDate : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
+    gameDetails := {
+      genre;
+      platforms;
+      releaseDate;
+    };
+  };
+
+  public shared ({ caller }) func updateInstagram(link : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
+    instagramLink := link;
+  };
+
+  public shared ({ caller }) func updateYoutubeLink(link : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
+    youtubeLink := link;
+  };
+
+  public shared ({ caller }) func updateDeveloperWebsite(link : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
+    developerWebsite := link;
+  };
+
+  public shared ({ caller }) func updatePressEmail(email : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
+    pressEmail := email;
+  };
+
+  public shared ({ caller }) func updateBodyTextColor(colorHex : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update content");
+    };
+    bodyTextColorHex := colorHex;
+  };
 
   public query ({ caller }) func getContent() : async Content {
     {
@@ -117,110 +169,5 @@ actor {
       bodyTextColorHex;
       passwordEnabled;
     };
-  };
-
-  public query ({ caller }) func getAboutText() : async Text {
-    aboutText;
-  };
-
-  public query ({ caller }) func getFeatures() : async [Text] {
-    features;
-  };
-
-  public query ({ caller }) func getGameDetails() : async GameDetails {
-    gameDetails;
-  };
-
-  public query ({ caller }) func getInstagramLink() : async Text {
-    instagramLink;
-  };
-
-  public query ({ caller }) func getDeveloperWebsite() : async Text {
-    developerWebsite;
-  };
-
-  public query ({ caller }) func getPressEmail() : async Text {
-    pressEmail;
-  };
-
-  public query ({ caller }) func getBodyTextColor() : async Text {
-    bodyTextColorHex;
-  };
-
-  public query ({ caller }) func getYoutubeLink() : async Text {
-    youtubeLink;
-  };
-
-  // ── Content Management Methods ───────────────────────────────────────────
-
-  public shared ({ caller }) func updateAbout(text : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update content");
-    };
-    aboutText := text;
-  };
-
-  public shared ({ caller }) func updateFeatures(newFeatures : [Text]) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update content");
-    };
-    let maxFeatures = 4;
-    if (newFeatures.size() > maxFeatures) {
-      Runtime.trap("Please keep features list to 4 items or less. Avoid overloading users.");
-    };
-    features := newFeatures;
-  };
-
-  public shared ({ caller }) func updateGameDetails(genre : Text, platforms : Text, releaseDate : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update content");
-    };
-    gameDetails := {
-      genre;
-      platforms;
-      releaseDate;
-    };
-  };
-
-  public shared ({ caller }) func updateInstagram(link : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update content");
-    };
-    instagramLink := link;
-  };
-
-  public shared ({ caller }) func updateYoutubeLink(link : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update content");
-    };
-    youtubeLink := link;
-  };
-
-  public shared ({ caller }) func updateDeveloperWebsite(link : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update content");
-    };
-    developerWebsite := link;
-  };
-
-  public shared ({ caller }) func updatePressEmail(email : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update content");
-    };
-    pressEmail := email;
-  };
-
-  public shared ({ caller }) func updateBodyTextColor(colorHex : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update content");
-    };
-    bodyTextColorHex := colorHex;
-  };
-
-  public query ({ caller }) func getAllUserProfiles() : async [UserProfile] {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can view all user profiles");
-    };
-    userProfiles.values().toArray();
   };
 };

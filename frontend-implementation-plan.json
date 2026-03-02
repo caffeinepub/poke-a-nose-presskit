@@ -1,79 +1,66 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix admin Unverified Origin login error, press kit text content display, and password dialog",
+  "title": "Fix password gate routing, remove Trailer header, reorder press kit sections",
   "requirements": [
     {
-      "id": "REQ-14",
-      "summary": "Fix the 'Unverified origin' error on the /admin route when attempting Internet Identity login in the deployed environment by ensuring the InternetIdentityProvider is configured with the correct II URL (https://identity.ic0.app) and derivationOrigin matching the deployed frontend canister URL",
+      "id": "REQ-18",
+      "summary": "Move password gate to landing page to block access before navigating to press kit",
       "acceptanceCriteria": [
-        "Navigating to /admin and clicking the Internet Identity login button no longer produces an 'Unverified origin' error",
-        "The Internet Identity flow completes and the authenticated principal is returned to the admin page",
-        "The derivationOrigin passed to the II provider matches the deployed frontend canister URL",
-        "The II provider URL is set to https://identity.ic0.app for production"
+        "When password protection is enabled, visiting '/' shows the PasswordGateModal on the landing page",
+        "The press kit page content is not visible while the password dialog is open",
+        "After entering the correct password, the user can access '/press-kit' and the modal does not reappear",
+        "The sessionStorage verification flag is set on successful password entry",
+        "If the user navigates directly to '/press-kit' without the sessionStorage flag set, they are redirected to the landing page where the password gate is shown"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/main.tsx",
+          "path": "frontend/src/pages/LandingPage.tsx",
           "operation": "modify",
-          "description": "Update the InternetIdentityProvider configuration to use the correct II URL (https://identity.ic0.app) for production and set the derivationOrigin to the deployed frontend canister URL. Ensure the provider URL and derivationOrigin are dynamically determined based on the deployment environment (local vs production). The derivationOrigin should be the frontend canister URL in the format https://<canister-id>.icp0.io for deployed environments."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboard.tsx",
-          "operation": "modify",
-          "description": "Review and ensure the Internet Identity login flow in AdminDashboard correctly uses the configured InternetIdentityProvider from main.tsx. Verify that no additional provider configuration is overriding the main configuration. Ensure error handling displays actionable messages if the II flow fails."
-        }
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "summary": "Fix the press kit page so that all CMS text content (about text, features list, game details, social links) is correctly fetched from the backend and rendered in the PressKitPage by investigating and fixing the useQueries hooks and ensuring the anonymous actor is properly initialized for public reads",
-      "acceptanceCriteria": [
-        "The About text section displays the text saved via the CMS",
-        "The Features list section displays the features saved via the CMS",
-        "The Game Details section displays the details saved via the CMS",
-        "Social links saved in the CMS are rendered in the Social Media section",
-        "Text content is fetched using the anonymous actor (no authentication required for public reads)",
-        "React Query hooks for text fields return data without errors in the deployed environment"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Audit all React Query hooks that fetch text-based content (about text, features, game details, social links). Ensure query keys are correct and consistent. Verify that the anonymous actor is properly passed and used for public read queries. Check that the enabled flag correctly waits for the actor to be available. Add error logging to identify any backend call failures or data structure mismatches."
+          "description": "Add PasswordGateModal to LandingPage that checks if password protection is enabled via useGetContent query. When passwordEnabled is true and sessionStorage verification flag is not set, show the modal. After successful verification, user can navigate to press kit. Import and use PasswordGateModal component with conditional rendering based on content.passwordEnabled and sessionStorage state."
         },
         {
           "path": "frontend/src/pages/PressKitPage.tsx",
           "operation": "modify",
-          "description": "Review how PressKitPage consumes the text data from useQueries hooks. Ensure that content fields (aboutText, features, gameDetails, social links) are correctly extracted from query results and passed to child components. Verify that loading states and data availability checks do not prevent text from rendering. Add fallback handling for empty or null text fields to ensure visibility during debugging."
+          "description": "Remove the PasswordGateModal from PressKitPage entirely. Add a useEffect hook that checks sessionStorage for the password verification flag when password protection is enabled. If the flag is missing, redirect the user to '/' using window.location.href or navigate. This ensures direct navigation to /press-kit without verification sends users back to the landing page where the gate will be shown."
         },
-        {
-          "path": "frontend/src/hooks/useActor.ts",
-          "operation": "modify",
-          "description": "Verify that the anonymous actor is correctly initialized for unauthenticated public reads. Ensure the actor is available immediately on mount without requiring authentication. Check that the actor creation logic does not fail silently for anonymous contexts. Confirm that dependent queries are notified when the anonymous actor becomes available."
-        }
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "summary": "Fix the password gate dialog (PasswordGateModal) on the press kit page by investigating the verifyPassword backend call, ensuring the anonymous actor is available and correctly invoked, that sessionStorage verification state is set on success, and that the modal dismisses correctly",
-      "acceptanceCriteria": [
-        "The PasswordGateModal renders and is interactable when password protection is enabled",
-        "Submitting the correct password calls the backend verifyPassword method without error",
-        "On successful verification, sessionStorage is updated and the modal closes",
-        "On incorrect password, an inline error message is displayed",
-        "The modal does not crash or silently fail when the actor is in anonymous/unauthenticated context"
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/components/PasswordGateModal.tsx",
           "operation": "modify",
-          "description": "Audit the verifyPassword backend call inside PasswordGateModal. Ensure the anonymous actor is retrieved using useActor and is available before attempting the verification call. Verify that the actor is not undefined or null when the password is submitted. Check that sessionStorage is correctly updated with the verification state key on successful password verification. Ensure the modal's onClose callback is invoked to dismiss the modal after successful verification. Add error handling and logging for actor unavailability, network errors, or backend rejections. Display inline error messages for incorrect passwords or failed verification attempts."
-        },
+          "description": "Update PasswordGateModal to accept an optional onSuccess callback prop that can be used by LandingPage to handle post-verification navigation (e.g., navigating to /press-kit). Ensure the modal still sets the sessionStorage flag on successful password verification as it currently does."
+        }
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "summary": "Remove the 'Trailer' header text from the video section on the press kit page",
+      "acceptanceCriteria": [
+        "No text reading 'Trailer' (or any section heading for the video block) is visible on the press kit page",
+        "The video thumbnail and YouTube player still render and function correctly",
+        "No other content is removed or altered"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/pages/PressKitPage.tsx",
           "operation": "modify",
-          "description": "Review the integration of PasswordGateModal in PressKitPage. Ensure the modal is conditionally rendered based on password protection status and sessionStorage verification state. Verify that the modal receives the correct props and callbacks. Confirm that the modal does not get unmounted prematurely or fail to re-render after verification state changes. Check that the password protection status query is correctly fetched and passed to the modal logic."
+          "description": "Remove any heading or label text (e.g., <h2>Trailer</h2> or similar) that appears above or around the VideoSection component in PressKitPage. Leave the VideoSection component itself intact so the video thumbnail and player continue to work. Only the section heading text should be deleted."
+        }
+      ]
+    },
+    {
+      "id": "REQ-20",
+      "summary": "Reorder press kit page sections to match the specified vertical sequence",
+      "acceptanceCriteria": [
+        "The press kit page renders sections in exactly this order: Game logo → YouTube video → About → Game Details → Features → Screenshots → Download all screenshots → Socials → Press email",
+        "All section content remains unchanged — only their vertical order is modified",
+        "No sections are removed or duplicated",
+        "The single shared max-width container and alignment of all sections is preserved"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PressKitPage.tsx",
+          "operation": "modify",
+          "description": "Reorder the JSX elements in PressKitPage to render sections in this exact vertical sequence: 1. Game logo image, 2. VideoSection (YouTube video), 3. About section, 4. Game Details section, 5. Features section, 6. ScreenshotsGallery, 7. MediaDownloadButton (Download all screenshots), 8. SocialMediaSection (Socials), 9. Press email section. Do not add, remove, or alter any content or styling within each section — only change the order in which they appear in the component's return statement."
         }
       ]
     }

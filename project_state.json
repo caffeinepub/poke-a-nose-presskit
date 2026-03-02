@@ -1,18 +1,19 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 19,
-  "summary": "Press kit webpage with a single centered content container layout: all sections (logo, video, about, details, features, screenshots) stacked vertically in one column with shared max-width and consistent alignment.",
-  "architectural_notes": [],
+  "projectStateVersion": 23,
+  "summary": "Press kit webpage with a single centered content container layout. Admin login and data connection are restored. New requests: password dialog must show on landing page (not press kit) so content is hidden behind it; remove 'Trailer' header text; reorder press kit sections to: 1. Game logo, 2. YouTube video, 3. About, 4. Game Details, 5. Features, 6. Screenshots, 7. Download all screenshots, 8. Socials, 9. Press email.",
+  "architectural_notes": [
+    "Admin principal ID for deployed environment: r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe — must never be removed."
+  ],
   "known_issues": [
-    "Admin CMS connection error on deployed environment: 'Actor not available' prevents saving — connection issue between data layer and CMS.",
-    "Admin login button missing after latest deployment.",
     "Press kit content (screenshots and other data) not displaying correctly on deployed environment.",
     "YouTube video thumbnail/placeholder image is missing from the press kit page.",
     "Game logo image is not matching the content container width (aspect ratio must be preserved).",
     "Press kit page background is white; the background image shown on the front page is not applied to the press kit page.",
     "Admin /admin login returns 'Unverified origin' error — Internet Identity rejecting the request origin in deployed environment.",
     "Press kit page text content (about, features, game details) not displaying even though images load correctly.",
-    "Admin password dialog is non-functional after recent deployment."
+    "Admin password dialog is non-functional after recent deployment.",
+    "Password dialog opens on press kit page and press kit content is visible behind it — should gate access before showing press kit content."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -120,6 +121,30 @@
         "REQ-16"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-move-the-password-gate-so-it-blocks-access-to-the-press-kit-from-the-landing-page-when-password-protection-is-enabled-the-passwordgatemodal-must-be-shown-on-the-landing-page-the-route-before-the-user-can-navigate-to-the-press-kit-press-kit-the-press-kit-page-content-must-not-be-visible-while-the-password-dialog-is-open-only-after-successful-password-verification-sessionstorage-flag-set-should-the-user-be-allowed-to-view-the-press-kit",
+      "title": "Move the password gate so it blocks access to the press kit from the landing page. When password protection is enabled, the PasswordGateModal must be shown on the landing page (the '/' route) before the user can navigate to the press kit ('/press-kit'). The press kit page content must not be visible while the password dialog is open. Only after successful password verification (sessionStorage flag set) should the user be allowed to view the press kit.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-trailer-header-label-text-from-the-press-kit-page-video-section-the-videosection-component-or-its-parent-in-presskitpage-must-no-longer-render-any-heading-or-label-text-that-says-trailer-only-the-video-thumbnail-and-player-should-remain",
+      "title": "Remove the 'Trailer' header/label text from the press kit page video section. The VideoSection component or its parent in PressKitPage must no longer render any heading or label text that says 'Trailer'. Only the video thumbnail and player should remain.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-reorder-the-sections-displayed-on-the-presskitpage-to-match-the-following-vertical-sequence-1-game-logo-2-youtube-video-3-about-4-game-details-5-features-6-screenshots-7-download-all-screenshots-button-8-socials-9-press-email-do-not-add-remove-or-alter-any-content-within-each-section-only-the-order-of-sections-changes",
+      "title": "Reorder the sections displayed on the PressKitPage to match the following vertical sequence: 1. Game logo, 2. YouTube video, 3. About, 4. Game Details, 5. Features, 6. Screenshots, 7. Download all screenshots button, 8. Socials, 9. Press email. Do not add, remove, or alter any content within each section — only the order of sections changes.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -178,6 +203,38 @@
     {
       "id": "AR-10",
       "summary": "Fix the password dialog on the admin page — it is no longer working after recent changes.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Restore the admin principal ID 'r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe' that was accidentally removed in Version 33. This principal must have admin access in the deployed environment only.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Restore the admin principal ID 'r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe' in the backend Motoko actor (backend/main.mo). This principal must be recognized as an authorized admin and granted full admin access. It was accidentally removed during Version 33 changes. Do not remove or modify any other existing principal IDs or admin authorization logic.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Fix password dialog so it appears on the landing page (not the press kit page) — currently the dialog opens on the press kit page and the press kit content is visible behind it. The password gate must block access to press kit content until verified.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Remove the 'Trailer' header/label text from the press kit page video section.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Reorder press kit page sections to: 1. Game logo, 2. YouTube video, 3. About, 4. Game Details, 5. Features, 6. Screenshots, 7. Download all screenshots, 8. Socials, 9. Press email.",
       "reqIds": [],
       "status": "pending"
     }

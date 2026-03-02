@@ -1,82 +1,81 @@
 {
   "kind": "build_request",
-  "title": "Fix admin Unverified Origin login error, press kit text content display, and password dialog",
-  "projectName": "PokeANose Press Kit",
-  "priority": "high",
+  "title": "Fix password gate routing, remove Trailer header, reorder press kit sections",
+  "projectName": "Poke A Nose Press Kit",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-14",
-      "text": "Fix the 'Unverified origin' error on the /admin route when attempting Internet Identity login in the deployed environment. The Internet Identity provider is rejecting the request origin, likely because the derivationOrigin or the II provider URL is misconfigured for the deployed canister. Audit the InternetIdentityProvider configuration in main.tsx and/or AdminDashboard.tsx — ensure the correct II URL (https://identity.ic0.app) and derivationOrigin (the deployed frontend canister URL, e.g. https://<canister-id>.icp0.io) are set. The login flow must complete successfully without an 'Unverified origin' error in the deployed environment.",
+      "id": "REQ-18",
+      "text": "Move the password gate so it blocks access to the press kit from the landing page. When password protection is enabled, the PasswordGateModal must be shown on the landing page (the '/' route) before the user can navigate to the press kit ('/press-kit'). The press kit page content must not be visible while the password dialog is open. Only after successful password verification (sessionStorage flag set) should the user be allowed to view the press kit.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "When I try to login on the admin I get /admin I get Unverified origin It seems like the request could not be processed."
+          "Please make sure when password dialog is open to show it on the landing page still, because now it is opened on the press kit and you see the content."
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to /admin and clicking the Internet Identity login button no longer produces an 'Unverified origin' error",
-        "The Internet Identity flow completes and the authenticated principal is returned to the admin page",
-        "The derivationOrigin passed to the II provider matches the deployed frontend canister URL",
-        "The II provider URL is set to https://identity.ic0.app for production"
+        "When password protection is enabled, visiting '/' shows the PasswordGateModal on the landing page",
+        "The press kit page content is not visible while the password dialog is open",
+        "After entering the correct password, the user can access '/press-kit' and the modal does not reappear",
+        "The sessionStorage verification flag is set on successful password entry",
+        "If the user navigates directly to '/press-kit' without the sessionStorage flag set, they are redirected to the landing page where the password gate is shown"
       ]
     },
     {
-      "id": "REQ-15",
-      "text": "Fix the press kit page so that all CMS text content (about text, features list, game details, social links) is correctly fetched from the backend and rendered in the PressKitPage. Images are loading correctly but text fields are not visible. Investigate the useQueries hooks that fetch text-based content fields — confirm the anonymous actor is properly initialized for public reads, that query keys are correct, that the backend returns the stored text values, and that PressKitPage correctly passes data to its child components. Ensure all text sections render their saved CMS values.",
-      "target": "both",
+      "id": "REQ-19",
+      "text": "Remove the 'Trailer' header/label text from the press kit page video section. The VideoSection component or its parent in PressKitPage must no longer render any heading or label text that says 'Trailer'. Only the video thumbnail and player should remain.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Images are loading fine, but I can't see my text on the press kit. Fix the issue between the CMS and the text content."
+          "Remove the Trailer header text."
         ]
       },
       "acceptanceCriteria": [
-        "The About text section displays the text saved via the CMS",
-        "The Features list section displays the features saved via the CMS",
-        "The Game Details section displays the details saved via the CMS",
-        "Social links saved in the CMS are rendered in the Social Media section",
-        "Text content is fetched using the anonymous actor (no authentication required for public reads)",
-        "React Query hooks for text fields return data without errors in the deployed environment"
+        "No text reading 'Trailer' (or any section heading for the video block) is visible on the press kit page",
+        "The video thumbnail and YouTube player still render and function correctly",
+        "No other content is removed or altered"
       ]
     },
     {
-      "id": "REQ-16",
-      "text": "Fix the password gate dialog (PasswordGateModal) on the press kit page — it is no longer functioning after recent changes. Investigate the verifyPassword backend call inside PasswordGateModal, confirm the anonymous actor is available and correctly invoked, that sessionStorage verification state is set on success, and that the modal dismisses correctly. The password gate must block access to the press kit when password protection is enabled, accept a correct password, and close on successful verification.",
-      "target": "both",
+      "id": "REQ-20",
+      "text": "Reorder the sections displayed on the PressKitPage to match the following vertical sequence: 1. Game logo, 2. YouTube video, 3. About, 4. Game Details, 5. Features, 6. Screenshots, 7. Download all screenshots button, 8. Socials, 9. Press email. Do not add, remove, or alter any content within each section — only the order of sections changes.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "the password dialog doesn't work now"
+          "For the presskit content only change the order of the content",
+          "Display content in press kit\n1. Game logo\n2. Youtube video\n3. About\n4. Game Details\n5. Features\n6. Screenshots \n7. Download all screenshots\n8. Socials\n9. Press email"
         ]
       },
       "acceptanceCriteria": [
-        "The PasswordGateModal renders and is interactable when password protection is enabled",
-        "Submitting the correct password calls the backend verifyPassword method without error",
-        "On successful verification, sessionStorage is updated and the modal closes",
-        "On incorrect password, an inline error message is displayed",
-        "The modal does not crash or silently fail when the actor is in anonymous/unauthenticated context"
+        "The press kit page renders sections in exactly this order: Game logo → YouTube video → About → Game Details → Features → Screenshots → Download all screenshots → Socials → Press email",
+        "All section content remains unchanged — only their vertical order is modified",
+        "No sections are removed or duplicated",
+        "The single shared max-width container and alignment of all sections is preserved"
       ]
     }
   ],
   "constraints": [
-    "Do not modify PressKitPage layout, visual design, or section ordering",
-    "Do not modify immutable frontend paths: useInternetIdentity.ts, useActor.ts, main.tsx, or components/ui",
-    "Do not change any working functionality — only fix the three identified issues",
-    "Do not alter the backend data schema or stored content"
+    "Do not modify any text content within press kit sections — only their order changes",
+    "Do not alter the VideoSection component's thumbnail or player functionality",
+    "Do not change backend logic or data models",
+    "Do not modify files listed in frontend.immutablePaths",
+    "Preserve existing layout, alignment, and styling of all press kit sections"
   ],
   "nonGoals": [
-    "Redesigning the admin dashboard UI",
-    "Adding new CMS fields",
-    "Changing the press kit page layout or visual style",
-    "Modifying the video thumbnail or screenshot gallery",
-    "Implementing new authentication methods"
+    "Changing any CMS content or backend data",
+    "Redesigning any section's visual appearance",
+    "Adding new sections or removing existing ones from the press kit",
+    "Modifying admin dashboard functionality",
+    "Changing the password verification logic itself — only where and when the modal is shown"
   ],
   "imageRequirements": {
     "required": [],

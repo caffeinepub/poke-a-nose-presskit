@@ -26,7 +26,7 @@ export interface GameDetails {
   'platforms' : string,
   'releaseDate' : string,
 }
-export interface UserProfile { 'principal' : Principal, 'name' : string }
+export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -61,22 +61,12 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'disablePasswordProtection' : ActorMethod<[], undefined>,
   'enablePasswordProtection' : ActorMethod<[string], undefined>,
-  'getAboutText' : ActorMethod<[], string>,
   'getAllUserProfiles' : ActorMethod<[], Array<UserProfile>>,
-  'getBodyTextColor' : ActorMethod<[], string>,
-  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getContent' : ActorMethod<[], Content>,
-  'getDeveloperWebsite' : ActorMethod<[], string>,
-  'getFeatures' : ActorMethod<[], Array<string>>,
-  'getGameDetails' : ActorMethod<[], GameDetails>,
-  'getInstagramLink' : ActorMethod<[], string>,
-  'getPasswordProtectionStatus' : ActorMethod<[], boolean>,
-  'getPressEmail' : ActorMethod<[], string>,
-  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'getYoutubeLink' : ActorMethod<[], string>,
+  'getUserProfile' : ActorMethod<[Principal], UserProfile>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'saveUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateAbout' : ActorMethod<[string], undefined>,
   'updateBodyTextColor' : ActorMethod<[string], undefined>,
   'updateDeveloperWebsite' : ActorMethod<[string], undefined>,

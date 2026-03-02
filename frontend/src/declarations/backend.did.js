@@ -24,10 +24,7 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const UserProfile = IDL.Record({
-  'principal' : IDL.Principal,
-  'name' : IDL.Text,
-});
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const GameDetails = IDL.Record({
   'genre' : IDL.Text,
   'platforms' : IDL.Text,
@@ -76,26 +73,12 @@ export const idlService = IDL.Service({
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'disablePasswordProtection' : IDL.Func([], [], []),
   'enablePasswordProtection' : IDL.Func([IDL.Text], [], []),
-  'getAboutText' : IDL.Func([], [IDL.Text], ['query']),
   'getAllUserProfiles' : IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
-  'getBodyTextColor' : IDL.Func([], [IDL.Text], ['query']),
-  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getContent' : IDL.Func([], [Content], ['query']),
-  'getDeveloperWebsite' : IDL.Func([], [IDL.Text], ['query']),
-  'getFeatures' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
-  'getGameDetails' : IDL.Func([], [GameDetails], ['query']),
-  'getInstagramLink' : IDL.Func([], [IDL.Text], ['query']),
-  'getPasswordProtectionStatus' : IDL.Func([], [IDL.Bool], ['query']),
-  'getPressEmail' : IDL.Func([], [IDL.Text], ['query']),
-  'getUserProfile' : IDL.Func(
-      [IDL.Principal],
-      [IDL.Opt(UserProfile)],
-      ['query'],
-    ),
-  'getYoutubeLink' : IDL.Func([], [IDL.Text], ['query']),
+  'getUserProfile' : IDL.Func([IDL.Principal], [UserProfile], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'saveUserProfile' : IDL.Func([UserProfile], [], []),
   'updateAbout' : IDL.Func([IDL.Text], [], []),
   'updateBodyTextColor' : IDL.Func([IDL.Text], [], []),
   'updateDeveloperWebsite' : IDL.Func([IDL.Text], [], []),
@@ -126,10 +109,7 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const UserProfile = IDL.Record({
-    'principal' : IDL.Principal,
-    'name' : IDL.Text,
-  });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const GameDetails = IDL.Record({
     'genre' : IDL.Text,
     'platforms' : IDL.Text,
@@ -178,26 +158,12 @@ export const idlFactory = ({ IDL }) => {
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'disablePasswordProtection' : IDL.Func([], [], []),
     'enablePasswordProtection' : IDL.Func([IDL.Text], [], []),
-    'getAboutText' : IDL.Func([], [IDL.Text], ['query']),
     'getAllUserProfiles' : IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
-    'getBodyTextColor' : IDL.Func([], [IDL.Text], ['query']),
-    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getContent' : IDL.Func([], [Content], ['query']),
-    'getDeveloperWebsite' : IDL.Func([], [IDL.Text], ['query']),
-    'getFeatures' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
-    'getGameDetails' : IDL.Func([], [GameDetails], ['query']),
-    'getInstagramLink' : IDL.Func([], [IDL.Text], ['query']),
-    'getPasswordProtectionStatus' : IDL.Func([], [IDL.Bool], ['query']),
-    'getPressEmail' : IDL.Func([], [IDL.Text], ['query']),
-    'getUserProfile' : IDL.Func(
-        [IDL.Principal],
-        [IDL.Opt(UserProfile)],
-        ['query'],
-      ),
-    'getYoutubeLink' : IDL.Func([], [IDL.Text], ['query']),
+    'getUserProfile' : IDL.Func([IDL.Principal], [UserProfile], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'saveUserProfile' : IDL.Func([UserProfile], [], []),
     'updateAbout' : IDL.Func([IDL.Text], [], []),
     'updateBodyTextColor' : IDL.Func([IDL.Text], [], []),
     'updateDeveloperWebsite' : IDL.Func([IDL.Text], [], []),

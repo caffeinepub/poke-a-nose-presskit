@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T15:56:12.189Z",
+  "generatedAt": "2026-03-02T16:30:45.934Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,41 +11,38 @@
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-14",
-        "summary": "Fix the 'Unverified origin' error on the /admin route when attempting Internet Identity login in the deployed environment. The Internet Identity provider is rejecting the request origin, likely because the derivationOrigin or the II provider URL is misconfigured for the deployed canister. Audit the InternetIdentityProvider configuration in main.tsx and/or AdminDashboard.tsx — ensure the correct II URL (https://identity.ic0.app) and derivationOrigin (the deployed frontend canister URL, e.g. https://<canister-id>.icp0.io) are set. The login flow must complete successfully without an 'Unverified origin' error in the deployed environment.",
+        "id": "REQ-18",
+        "summary": "Move the password gate so it blocks access to the press kit from the landing page. When password protection is enabled, the PasswordGateModal must be shown on the landing page (the '/' route) before the user can navigate to the press kit ('/press-kit'). The press kit page content must not be visible while the password dialog is open. Only after successful password verification (sessionStorage flag set) should the user be allowed to view the press kit.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/main.tsx",
-          "frontend/src/pages/AdminDashboard.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/AdminDashboard.tsx"
-        ]
-      },
-      {
-        "id": "REQ-15",
-        "summary": "Fix the press kit page so that all CMS text content (about text, features list, game details, social links) is correctly fetched from the backend and rendered in the PressKitPage. Images are loading correctly but text fields are not visible. Investigate the useQueries hooks that fetch text-based content fields — confirm the anonymous actor is properly initialized for public reads, that query keys are correct, that the backend returns the stored text values, and that PressKitPage correctly passes data to its child components. Ensure all text sections render their saved CMS values.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/LandingPage.tsx",
           "frontend/src/pages/PressKitPage.tsx",
-          "frontend/src/hooks/useActor.ts"
+          "frontend/src/components/PasswordGateModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/LandingPage.tsx",
           "frontend/src/pages/PressKitPage.tsx"
         ]
       },
       {
-        "id": "REQ-16",
-        "summary": "Fix the password gate dialog (PasswordGateModal) on the press kit page — it is no longer functioning after recent changes. Investigate the verifyPassword backend call inside PasswordGateModal, confirm the anonymous actor is available and correctly invoked, that sessionStorage verification state is set on success, and that the modal dismisses correctly. The password gate must block access to the press kit when password protection is enabled, accept a correct password, and close on successful verification.",
+        "id": "REQ-19",
+        "summary": "Remove the 'Trailer' header/label text from the press kit page video section. The VideoSection component or its parent in PressKitPage must no longer render any heading or label text that says 'Trailer'. Only the video thumbnail and player should remain.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/PasswordGateModal.tsx",
           "frontend/src/pages/PressKitPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/PasswordGateModal.tsx",
+          "frontend/src/pages/PressKitPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-20",
+        "summary": "Reorder the sections displayed on the PressKitPage to match the following vertical sequence: 1. Game logo, 2. YouTube video, 3. About, 4. Game Details, 5. Features, 6. Screenshots, 7. Download all screenshots button, 8. Socials, 9. Press email. Do not add, remove, or alter any content within each section — only the order of sections changes.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/PressKitPage.tsx"
+        ],
+        "matchedFiles": [
           "frontend/src/pages/PressKitPage.tsx"
         ]
       }
@@ -56,9 +53,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/PasswordGateModal.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminDashboard.tsx",
+    "frontend/src/pages/LandingPage.tsx",
     "frontend/src/pages/PressKitPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

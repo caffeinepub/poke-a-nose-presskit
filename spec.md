@@ -1,11 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix three broken features in the PokeANose Press Kit app: the admin Internet Identity login "Unverified origin" error, missing text content on the press kit page, and the non-functional password gate dialog.
+**Goal:** Fix the password gate to block access on the landing page, remove the "Trailer" header from the video section, and reorder the press kit sections.
 
 **Planned changes:**
-- Fix the `/admin` Internet Identity login by correcting the `derivationOrigin` and II provider URL (`https://identity.ic0.app`) so the login flow completes without an "Unverified origin" error in the deployed environment
-- Fix the press kit page text content (about text, features list, game details, social links) by ensuring the anonymous actor is properly initialized for public reads and that React Query hooks correctly fetch and pass text data to child components
-- Fix the `PasswordGateModal` by ensuring the anonymous actor is correctly used when calling `verifyPassword`, that session storage is updated on success, and that the modal dismisses properly or shows an error on failure
+- Move the PasswordGateModal so it appears on the landing page (`/`) instead of the press kit page (`/press-kit`); the press kit content must not be visible while the modal is open
+- If a user navigates directly to `/press-kit` without the sessionStorage verification flag, redirect them to `/` where the password gate is shown
+- Remove the "Trailer" heading/label text from the video section on the press kit page
+- Reorder press kit sections to: Game logo → YouTube video → About → Game Details → Features → Screenshots → Download all screenshots button → Socials → Press email
 
-**User-visible outcome:** Admin users can log in via Internet Identity without errors; press kit visitors see all CMS text content alongside images; and the password gate correctly blocks and grants access based on the entered password.
+**User-visible outcome:** The password prompt now appears on the landing page before any press kit content is accessible; the video section no longer shows a "Trailer" header; and the press kit sections appear in the new specified order.
