@@ -1,181 +1,243 @@
-import React, { useState } from 'react';
-import { useContent } from '../hooks/useQueries';
-import { useActor } from '../hooks/useActor';
+import React, { useState, useEffect } from 'react';
+import { useGetContent, useGetPasswordProtectionStatus } from '../hooks/useQueries';
 import PasswordGateModal from '../components/PasswordGateModal';
-import ScreenshotsGallery from '../components/ScreenshotsGallery';
 import VideoSection from '../components/VideoSection';
-import MediaDownloadButton from '../components/MediaDownloadButton';
+import ScreenshotsGallery from '../components/ScreenshotsGallery';
 import SocialMediaSection from '../components/SocialMediaSection';
-import { Loader2 } from 'lucide-react';
+import MediaDownloadButton from '../components/MediaDownloadButton';
+
+const VERIFIED_SESSION_KEY = 'presskit_verified';
 
 export default function PressKitPage() {
-  const { actor, isFetching: actorFetching } = useActor();
-  const { data: content, isLoading: contentLoading } = useContent();
+  const { data: content, isLoading: contentLoading } = useGetContent();
+  const { data: passwordEnabled, isLoading: passwordStatusLoading } = useGetPasswordProtectionStatus();
 
-  // Password gate state
-  const [isVerified, setIsVerified] = useState(() => {
-    return sessionStorage.getItem('presskit_verified') === 'true';
+  const [isVerified, setIsVerified] = useState<boolean>(() => {
+    return sessionStorage.getItem(VERIFIED_SESSION_KEY) === 'true';
   });
 
-  // Determine if we need to show the password gate
-  const isReady = !actorFetching && !contentLoading && !!content;
-  const needsPassword = isReady && content.passwordEnabled && !isVerified;
+  // If password is disabled, mark as verified automatically
+  useEffect(() => {
+    if (passwordEnabled === false) {
+      setIsVerified(true);
+    }
+  }, [passwordEnabled]);
 
-  // Show loading while actor or content is initializing
-  if (actorFetching || contentLoading) {
-    return (
-      <div className="min-h-screen relative">
-        <div className="page-bg" />
-        <div className="page-content min-h-screen flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto text-foreground" />
-            <p className="text-muted-foreground text-sm">Loading press kit…</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleVerified = () => {
+    sessionStorage.setItem(VERIFIED_SESSION_KEY, 'true');
+    setIsVerified(true);
+  };
 
-  // Show password gate if needed
-  if (needsPassword) {
-    return <PasswordGateModal onVerified={() => setIsVerified(true)} />;
-  }
+  const showPasswordGate =
+    !passwordStatusLoading &&
+    passwordEnabled === true &&
+    !isVerified;
 
-  // Press kit content
-  const gameDetails = content?.gameDetails;
-  const features = content?.features ?? [];
+  // Extract content fields with safe defaults
   const aboutText = content?.aboutText ?? '';
+  const features = content?.features ?? [];
+  const gameDetails = content?.gameDetails ?? { genre: '', platforms: '', releaseDate: '' };
   const instagramLink = content?.instagramLink ?? '';
   const youtubeLink = content?.youtubeLink ?? '';
   const developerWebsite = content?.developerWebsite ?? '';
   const pressEmail = content?.pressEmail ?? '';
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background — same as landing page */}
-      <div className="page-bg" />
+    <div className="page-bg">
+      <div className="page-content">
+        {/* Password Gate Modal */}
+        {showPasswordGate && (
+          <PasswordGateModal onVerified={handleVerified} />
+        )}
 
-      <div className="page-content min-h-screen flex flex-col">
-        <main className="flex-1 w-full">
-
-          {/* 1. Game Logo — full content width, aspect ratio preserved */}
-          <section className="w-full max-w-2xl mx-auto px-6 pt-16 pb-6">
+        <main className="max-w-4xl mx-auto px-4 py-8 space-y-12">
+          {/* Game Logo */}
+          <section className="flex justify-center">
             <img
               src="/assets/gamelogo.png"
               alt="Poke A Nose"
-              className="game-logo w-full h-auto object-contain"
+              className="max-h-48 object-contain game-logo-invert"
             />
           </section>
 
-          {/* 2. YouTube Video */}
-          <section className="w-full max-w-2xl mx-auto px-6 py-6">
+          {/* About */}
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+              About
+            </h2>
+            {contentLoading ? (
+              <div className="h-20 bg-muted animate-pulse rounded" />
+            ) : aboutText ? (
+              <p className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--body-text-color)' }}>
+                {aboutText}
+              </p>
+            ) : (
+              <p className="text-base leading-relaxed text-muted-foreground italic">
+                No description available yet.
+              </p>
+            )}
+          </section>
+
+          {/* Features */}
+          {(contentLoading || features.length > 0) && (
+            <section>
+              <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+                Features
+              </h2>
+              {contentLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-6 bg-muted animate-pulse rounded" />
+                  ))}
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {features.map((feature, index) => (
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 text-base"
+                      style={{ color: 'var(--body-text-color)' }}
+                    >
+                      <span className="mt-1 text-primary">•</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
+
+          {/* Game Details */}
+          {(contentLoading || gameDetails.genre || gameDetails.platforms || gameDetails.releaseDate) && (
+            <section>
+              <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+                Game Details
+              </h2>
+              {contentLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-6 bg-muted animate-pulse rounded" />
+                  ))}
+                </div>
+              ) : (
+                <dl className="space-y-2">
+                  {gameDetails.genre && (
+                    <div className="flex gap-2">
+                      <dt className="font-semibold min-w-[120px]" style={{ color: 'var(--body-text-color)' }}>
+                        Genre:
+                      </dt>
+                      <dd style={{ color: 'var(--body-text-color)' }}>{gameDetails.genre}</dd>
+                    </div>
+                  )}
+                  {gameDetails.platforms && (
+                    <div className="flex gap-2">
+                      <dt className="font-semibold min-w-[120px]" style={{ color: 'var(--body-text-color)' }}>
+                        Platforms:
+                      </dt>
+                      <dd style={{ color: 'var(--body-text-color)' }}>{gameDetails.platforms}</dd>
+                    </div>
+                  )}
+                  {gameDetails.releaseDate && (
+                    <div className="flex gap-2">
+                      <dt className="font-semibold min-w-[120px]" style={{ color: 'var(--body-text-color)' }}>
+                        Release Date:
+                      </dt>
+                      <dd style={{ color: 'var(--body-text-color)' }}>{gameDetails.releaseDate}</dd>
+                    </div>
+                  )}
+                </dl>
+              )}
+            </section>
+          )}
+
+          {/* Video */}
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+              Trailer
+            </h2>
             <VideoSection youtubeLink={youtubeLink} />
           </section>
 
-          {/* 3. About */}
-          {aboutText && (
-            <section className="w-full max-w-2xl mx-auto px-6 py-6">
-              <h2 className="font-heading text-2xl font-bold mb-3">About</h2>
-              <p className="leading-relaxed whitespace-pre-wrap body-text">{aboutText}</p>
-            </section>
-          )}
-
-          {/* 4. Game Details */}
-          {gameDetails && (gameDetails.genre || gameDetails.platforms || gameDetails.releaseDate) && (
-            <section className="w-full max-w-2xl mx-auto px-6 py-6">
-              <h2 className="font-heading text-2xl font-bold mb-3">Game Details</h2>
-              <dl className="space-y-2">
-                {gameDetails.genre && (
-                  <div className="flex gap-3">
-                    <dt className="font-semibold w-32 shrink-0 body-text">Genre</dt>
-                    <dd className="body-text">{gameDetails.genre}</dd>
-                  </div>
-                )}
-                {gameDetails.platforms && (
-                  <div className="flex gap-3">
-                    <dt className="font-semibold w-32 shrink-0 body-text">Platforms</dt>
-                    <dd className="body-text">{gameDetails.platforms}</dd>
-                  </div>
-                )}
-                {gameDetails.releaseDate && (
-                  <div className="flex gap-3">
-                    <dt className="font-semibold w-32 shrink-0 body-text">Release Date</dt>
-                    <dd className="body-text">{gameDetails.releaseDate}</dd>
-                  </div>
-                )}
-              </dl>
-            </section>
-          )}
-
-          {/* 5. Features */}
-          {features.length > 0 && (
-            <section className="w-full max-w-2xl mx-auto px-6 py-6">
-              <h2 className="font-heading text-2xl font-bold mb-3">Features</h2>
-              <ul className="list-disc list-inside space-y-1">
-                {features.map((f, i) => (
-                  <li key={i} className="body-text">{f}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* 6. Screenshots */}
-          <section className="w-full max-w-4xl mx-auto px-6 py-6">
-            <h2 className="font-heading text-2xl font-bold mb-4">Screenshots</h2>
+          {/* Screenshots */}
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+              Screenshots
+            </h2>
             <ScreenshotsGallery />
           </section>
 
-          {/* 7. Download All Screenshots */}
-          <section className="w-full max-w-2xl mx-auto px-6 py-4">
+          {/* Media Download */}
+          <section>
+            <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+              Media Kit
+            </h2>
             <MediaDownloadButton />
           </section>
 
-          {/* 8. Socials */}
-          <section className="w-full max-w-2xl mx-auto px-6 py-6">
-            <SocialMediaSection instagramLink={instagramLink} />
-          </section>
+          {/* Social Media */}
+          {instagramLink && (
+            <section>
+              <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+                Social Media
+              </h2>
+              <SocialMediaSection instagramUrl={instagramLink} />
+            </section>
+          )}
 
-          {/* 9. Press Email */}
-          {(pressEmail || developerWebsite) && (
-            <section className="w-full max-w-2xl mx-auto px-6 py-6">
-              <h2 className="font-heading text-2xl font-bold mb-3">Press Contact</h2>
+          {/* Contact */}
+          {(developerWebsite || pressEmail) && (
+            <section>
+              <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: 'var(--body-text-color)' }}>
+                Contact
+              </h2>
               <div className="space-y-2">
-                {pressEmail && (
-                  <p className="body-text">
-                    <span className="font-semibold">Press Email: </span>
-                    <a href={`mailto:${pressEmail}`} className="underline hover:opacity-70">
-                      {pressEmail}
+                {developerWebsite && (
+                  <p style={{ color: 'var(--body-text-color)' }}>
+                    <span className="font-semibold">Website: </span>
+                    <a
+                      href={developerWebsite}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:opacity-80"
+                      style={{ color: 'var(--body-text-color)' }}
+                    >
+                      {developerWebsite}
                     </a>
                   </p>
                 )}
-                {developerWebsite && (
-                  <p className="body-text">
-                    <span className="font-semibold">Website: </span>
-                    <a href={developerWebsite} target="_blank" rel="noopener noreferrer" className="underline hover:opacity-70">
-                      {developerWebsite}
+                {pressEmail && (
+                  <p style={{ color: 'var(--body-text-color)' }}>
+                    <span className="font-semibold">Press Email: </span>
+                    <a
+                      href={`mailto:${pressEmail}`}
+                      className="underline hover:opacity-80"
+                      style={{ color: 'var(--body-text-color)' }}
+                    >
+                      {pressEmail}
                     </a>
                   </p>
                 )}
               </div>
             </section>
           )}
-
         </main>
 
         {/* Footer */}
-        <footer className="relative z-10 mt-16 py-8 px-6 text-center border-t border-border">
-          <p className="font-body text-xs opacity-40 body-text">
-            © {new Date().getFullYear()} Poke A Nose &mdash; Built with{' '}
-            <span className="text-red-500">♥</span> using{' '}
+        <footer className="text-center py-6 text-sm text-muted-foreground">
+          <p>
+            Built with{' '}
+            <span className="text-red-500">♥</span>{' '}
+            using{' '}
             <a
-              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname || 'poke-a-nose-presskit')}`}
+              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname || 'unknown-app')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:opacity-70"
+              className="underline hover:opacity-80"
             >
               caffeine.ai
             </a>
           </p>
+          <p className="mt-1">© {new Date().getFullYear()} Poke A Nose. All rights reserved.</p>
         </footer>
       </div>
     </div>

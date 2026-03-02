@@ -1,60 +1,79 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Press Kit Layout & Content Order Overhaul",
+  "title": "Fix admin Unverified Origin login error, press kit text content display, and password dialog",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Display the game logo at full content-container width while preserving aspect ratio and ensuring responsive behavior across all screen sizes",
+      "id": "REQ-14",
+      "summary": "Fix the 'Unverified origin' error on the /admin route when attempting Internet Identity login in the deployed environment by ensuring the InternetIdentityProvider is configured with the correct II URL (https://identity.ic0.app) and derivationOrigin matching the deployed frontend canister URL",
       "acceptanceCriteria": [
-        "Game logo width matches the content container width on all screen sizes",
-        "Game logo aspect ratio is not distorted",
-        "Logo scales down correctly on mobile viewports"
+        "Navigating to /admin and clicking the Internet Identity login button no longer produces an 'Unverified origin' error",
+        "The Internet Identity flow completes and the authenticated principal is returned to the admin page",
+        "The derivationOrigin passed to the II provider matches the deployed frontend canister URL",
+        "The II provider URL is set to https://identity.ic0.app for production"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PressKitPage.tsx",
+          "path": "frontend/src/main.tsx",
           "operation": "modify",
-          "description": "Update the game logo rendering to use w-full class and object-contain to match content container width while preserving aspect ratio. Ensure the logo img element uses responsive Tailwind classes (w-full, h-auto) and is wrapped in a container that matches the content width. Remove any fixed width constraints on the logo."
+          "description": "Update the InternetIdentityProvider configuration to use the correct II URL (https://identity.ic0.app) for production and set the derivationOrigin to the deployed frontend canister URL. Ensure the provider URL and derivationOrigin are dynamically determined based on the deployment environment (local vs production). The derivationOrigin should be the frontend canister URL in the format https://<canister-id>.icp0.io for deployed environments."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Review and ensure the Internet Identity login flow in AdminDashboard correctly uses the configured InternetIdentityProvider from main.tsx. Verify that no additional provider configuration is overriding the main configuration. Ensure error handling displays actionable messages if the II flow fails."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "Apply the same custom background image used on the Landing page to the Press Kit page with identical positioning, sizing, and overlay behavior",
+      "id": "REQ-15",
+      "summary": "Fix the press kit page so that all CMS text content (about text, features list, game details, social links) is correctly fetched from the backend and rendered in the PressKitPage by investigating and fixing the useQueries hooks and ensuring the anonymous actor is properly initialized for public reads",
       "acceptanceCriteria": [
-        "Press Kit page displays the same custom background image as the Landing page",
-        "Background image positioning and sizing matches the Landing page",
-        "Background is visible behind all Press Kit content"
+        "The About text section displays the text saved via the CMS",
+        "The Features list section displays the features saved via the CMS",
+        "The Game Details section displays the details saved via the CMS",
+        "Social links saved in the CMS are rendered in the Social Media section",
+        "Text content is fetched using the anonymous actor (no authentication required for public reads)",
+        "React Query hooks for text fields return data without errors in the deployed environment"
       ],
       "file_operations": [
         {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Audit all React Query hooks that fetch text-based content (about text, features, game details, social links). Ensure query keys are correct and consistent. Verify that the anonymous actor is properly passed and used for public read queries. Check that the enabled flag correctly waits for the actor to be available. Add error logging to identify any backend call failures or data structure mismatches."
+        },
+        {
           "path": "frontend/src/pages/PressKitPage.tsx",
           "operation": "modify",
-          "description": "Add the custom-background CSS class to the root container element of PressKitPage to match the background styling used on LandingPage. Ensure the page container has the same structure that allows the background_web.jpg image (defined in frontend/src/index.css) to render with proper positioning and overlay."
+          "description": "Review how PressKitPage consumes the text data from useQueries hooks. Ensure that content fields (aboutText, features, gameDetails, social links) are correctly extracted from query results and passed to child components. Verify that loading states and data availability checks do not prevent text from rendering. Add fallback handling for empty or null text fields to ensure visibility during debugging."
+        },
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Verify that the anonymous actor is correctly initialized for unauthenticated public reads. Ensure the actor is available immediately on mount without requiring authentication. Check that the actor creation logic does not fail silently for anonymous contexts. Confirm that dependent queries are notified when the anonymous actor becomes available."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Restructure Press Kit page content to display sections in strict order: Game Logo, YouTube Video, About, Game Details, Features, Screenshots, Download All Screenshots button, Socials, Press Email",
+      "id": "REQ-16",
+      "summary": "Fix the password gate dialog (PasswordGateModal) on the press kit page by investigating the verifyPassword backend call, ensuring the anonymous actor is available and correctly invoked, that sessionStorage verification state is set on success, and that the modal dismisses correctly",
       "acceptanceCriteria": [
-        "Game Logo appears first in the Press Kit page",
-        "YouTube Video section appears second",
-        "About section appears third",
-        "Game Details section appears fourth",
-        "Features section appears fifth",
-        "Screenshots gallery appears sixth",
-        "Download All Screenshots button appears immediately after the screenshots gallery",
-        "Socials section appears eighth",
-        "Press Email appears last",
-        "No existing content or functionality is removed"
+        "The PasswordGateModal renders and is interactable when password protection is enabled",
+        "Submitting the correct password calls the backend verifyPassword method without error",
+        "On successful verification, sessionStorage is updated and the modal closes",
+        "On incorrect password, an inline error message is displayed",
+        "The modal does not crash or silently fail when the actor is in anonymous/unauthenticated context"
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/PasswordGateModal.tsx",
+          "operation": "modify",
+          "description": "Audit the verifyPassword backend call inside PasswordGateModal. Ensure the anonymous actor is retrieved using useActor and is available before attempting the verification call. Verify that the actor is not undefined or null when the password is submitted. Check that sessionStorage is correctly updated with the verification state key on successful password verification. Ensure the modal's onClose callback is invoked to dismiss the modal after successful verification. Add error handling and logging for actor unavailability, network errors, or backend rejections. Display inline error messages for incorrect passwords or failed verification attempts."
+        },
+        {
           "path": "frontend/src/pages/PressKitPage.tsx",
           "operation": "modify",
-          "description": "Reorder all content sections in the PressKitPage component JSX to match the required sequence: (1) Game Logo (gamelogo.png), (2) VideoSection component with youtubeLink, (3) About text section, (4) Game Details section (genre, platforms, releaseDate), (5) Features list, (6) ScreenshotsGallery component, (7) MediaDownloadButton component, (8) SocialMediaSection component with instagramLink, (9) Press Email display. Preserve all existing rendering logic, conditional checks, styling classes, and component props while reorganizing the JSX structure."
+          "description": "Review the integration of PasswordGateModal in PressKitPage. Ensure the modal is conditionally rendered based on password protection status and sessionStorage verification state. Verify that the modal receives the correct props and callbacks. Confirm that the modal does not get unmounted prematurely or fail to re-render after verification state changes. Check that the password protection status query is correctly fetched and passed to the modal logic."
         }
       ]
     }

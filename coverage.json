@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T13:10:34.490Z",
+  "generatedAt": "2026-03-02T15:56:12.189Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,35 +11,41 @@
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "On the Press Kit page, display the game logo at the same width as the content container, preserving its original aspect ratio. The logo must remain fully responsive across all screen sizes.",
+        "id": "REQ-14",
+        "summary": "Fix the 'Unverified origin' error on the /admin route when attempting Internet Identity login in the deployed environment. The Internet Identity provider is rejecting the request origin, likely because the derivationOrigin or the II provider URL is misconfigured for the deployed canister. Audit the InternetIdentityProvider configuration in main.tsx and/or AdminDashboard.tsx — ensure the correct II URL (https://identity.ic0.app) and derivationOrigin (the deployed frontend canister URL, e.g. https://<canister-id>.icp0.io) are set. The login flow must complete successfully without an 'Unverified origin' error in the deployed environment.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/PressKitPage.tsx"
+          "frontend/src/main.tsx",
+          "frontend/src/pages/AdminDashboard.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/pages/AdminDashboard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-15",
+        "summary": "Fix the press kit page so that all CMS text content (about text, features list, game details, social links) is correctly fetched from the backend and rendered in the PressKitPage. Images are loading correctly but text fields are not visible. Investigate the useQueries hooks that fetch text-based content fields — confirm the anonymous actor is properly initialized for public reads, that query keys are correct, that the backend returns the stored text values, and that PressKitPage correctly passes data to its child components. Ensure all text sections render their saved CMS values.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/PressKitPage.tsx",
+          "frontend/src/hooks/useActor.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
           "frontend/src/pages/PressKitPage.tsx"
         ]
       },
       {
-        "id": "REQ-2",
-        "summary": "Apply the same custom background image used on the Landing page to the Press Kit page. The background should render identically (same positioning, sizing, and overlay behavior) as on the landing page.",
+        "id": "REQ-16",
+        "summary": "Fix the password gate dialog (PasswordGateModal) on the press kit page — it is no longer functioning after recent changes. Investigate the verifyPassword backend call inside PasswordGateModal, confirm the anonymous actor is available and correctly invoked, that sessionStorage verification state is set on success, and that the modal dismisses correctly. The password gate must block access to the press kit when password protection is enabled, accept a correct password, and close on successful verification.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/components/PasswordGateModal.tsx",
           "frontend/src/pages/PressKitPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/PressKitPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Restructure the Press Kit page content to display sections in the following strict order: (1) Game Logo, (2) YouTube Video, (3) About, (4) Game Details, (5) Features, (6) Screenshots, (7) Download All Screenshots button, (8) Socials, (9) Press Email. Do not remove any existing content or functionality.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PressKitPage.tsx"
-        ],
-        "matchedFiles": [
+          "frontend/src/components/PasswordGateModal.tsx",
           "frontend/src/pages/PressKitPage.tsx"
         ]
       }
@@ -50,6 +56,9 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/components/PasswordGateModal.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminDashboard.tsx",
     "frontend/src/pages/PressKitPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

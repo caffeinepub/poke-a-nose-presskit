@@ -6,30 +6,41 @@ import Header from './components/Header';
 import LandingPage from './pages/LandingPage';
 import PressKitPage from './pages/PressKitPage';
 import AdminDashboard from './pages/AdminDashboard';
-import { useContent } from './hooks/useQueries';
+import { useGetContent } from './hooks/useQueries';
+
+// ── Query Client ──────────────────────────────────────────────────────────────
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
-      staleTime: 30_000,
+      staleTime: 1000 * 60 * 5,
+      retry: (failureCount, error) => {
+        // Don't retry on auth errors
+        if (error instanceof Error && error.message.includes('Unauthorized')) return false;
+        return failureCount < 3;
+      },
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 15000),
     },
   },
 });
 
-// Body text color applier — reads from backend content
+// ── Body Text Color Applier ───────────────────────────────────────────────────
+
 function BodyTextColorApplier() {
-  const { data: content } = useContent();
+  const { data: content } = useGetContent();
+
   useEffect(() => {
     if (content?.bodyTextColorHex) {
       document.documentElement.style.setProperty('--body-text-color', content.bodyTextColorHex);
     }
   }, [content?.bodyTextColorHex]);
+
   return null;
 }
 
-// Layout with header (hidden on /admin)
-function Layout() {
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+function RootLayout() {
   return (
     <>
       <BodyTextColorApplier />
@@ -39,8 +50,11 @@ function Layout() {
   );
 }
 
-// Routes
-const rootRoute = createRootRoute({ component: Layout });
+// ── Routes ────────────────────────────────────────────────────────────────────
+
+const rootRoute = createRootRoute({
+  component: RootLayout,
+});
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -69,6 +83,8 @@ declare module '@tanstack/react-router' {
     router: typeof router;
   }
 }
+
+// ── App ───────────────────────────────────────────────────────────────────────
 
 export default function App() {
   return (

@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-on-the-press-kit-page-display-the-game-logo-at-the-same-width-as-the-content-container-preserving-its-original-aspect-ratio-the-logo-must-remain-fully-responsive-across-all-screen-sizes",
-      "featureTitle": "On the Press Kit page, display the game logo at the same width as the content container, preserving its original aspect ratio. The logo must remain fully responsive across all screen sizes.",
+      "featureId": "feature-fix-the-unverified-origin-error-on-the-admin-route-when-attempting-internet-identity-login-in-the-deployed-environment-the-internet-identity-provider-is-rejecting-the-request-origin-likely-because-the-derivationorigin-or-the-ii-provider-url-is-misconfigured-for-the-deployed-canister-audit-the-internetidentityprovider-configuration-in-main-tsx-and-or-admindashboard-tsx-ensure-the-correct-ii-url-https-identity-ic0-app-and-derivationorigin-the-deployed-frontend-canister-url-e-g-https-canister-id-icp0-io-are-set-the-login-flow-must-complete-successfully-without-an-unverified-origin-error-in-the-deployed-environment",
+      "featureTitle": "Fix the 'Unverified origin' error on the /admin route when attempting Internet Identity login in the deployed environment. The Internet Identity provider is rejecting the request origin, likely because the derivationOrigin or the II provider URL is misconfigured for the deployed canister. Audit the InternetIdentityProvider configuration in main.tsx and/or AdminDashboard.tsx — ensure the correct II URL (https://identity.ic0.app) and derivationOrigin (the deployed frontend canister URL, e.g. https://<canister-id>.icp0.io) are set. The login flow must complete successfully without an 'Unverified origin' error in the deployed environment.",
       "files": [
-        "frontend/src/pages/PressKitPage.tsx"
+        "frontend/src/pages/AdminDashboard.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,14 +17,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-14"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-apply-the-same-custom-background-image-used-on-the-landing-page-to-the-press-kit-page-the-background-should-render-identically-same-positioning-sizing-and-overlay-behavior-as-on-the-landing-page",
-      "featureTitle": "Apply the same custom background image used on the Landing page to the Press Kit page. The background should render identically (same positioning, sizing, and overlay behavior) as on the landing page.",
+      "featureId": "feature-fix-the-press-kit-page-so-that-all-cms-text-content-about-text-features-list-game-details-social-links-is-correctly-fetched-from-the-backend-and-rendered-in-the-presskitpage-images-are-loading-correctly-but-text-fields-are-not-visible-investigate-the-usequeries-hooks-that-fetch-text-based-content-fields-confirm-the-anonymous-actor-is-properly-initialized-for-public-reads-that-query-keys-are-correct-that-the-backend-returns-the-stored-text-values-and-that-presskitpage-correctly-passes-data-to-its-child-components-ensure-all-text-sections-render-their-saved-cms-values",
+      "featureTitle": "Fix the press kit page so that all CMS text content (about text, features list, game details, social links) is correctly fetched from the backend and rendered in the PressKitPage. Images are loading correctly but text fields are not visible. Investigate the useQueries hooks that fetch text-based content fields — confirm the anonymous actor is properly initialized for public reads, that query keys are correct, that the backend returns the stored text values, and that PressKitPage correctly passes data to its child components. Ensure all text sections render their saved CMS values.",
       "files": [
+        "frontend/src/hooks/useQueries.ts",
         "frontend/src/pages/PressKitPage.tsx"
       ],
       "components": [
@@ -37,14 +38,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-15"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-restructure-the-press-kit-page-content-to-display-sections-in-the-following-strict-order-1-game-logo-2-youtube-video-3-about-4-game-details-5-features-6-screenshots-7-download-all-screenshots-button-8-socials-9-press-email-do-not-remove-any-existing-content-or-functionality",
-      "featureTitle": "Restructure the Press Kit page content to display sections in the following strict order: (1) Game Logo, (2) YouTube Video, (3) About, (4) Game Details, (5) Features, (6) Screenshots, (7) Download All Screenshots button, (8) Socials, (9) Press Email. Do not remove any existing content or functionality.",
+      "featureId": "feature-fix-the-password-gate-dialog-passwordgatemodal-on-the-press-kit-page-it-is-no-longer-functioning-after-recent-changes-investigate-the-verifypassword-backend-call-inside-passwordgatemodal-confirm-the-anonymous-actor-is-available-and-correctly-invoked-that-sessionstorage-verification-state-is-set-on-success-and-that-the-modal-dismisses-correctly-the-password-gate-must-block-access-to-the-press-kit-when-password-protection-is-enabled-accept-a-correct-password-and-close-on-successful-verification",
+      "featureTitle": "Fix the password gate dialog (PasswordGateModal) on the press kit page — it is no longer functioning after recent changes. Investigate the verifyPassword backend call inside PasswordGateModal, confirm the anonymous actor is available and correctly invoked, that sessionStorage verification state is set on success, and that the modal dismisses correctly. The password gate must block access to the press kit when password protection is enabled, accept a correct password, and close on successful verification.",
       "files": [
+        "frontend/src/components/PasswordGateModal.tsx",
         "frontend/src/pages/PressKitPage.tsx"
       ],
       "components": [
@@ -57,7 +59,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-3"
+        "REQ-16"
       ],
       "confidence": "high"
     }

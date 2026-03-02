@@ -1,37 +1,123 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "Game press kit website with landing page and press kit page. Admin login is functional. Press kit page needs layout updates including responsive game logo, background image matching landing page, and ordered content sections.",
-  "architectural_notes": [
-    "Landing page layout must not be changed — only press kit page is being updated",
-    "Admin login functionality is working and must not be modified"
-  ],
+  "projectStateVersion": 19,
+  "summary": "Press kit webpage with a single centered content container layout: all sections (logo, video, about, details, features, screenshots) stacked vertically in one column with shared max-width and consistent alignment.",
+  "architectural_notes": [],
   "known_issues": [
-    "Press kit page is missing the custom background image that exists on the landing page"
+    "Admin CMS connection error on deployed environment: 'Actor not available' prevents saving — connection issue between data layer and CMS.",
+    "Admin login button missing after latest deployment.",
+    "Press kit content (screenshots and other data) not displaying correctly on deployed environment.",
+    "YouTube video thumbnail/placeholder image is missing from the press kit page.",
+    "Game logo image is not matching the content container width (aspect ratio must be preserved).",
+    "Press kit page background is white; the background image shown on the front page is not applied to the press kit page.",
+    "Admin /admin login returns 'Unverified origin' error — Internet Identity rejecting the request origin in deployed environment.",
+    "Press kit page text content (about, features, game details) not displaying even though images load correctly.",
+    "Admin password dialog is non-functional after recent deployment."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-on-the-press-kit-page-display-the-game-logo-at-the-same-width-as-the-content-container-preserving-its-original-aspect-ratio-the-logo-must-remain-fully-responsive-across-all-screen-sizes",
-      "title": "On the Press Kit page, display the game logo at the same width as the content container, preserving its original aspect ratio. The logo must remain fully responsive across all screen sizes.",
+      "id": "feature-redesign-the-presskitpage-layout-to-use-a-single-shared-max-width-container-that-centers-all-content-horizontally-on-the-page-all-sections-game-logo-youtube-video-thumbnail-about-section-game-details-features-list-and-screenshot-gallery-must-be-stacked-vertically-in-one-column-and-share-identical-left-and-right-edges-defined-by-the-screenshot-gallery-s-width-the-game-logo-width-must-stretch-to-match-the-container-width-the-youtube-video-thumbnail-width-must-exactly-match-the-screenshot-gallery-width-no-side-by-side-columns-are-permitted-anywhere-on-this-page-vertical-spacing-between-sections-must-be-even-and-consistent-text-blocks-remain-left-aligned-within-the-container-on-smaller-screens-reduce-horizontal-padding-but-maintain-alignment-across-all-sections-do-not-change-reorder-or-rewrite-any-text-content-layout-adjustments-only",
+      "title": "Redesign the PressKitPage layout to use a single shared max-width container that centers all content horizontally on the page. All sections — game logo, YouTube video/thumbnail, About section, Game Details, Features list, and Screenshot gallery — must be stacked vertically in one column and share identical left and right edges defined by the screenshot gallery's width. The game logo width must stretch to match the container width. The YouTube video/thumbnail width must exactly match the screenshot gallery width. No side-by-side columns are permitted anywhere on this page. Vertical spacing between sections must be even and consistent. Text blocks remain left-aligned within the container. On smaller screens, reduce horizontal padding but maintain alignment across all sections. Do not change, reorder, or rewrite any text content — layout adjustments only.",
       "reqIds": [
-        "REQ-1"
+        "REQ-2",
+        "REQ-4"
       ],
-      "version": 1
+      "version": 2
     },
     {
-      "id": "feature-apply-the-same-custom-background-image-used-on-the-landing-page-to-the-press-kit-page-the-background-should-render-identically-same-positioning-sizing-and-overlay-behavior-as-on-the-landing-page",
-      "title": "Apply the same custom background image used on the Landing page to the Press Kit page. The background should render identically (same positioning, sizing, and overlay behavior) as on the landing page.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-restructure-the-press-kit-page-content-to-display-sections-in-the-following-strict-order-1-game-logo-2-youtube-video-3-about-4-game-details-5-features-6-screenshots-7-download-all-screenshots-button-8-socials-9-press-email-do-not-remove-any-existing-content-or-functionality",
-      "title": "Restructure the Press Kit page content to display sections in the following strict order: (1) Game Logo, (2) YouTube Video, (3) About, (4) Game Details, (5) Features, (6) Screenshots, (7) Download All Screenshots button, (8) Socials, (9) Press Email. Do not remove any existing content or functionality.",
+      "id": "feature-investigate-and-fix-the-actor-not-available-error-that-occurs-in-the-deployed-environment-when-an-authenticated-admin-attempts-to-save-content-via-the-cms-ensure-the-actor-is-correctly-initialized-with-the-authenticated-internet-identity-principal-in-production-including-proper-canister-id-resolution-and-agent-configuration-for-the-deployed-network",
+      "title": "Investigate and fix the 'Actor not available' error that occurs in the deployed environment when an authenticated admin attempts to save content via the CMS. Ensure the actor is correctly initialized with the authenticated Internet Identity principal in production, including proper canister ID resolution and agent configuration for the deployed network.",
       "reqIds": [
         "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-investigate-and-fix-the-actor-not-available-error-that-occurs-in-the-deployed-environment-when-an-authenticated-admin-attempts-to-save-content-via-the-cms-admindashboard-ensure-the-actor-is-correctly-initialized-with-the-authenticated-internet-identity-principal-in-production-including-proper-canister-id-resolution-and-agent-configuration-for-the-deployed-network-do-not-modify-presskitpage-layout-any-frontend-layout-code-or-any-other-working-functionality-only-fix-the-actor-initialization-and-connection-logic",
+      "title": "Investigate and fix the 'Actor not available' error that occurs in the deployed environment when an authenticated admin attempts to save content via the CMS (AdminDashboard). Ensure the actor is correctly initialized with the authenticated Internet Identity principal in production, including proper canister ID resolution and agent configuration for the deployed network. Do NOT modify PressKitPage layout, any frontend layout code, or any other working functionality — only fix the actor initialization and connection logic.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restore-the-missing-login-button-on-the-admindashboard-page-the-admin-route-must-render-a-visible-internet-identity-login-button-when-the-user-is-not-authenticated-investigate-why-the-login-button-disappeared-after-the-last-deployment-and-ensure-it-is-always-rendered-for-unauthenticated-users",
+      "title": "Restore the missing login button on the AdminDashboard page. The /admin route must render a visible Internet Identity login button when the user is not authenticated. Investigate why the login button disappeared after the last deployment and ensure it is always rendered for unauthenticated users.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-backend-actor-initialization-and-connection-so-that-authenticated-admin-actions-save-update-content-work-correctly-in-the-deployed-production-environment-the-actor-must-be-initialized-with-the-authenticated-internet-identity-principal-correct-canister-id-and-proper-agent-configuration-for-the-deployed-network-the-actor-not-available-error-must-be-resolved",
+      "title": "Fix the backend actor initialization and connection so that authenticated admin actions (save, update content) work correctly in the deployed production environment. The actor must be initialized with the authenticated Internet Identity principal, correct canister ID, and proper agent configuration for the deployed network. The 'Actor not available' error must be resolved.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-presskitpage-so-that-all-dynamic-content-screenshots-game-details-features-about-text-social-links-video-is-fetched-and-rendered-correctly-from-the-backend-investigate-why-screenshots-and-other-data-are-not-displaying-check-that-react-query-hooks-are-correctly-calling-the-backend-actor-that-the-actor-is-available-in-an-unauthenticated-context-for-public-reads-and-that-the-data-is-passed-properly-to-display-components",
+      "title": "Fix the PressKitPage so that all dynamic content (screenshots, game details, features, about text, social links, video) is fetched and rendered correctly from the backend. Investigate why screenshots and other data are not displaying — check that React Query hooks are correctly calling the backend actor, that the actor is available in an unauthenticated context for public reads, and that the data is passed properly to display components.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restore-the-youtube-video-thumbnail-image-on-the-presskitpage-the-uploaded-image-video-thumbnail-1-png-must-be-placed-in-frontend-public-assets-generated-and-used-as-the-static-thumbnail-in-the-videosection-component-it-must-display-at-the-full-content-container-width-matching-the-screenshot-gallery-width-with-correct-aspect-ratio-and-clicking-it-should-still-swap-to-the-embedded-youtube-iframe-player-as-before",
+      "title": "Restore the YouTube video thumbnail image on the PressKitPage. The uploaded image 'video_thumbnail-1.png' must be placed in 'frontend/public/assets/generated/' and used as the static thumbnail in the VideoSection component. It must display at the full content container width (matching the screenshot gallery width) with correct aspect ratio, and clicking it should still swap to the embedded YouTube iframe player as before.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-existing-video-thumbnail-static-asset-with-the-newly-uploaded-image-video-thumbnail-2-png-place-it-at-frontend-public-assets-generated-video-thumbnail-2-png-and-update-the-videosection-component-to-reference-this-new-file-instead-of-the-previous-thumbnail-the-thumbnail-must-display-at-full-content-container-width-with-correct-aspect-ratio-and-clicking-it-must-still-swap-to-the-embedded-youtube-iframe-player",
+      "title": "Replace the existing video thumbnail static asset with the newly uploaded image 'video_thumbnail-2.png'. Place it at 'frontend/public/assets/generated/video_thumbnail-2.png' and update the VideoSection component to reference this new file instead of the previous thumbnail. The thumbnail must display at full content container width with correct aspect ratio, and clicking it must still swap to the embedded YouTube iframe player.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-the-same-background-image-used-on-the-landingpage-front-page-to-the-presskitpage-the-press-kit-page-currently-shows-a-plain-white-background-it-must-display-the-background-image-consistently-with-the-front-page-ensure-the-background-image-is-set-at-the-page-body-level-or-on-the-root-container-of-presskitpage-so-it-covers-the-full-page",
+      "title": "Apply the same background image used on the LandingPage (front page) to the PressKitPage. The press kit page currently shows a plain white background; it must display the background image consistently with the front page. Ensure the background image is set at the page/body level or on the root container of PressKitPage so it covers the full page.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-videosection-component-to-use-assets-video-thumbnail-png-as-the-static-thumbnail-image-source-the-thumbnail-must-display-at-full-content-container-width-matching-the-screenshot-gallery-width-with-correct-aspect-ratio-clicking-the-thumbnail-must-still-swap-to-the-embedded-youtube-iframe-player-as-before",
+      "title": "Update the VideoSection component to use '/assets/video_thumbnail.png' as the static thumbnail image source. The thumbnail must display at full content container width (matching the screenshot gallery width) with correct aspect ratio. Clicking the thumbnail must still swap to the embedded YouTube iframe player as before.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-unverified-origin-error-on-the-admin-route-when-attempting-internet-identity-login-in-the-deployed-environment-the-internet-identity-provider-is-rejecting-the-request-origin-likely-because-the-derivationorigin-or-the-ii-provider-url-is-misconfigured-for-the-deployed-canister-audit-the-internetidentityprovider-configuration-in-main-tsx-and-or-admindashboard-tsx-ensure-the-correct-ii-url-https-identity-ic0-app-and-derivationorigin-the-deployed-frontend-canister-url-e-g-https-canister-id-icp0-io-are-set-the-login-flow-must-complete-successfully-without-an-unverified-origin-error-in-the-deployed-environment",
+      "title": "Fix the 'Unverified origin' error on the /admin route when attempting Internet Identity login in the deployed environment. The Internet Identity provider is rejecting the request origin, likely because the derivationOrigin or the II provider URL is misconfigured for the deployed canister. Audit the InternetIdentityProvider configuration in main.tsx and/or AdminDashboard.tsx — ensure the correct II URL (https://identity.ic0.app) and derivationOrigin (the deployed frontend canister URL, e.g. https://<canister-id>.icp0.io) are set. The login flow must complete successfully without an 'Unverified origin' error in the deployed environment.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-press-kit-page-so-that-all-cms-text-content-about-text-features-list-game-details-social-links-is-correctly-fetched-from-the-backend-and-rendered-in-the-presskitpage-images-are-loading-correctly-but-text-fields-are-not-visible-investigate-the-usequeries-hooks-that-fetch-text-based-content-fields-confirm-the-anonymous-actor-is-properly-initialized-for-public-reads-that-query-keys-are-correct-that-the-backend-returns-the-stored-text-values-and-that-presskitpage-correctly-passes-data-to-its-child-components-ensure-all-text-sections-render-their-saved-cms-values",
+      "title": "Fix the press kit page so that all CMS text content (about text, features list, game details, social links) is correctly fetched from the backend and rendered in the PressKitPage. Images are loading correctly but text fields are not visible. Investigate the useQueries hooks that fetch text-based content fields — confirm the anonymous actor is properly initialized for public reads, that query keys are correct, that the backend returns the stored text values, and that PressKitPage correctly passes data to its child components. Ensure all text sections render their saved CMS values.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-password-gate-dialog-passwordgatemodal-on-the-press-kit-page-it-is-no-longer-functioning-after-recent-changes-investigate-the-verifypassword-backend-call-inside-passwordgatemodal-confirm-the-anonymous-actor-is-available-and-correctly-invoked-that-sessionstorage-verification-state-is-set-on-success-and-that-the-modal-dismisses-correctly-the-password-gate-must-block-access-to-the-press-kit-when-password-protection-is-enabled-accept-a-correct-password-and-close-on-successful-verification",
+      "title": "Fix the password gate dialog (PasswordGateModal) on the press kit page — it is no longer functioning after recent changes. Investigate the verifyPassword backend call inside PasswordGateModal, confirm the anonymous actor is available and correctly invoked, that sessionStorage verification state is set on success, and that the modal dismisses correctly. The password gate must block access to the press kit when password protection is enabled, accept a correct password, and close on successful verification.",
+      "reqIds": [
+        "REQ-16"
       ],
       "version": 1
     }
@@ -39,24 +125,63 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Press kit: game logo responsive with same width as content and same aspect ratio",
-      "reqIds": [],
+      "summary": "Investigate and fix the 'Actor not available' error that occurs in the deployed environment when an authenticated admin attempts to save content via the CMS. The root cause is a connection failure between the frontend CMS (AdminDashboard) and the backend actor. Ensure the actor is correctly initialized with the authenticated Internet Identity principal in production, including proper canister ID resolution and agent configuration for the deployed network.",
+      "reqIds": [
+        "REQ-1"
+      ],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Press kit: add same custom background image as landing page",
+      "summary": "Redesign press kit page layout to use a single centered max-width container with all sections (logo, video, about, game details, features, screenshots) stacked vertically in one column, sharing identical left/right alignment. Logo and video must match container/gallery width. No side-by-side columns. Single-column responsive behavior preserved.",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Press kit: display content in order — logo, YouTube video, about, game details, features, screenshots, download all screenshots, socials, press email",
+      "summary": "Restore the YouTube video thumbnail/placeholder image that is missing from the press kit page.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Adjust the game logo image width to match the content container width while preserving its aspect ratio.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Fix the game logo image on the PressKitPage so its width matches the shared content container width (same as the screenshot gallery). The aspect ratio must be preserved — do not stretch or distort the logo. Use object-fit contain or equivalent so the logo fills the container width and scales its height proportionally.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Add the background image (visible on the front page) to the press kit page — currently the press kit background is white instead of showing the background image.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Fix 'Unverified origin' error on /admin login — Internet Identity is rejecting the origin, likely due to misconfigured canister or derivation origin in the deployed environment.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Fix text content not displaying on the press kit page — images load but text (about, features, game details, etc.) is not rendering. Investigate CMS-to-frontend data flow for text fields.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Fix the password dialog on the admin page — it is no longer working after recent changes.",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "gameProjectType": "2d",
   "projectName": "PokeANose Press Kit",
   "clarification_mode": "instant",
   "clarification_rounds": 0

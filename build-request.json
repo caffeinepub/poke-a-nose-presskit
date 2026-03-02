@@ -1,84 +1,82 @@
 {
   "kind": "build_request",
-  "title": "Press Kit Layout & Content Order Overhaul",
+  "title": "Fix admin Unverified Origin login error, press kit text content display, and password dialog",
   "projectName": "PokeANose Press Kit",
-  "priority": "normal",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "On the Press Kit page, display the game logo at the same width as the content container, preserving its original aspect ratio. The logo must remain fully responsive across all screen sizes.",
+      "id": "REQ-14",
+      "text": "Fix the 'Unverified origin' error on the /admin route when attempting Internet Identity login in the deployed environment. The Internet Identity provider is rejecting the request origin, likely because the derivationOrigin or the II provider URL is misconfigured for the deployed canister. Audit the InternetIdentityProvider configuration in main.tsx and/or AdminDashboard.tsx — ensure the correct II URL (https://identity.ic0.app) and derivationOrigin (the deployed frontend canister URL, e.g. https://<canister-id>.icp0.io) are set. The login flow must complete successfully without an 'Unverified origin' error in the deployed environment.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-latest"
         ],
         "quotes": [
-          "Game logo keep same aspect ratio but same width as content. Keep responsive in mind."
+          "When I try to login on the admin I get /admin I get Unverified origin It seems like the request could not be processed."
         ]
       },
       "acceptanceCriteria": [
-        "Game logo width matches the content container width on all screen sizes",
-        "Game logo aspect ratio is not distorted",
-        "Logo scales down correctly on mobile viewports"
+        "Navigating to /admin and clicking the Internet Identity login button no longer produces an 'Unverified origin' error",
+        "The Internet Identity flow completes and the authenticated principal is returned to the admin page",
+        "The derivationOrigin passed to the II provider matches the deployed frontend canister URL",
+        "The II provider URL is set to https://identity.ic0.app for production"
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Apply the same custom background image used on the Landing page to the Press Kit page. The background should render identically (same positioning, sizing, and overlay behavior) as on the landing page.",
-      "target": "frontend",
+      "id": "REQ-15",
+      "text": "Fix the press kit page so that all CMS text content (about text, features list, game details, social links) is correctly fetched from the backend and rendered in the PressKitPage. Images are loading correctly but text fields are not visible. Investigate the useQueries hooks that fetch text-based content fields — confirm the anonymous actor is properly initialized for public reads, that query keys are correct, that the backend returns the stored text values, and that PressKitPage correctly passes data to its child components. Ensure all text sections render their saved CMS values.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-latest"
         ],
         "quotes": [
-          "Now the custom background that works in the first page is not there add the same background image to the presskit page."
+          "Images are loading fine, but I can't see my text on the press kit. Fix the issue between the CMS and the text content."
         ]
       },
       "acceptanceCriteria": [
-        "Press Kit page displays the same custom background image as the Landing page",
-        "Background image positioning and sizing matches the Landing page",
-        "Background is visible behind all Press Kit content"
+        "The About text section displays the text saved via the CMS",
+        "The Features list section displays the features saved via the CMS",
+        "The Game Details section displays the details saved via the CMS",
+        "Social links saved in the CMS are rendered in the Social Media section",
+        "Text content is fetched using the anonymous actor (no authentication required for public reads)",
+        "React Query hooks for text fields return data without errors in the deployed environment"
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Restructure the Press Kit page content to display sections in the following strict order: (1) Game Logo, (2) YouTube Video, (3) About, (4) Game Details, (5) Features, (6) Screenshots, (7) Download All Screenshots button, (8) Socials, (9) Press Email. Do not remove any existing content or functionality.",
-      "target": "frontend",
+      "id": "REQ-16",
+      "text": "Fix the password gate dialog (PasswordGateModal) on the press kit page — it is no longer functioning after recent changes. Investigate the verifyPassword backend call inside PasswordGateModal, confirm the anonymous actor is available and correctly invoked, that sessionStorage verification state is set on success, and that the modal dismisses correctly. The password gate must block access to the press kit when password protection is enabled, accept a correct password, and close on successful verification.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-latest"
         ],
         "quotes": [
-          "Display content in press kit: 1. Game logo 2. Youtube video 3. About 4. Game Details 5. Features 6. Screenshots 7. Download all screenshots 8. Socials 9. Press email"
+          "the password dialog doesn't work now"
         ]
       },
       "acceptanceCriteria": [
-        "Game Logo appears first in the Press Kit page",
-        "YouTube Video section appears second",
-        "About section appears third",
-        "Game Details section appears fourth",
-        "Features section appears fifth",
-        "Screenshots gallery appears sixth",
-        "Download All Screenshots button appears immediately after the screenshots gallery",
-        "Socials section appears eighth",
-        "Press Email appears last",
-        "No existing content or functionality is removed"
+        "The PasswordGateModal renders and is interactable when password protection is enabled",
+        "Submitting the correct password calls the backend verifyPassword method without error",
+        "On successful verification, sessionStorage is updated and the modal closes",
+        "On incorrect password, an inline error message is displayed",
+        "The modal does not crash or silently fail when the actor is in anonymous/unauthenticated context"
       ]
     }
   ],
   "constraints": [
-    "Do not modify the Landing page in any way",
-    "Do not change any admin login, authentication, or password protection logic",
-    "Do not modify any files under frontend/src/hooks/ (immutable paths)",
-    "Do not modify frontend/src/components/ui/ components",
-    "Do not modify frontend/src/main.tsx"
+    "Do not modify PressKitPage layout, visual design, or section ordering",
+    "Do not modify immutable frontend paths: useInternetIdentity.ts, useActor.ts, main.tsx, or components/ui",
+    "Do not change any working functionality — only fix the three identified issues",
+    "Do not alter the backend data schema or stored content"
   ],
   "nonGoals": [
-    "Changes to the Landing page design or layout",
-    "Changes to the Admin Dashboard",
-    "Adding new backend fields or data models",
-    "Modifying the newsletter signup functionality",
-    "Changing authentication or password gate behavior"
+    "Redesigning the admin dashboard UI",
+    "Adding new CMS fields",
+    "Changing the press kit page layout or visual style",
+    "Modifying the video thumbnail or screenshot gallery",
+    "Implementing new authentication methods"
   ],
   "imageRequirements": {
     "required": [],

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import FullscreenViewer from './FullscreenViewer';
 
 const SCREENSHOTS = [
@@ -11,32 +11,47 @@ const SCREENSHOTS = [
 ];
 
 export default function ScreenshotsGallery() {
-  const [fullscreen, setFullscreen] = useState<{ src: string; alt: string } | null>(null);
+  const [fullscreenSrc, setFullscreenSrc] = useState<string | null>(null);
+  const [fullscreenAlt, setFullscreenAlt] = useState<string>('');
+
+  const openFullscreen = (src: string, alt: string) => {
+    setFullscreenSrc(src);
+    setFullscreenAlt(alt);
+  };
+
+  const closeFullscreen = () => {
+    setFullscreenSrc(null);
+    setFullscreenAlt('');
+  };
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {SCREENSHOTS.map((s) => (
-          <div
-            key={s.src}
-            className="aspect-video overflow-hidden cursor-pointer"
-            onClick={() => setFullscreen(s)}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {SCREENSHOTS.map((shot) => (
+          <button
+            key={shot.src}
+            onClick={() => openFullscreen(shot.src, shot.alt)}
+            className="group relative aspect-video overflow-hidden border border-foreground/20 rounded-sm hover:border-foreground/60 transition-colors focus:outline-none focus:ring-2 focus:ring-foreground/40"
+            aria-label={`View ${shot.alt} fullscreen`}
           >
             <img
-              src={s.src}
-              alt={s.alt}
-              className="screenshot-img"
+              src={shot.src}
+              alt={shot.alt}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
-              style={{ border: '1px solid #000000' }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
             />
-          </div>
+          </button>
         ))}
       </div>
-      {fullscreen && (
+
+      {fullscreenSrc && (
         <FullscreenViewer
-          src={fullscreen.src}
-          alt={fullscreen.alt}
-          onClose={() => setFullscreen(null)}
+          src={fullscreenSrc}
+          alt={fullscreenAlt}
+          onClose={closeFullscreen}
         />
       )}
     </>

@@ -2,41 +2,178 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import type { Content, GameDetails } from '../backend';
 
-// ── Content ──────────────────────────────────────────────────────────────────
+// ── Read Hooks ────────────────────────────────────────────────────────────────
 
-export function useContent() {
-  const { actor, isFetching: actorFetching } = useActor();
+export function useGetContent() {
+  const { actor, isFetching } = useActor();
 
   return useQuery<Content>({
     queryKey: ['content'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return actor.getContent();
+      const result = await actor.getContent();
+      return result;
     },
-    enabled: !!actor && !actorFetching,
-    staleTime: 30_000,
-    retry: 2,
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 30,
+    retry: 3,
   });
 }
 
-// ── Admin check ───────────────────────────────────────────────────────────────
-
 export function useIsAdmin() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching } = useActor();
 
   return useQuery<boolean>({
     queryKey: ['isAdmin'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.isCallerAdmin();
+      if (!actor) return false;
+      try {
+        return await actor.isCallerAdmin();
+      } catch {
+        return false;
+      }
     },
-    enabled: !!actor && !actorFetching,
-    staleTime: 60_000,
-    retry: 1,
+    enabled: !!actor && !isFetching,
+    retry: false,
   });
 }
 
-// ── Update About ──────────────────────────────────────────────────────────────
+export function useGetPasswordProtectionStatus() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ['passwordProtectionStatus'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getPasswordProtectionStatus();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+export function useGetAboutText() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string>({
+    queryKey: ['aboutText'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getAboutText();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+export function useGetFeatures() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string[]>({
+    queryKey: ['features'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getFeatures();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+export function useGetGameDetails() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<GameDetails>({
+    queryKey: ['gameDetails'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getGameDetails();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+export function useGetInstagramLink() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string>({
+    queryKey: ['instagramLink'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getInstagramLink();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+export function useGetYoutubeLink() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string>({
+    queryKey: ['youtubeLink'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getYoutubeLink();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+export function useGetDeveloperWebsite() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string>({
+    queryKey: ['developerWebsite'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getDeveloperWebsite();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+export function useGetPressEmail() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string>({
+    queryKey: ['pressEmail'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getPressEmail();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+export function useGetBodyTextColor() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string>({
+    queryKey: ['bodyTextColor'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getBodyTextColor();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 1000 * 60,
+    retry: 2,
+  });
+}
+
+// ── Mutation Hooks ────────────────────────────────────────────────────────────
 
 export function useUpdateAbout() {
   const { actor } = useActor();
@@ -45,49 +182,46 @@ export function useUpdateAbout() {
   return useMutation({
     mutationFn: async (text: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateAbout(text);
+      await actor.updateAbout(text);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['aboutText'] });
     },
   });
 }
-
-// ── Update Features ───────────────────────────────────────────────────────────
 
 export function useUpdateFeatures() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (features: string[]) => {
+    mutationFn: async (newFeatures: string[]) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateFeatures(features);
+      await actor.updateFeatures(newFeatures);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['features'] });
     },
   });
 }
-
-// ── Update Game Details ───────────────────────────────────────────────────────
 
 export function useUpdateGameDetails() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (details: GameDetails) => {
+    mutationFn: async ({ genre, platforms, releaseDate }: { genre: string; platforms: string; releaseDate: string }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateGameDetails(details.genre, details.platforms, details.releaseDate);
+      await actor.updateGameDetails(genre, platforms, releaseDate);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['gameDetails'] });
     },
   });
 }
-
-// ── Update Instagram ──────────────────────────────────────────────────────────
 
 export function useUpdateInstagram() {
   const { actor } = useActor();
@@ -96,15 +230,14 @@ export function useUpdateInstagram() {
   return useMutation({
     mutationFn: async (link: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateInstagram(link);
+      await actor.updateInstagram(link);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['instagramLink'] });
     },
   });
 }
-
-// ── Update YouTube Link ───────────────────────────────────────────────────────
 
 export function useUpdateYoutubeLink() {
   const { actor } = useActor();
@@ -113,15 +246,14 @@ export function useUpdateYoutubeLink() {
   return useMutation({
     mutationFn: async (link: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateYoutubeLink(link);
+      await actor.updateYoutubeLink(link);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['youtubeLink'] });
     },
   });
 }
-
-// ── Update Developer Website ──────────────────────────────────────────────────
 
 export function useUpdateDeveloperWebsite() {
   const { actor } = useActor();
@@ -130,15 +262,14 @@ export function useUpdateDeveloperWebsite() {
   return useMutation({
     mutationFn: async (link: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateDeveloperWebsite(link);
+      await actor.updateDeveloperWebsite(link);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['developerWebsite'] });
     },
   });
 }
-
-// ── Update Press Email ────────────────────────────────────────────────────────
 
 export function useUpdatePressEmail() {
   const { actor } = useActor();
@@ -147,15 +278,14 @@ export function useUpdatePressEmail() {
   return useMutation({
     mutationFn: async (email: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updatePressEmail(email);
+      await actor.updatePressEmail(email);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['pressEmail'] });
     },
   });
 }
-
-// ── Update Body Text Color ────────────────────────────────────────────────────
 
 export function useUpdateBodyTextColor() {
   const { actor } = useActor();
@@ -164,15 +294,14 @@ export function useUpdateBodyTextColor() {
   return useMutation({
     mutationFn: async (colorHex: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateBodyTextColor(colorHex);
+      await actor.updateBodyTextColor(colorHex);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['bodyTextColor'] });
     },
   });
 }
-
-// ── Password Protection ───────────────────────────────────────────────────────
 
 export function useEnablePasswordProtection() {
   const { actor } = useActor();
@@ -181,10 +310,11 @@ export function useEnablePasswordProtection() {
   return useMutation({
     mutationFn: async (password: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.enablePasswordProtection(password);
+      await actor.enablePasswordProtection(password);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
+      queryClient.invalidateQueries({ queryKey: ['passwordProtectionStatus'] });
     },
   });
 }
@@ -194,60 +324,13 @@ export function useDisablePasswordProtection() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (_: undefined) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.disablePasswordProtection();
+      await actor.disablePasswordProtection();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] });
-    },
-  });
-}
-
-export function useVerifyPassword() {
-  const { actor } = useActor();
-
-  return useMutation({
-    mutationFn: async (password: string) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.verifyPassword(password);
-    },
-  });
-}
-
-// ── User Profile ──────────────────────────────────────────────────────────────
-
-export function useGetCallerUserProfile() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  const query = useQuery({
-    queryKey: ['currentUserProfile'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getCallerUserProfile();
-    },
-    enabled: !!actor && !actorFetching,
-    retry: false,
-  });
-
-  return {
-    ...query,
-    isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && query.isFetched,
-  };
-}
-
-export function useSaveCallerUserProfile() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (profile: { name: string; principal: import('@dfinity/principal').Principal }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.saveCallerUserProfile(profile);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['passwordProtectionStatus'] });
     },
   });
 }
