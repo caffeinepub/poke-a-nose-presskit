@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 23,
+  "projectStateVersion": 25,
   "summary": "Press kit webpage with a single centered content container layout. Admin login and data connection are restored. New requests: password dialog must show on landing page (not press kit) so content is hidden behind it; remove 'Trailer' header text; reorder press kit sections to: 1. Game logo, 2. YouTube video, 3. About, 4. Game Details, 5. Features, 6. Screenshots, 7. Download all screenshots, 8. Socials, 9. Press email.",
   "architectural_notes": [
     "Admin principal ID for deployed environment: r423e-lboyg-thldn-64zao-ew2h3-bh3v6-uouit-khwus-vkwn2-afrmu-rqe — must never be removed."
@@ -13,7 +13,8 @@
     "Admin /admin login returns 'Unverified origin' error — Internet Identity rejecting the request origin in deployed environment.",
     "Press kit page text content (about, features, game details) not displaying even though images load correctly.",
     "Admin password dialog is non-functional after recent deployment.",
-    "Password dialog opens on press kit page and press kit content is visible behind it — should gate access before showing press kit content."
+    "Password dialog opens on press kit page and press kit content is visible behind it — should gate access before showing press kit content.",
+    "Press kit page has no scroll bar — page content is not scrollable."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -145,6 +146,14 @@
         "REQ-20"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-presskitpage-so-that-the-page-is-fully-scrollable-and-a-scrollbar-is-visible-accessible-ensure-the-root-container-and-any-parent-elements-on-the-press-kit-route-do-not-have-overflow-hidden-overflow-clip-or-any-other-css-that-suppresses-scrolling-the-page-body-and-root-container-must-allow-vertical-scroll-so-users-can-reach-all-sections-logo-video-about-game-details-features-screenshots-download-button-socials-press-email",
+      "title": "Fix the PressKitPage so that the page is fully scrollable and a scrollbar is visible/accessible. Ensure the root container and any parent elements on the /press-kit route do not have overflow:hidden, overflow:clip, or any other CSS that suppresses scrolling. The page body and root container must allow vertical scroll so users can reach all sections (logo, video, about, game details, features, screenshots, download button, socials, press email).",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -235,6 +244,12 @@
     {
       "id": "AR-15",
       "summary": "Reorder press kit page sections to: 1. Game logo, 2. YouTube video, 3. About, 4. Game Details, 5. Features, 6. Screenshots, 7. Download all screenshots, 8. Socials, 9. Press email.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Fix missing scroll bar on the press kit page — the page is not scrollable or the scrollbar is not visible/accessible.",
       "reqIds": [],
       "status": "pending"
     }

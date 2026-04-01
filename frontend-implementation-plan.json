@@ -1,66 +1,32 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix password gate routing, remove Trailer header, reorder press kit sections",
+  "title": "Fix missing scrollbar on the press kit page",
   "requirements": [
     {
-      "id": "REQ-18",
-      "summary": "Move password gate to landing page to block access before navigating to press kit",
+      "id": "REQ-21",
+      "summary": "Fix the PressKitPage so that the page is fully scrollable with a visible scrollbar, ensuring the root container and parent elements do not suppress vertical overflow",
       "acceptanceCriteria": [
-        "When password protection is enabled, visiting '/' shows the PasswordGateModal on the landing page",
-        "The press kit page content is not visible while the password dialog is open",
-        "After entering the correct password, the user can access '/press-kit' and the modal does not reappear",
-        "The sessionStorage verification flag is set on successful password entry",
-        "If the user navigates directly to '/press-kit' without the sessionStorage flag set, they are redirected to the landing page where the password gate is shown"
+        "The /press-kit page is vertically scrollable and all sections are reachable by scrolling.",
+        "A scrollbar appears on the press kit page when content overflows the viewport height.",
+        "No CSS rule on the page root, body, or any wrapping container suppresses vertical overflow on the press kit route.",
+        "Scrolling behavior is unaffected on the landing page (/) and admin (/admin) routes."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/LandingPage.tsx",
+          "path": "frontend/src/pages/PressKitPage.tsx",
           "operation": "modify",
-          "description": "Add PasswordGateModal to LandingPage that checks if password protection is enabled via useGetContent query. When passwordEnabled is true and sessionStorage verification flag is not set, show the modal. After successful verification, user can navigate to press kit. Import and use PasswordGateModal component with conditional rendering based on content.passwordEnabled and sessionStorage state."
+          "description": "Review and fix the root container and wrapper elements to ensure they do not have overflow:hidden, overflow:clip, or h-screen/h-full constraints that would prevent scrolling. Ensure the page content is wrapped in a scrollable container that allows vertical overflow and displays a scrollbar when content exceeds viewport height."
         },
         {
-          "path": "frontend/src/pages/PressKitPage.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Remove the PasswordGateModal from PressKitPage entirely. Add a useEffect hook that checks sessionStorage for the password verification flag when password protection is enabled. If the flag is missing, redirect the user to '/' using window.location.href or navigate. This ensures direct navigation to /press-kit without verification sends users back to the landing page where the gate will be shown."
+          "description": "Review the router outlet wrapper to ensure no overflow or height constraints are applied that would suppress scrolling on child routes. Verify that the root div does not have h-screen, overflow-hidden, or similar CSS that would prevent the press kit page from scrolling naturally."
         },
         {
-          "path": "frontend/src/components/PasswordGateModal.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Update PasswordGateModal to accept an optional onSuccess callback prop that can be used by LandingPage to handle post-verification navigation (e.g., navigating to /press-kit). Ensure the modal still sets the sessionStorage flag on successful password verification as it currently does."
-        }
-      ]
-    },
-    {
-      "id": "REQ-19",
-      "summary": "Remove the 'Trailer' header text from the video section on the press kit page",
-      "acceptanceCriteria": [
-        "No text reading 'Trailer' (or any section heading for the video block) is visible on the press kit page",
-        "The video thumbnail and YouTube player still render and function correctly",
-        "No other content is removed or altered"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/PressKitPage.tsx",
-          "operation": "modify",
-          "description": "Remove any heading or label text (e.g., <h2>Trailer</h2> or similar) that appears above or around the VideoSection component in PressKitPage. Leave the VideoSection component itself intact so the video thumbnail and player continue to work. Only the section heading text should be deleted."
-        }
-      ]
-    },
-    {
-      "id": "REQ-20",
-      "summary": "Reorder press kit page sections to match the specified vertical sequence",
-      "acceptanceCriteria": [
-        "The press kit page renders sections in exactly this order: Game logo → YouTube video → About → Game Details → Features → Screenshots → Download all screenshots → Socials → Press email",
-        "All section content remains unchanged — only their vertical order is modified",
-        "No sections are removed or duplicated",
-        "The single shared max-width container and alignment of all sections is preserved"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/PressKitPage.tsx",
-          "operation": "modify",
-          "description": "Reorder the JSX elements in PressKitPage to render sections in this exact vertical sequence: 1. Game logo image, 2. VideoSection (YouTube video), 3. About section, 4. Game Details section, 5. Features section, 6. ScreenshotsGallery, 7. MediaDownloadButton (Download all screenshots), 8. SocialMediaSection (Socials), 9. Press email section. Do not add, remove, or alter any content or styling within each section — only change the order in which they appear in the component's return statement."
+          "description": "Review global CSS rules for html, body, and #root to ensure no overflow:hidden, overflow:clip, or height:100vh/100% constraints are preventing vertical scrolling. Add or adjust CSS to explicitly allow vertical overflow and ensure the scrollbar is visible when content overflows."
         }
       ]
     }

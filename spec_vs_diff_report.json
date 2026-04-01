@@ -1,14 +1,13 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T16:30:45.930Z",
-  "summary": "All three requirements (REQ-18, REQ-19, REQ-20) appear to be implemented in the diff. LandingPage.tsx now shows PasswordGateModal when password protection is enabled and redirects to /press-kit on success. PressKitPage.tsx redirects to '/' if password is enabled but not verified, removes the 'Trailer' heading, and reorders sections to match the specified sequence.",
+  "generatedAt": "2026-03-02T19:31:34.325Z",
+  "summary": "The diff modifies PressKitPage.tsx to fix scrolling by separating the fixed background div (page-bg) from the scrollable content wrapper (page-content), matching the pattern used by LandingPage. This directly addresses REQ-21's requirement to remove overflow-suppressing CSS and restore vertical scrollability on the /press-kit route. The file summary explicitly confirms this fix.",
   "missing_requirements": [],
   "hallucinated_features": [],
-  "confidence": 0.93,
+  "confidence": 0.9,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/pages/LandingPage.tsx",
     "frontend/src/pages/PressKitPage.tsx",
     "project_state.json"
   ]

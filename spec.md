@@ -1,12 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the password gate to block access on the landing page, remove the "Trailer" header from the video section, and reorder the press kit sections.
+**Goal:** Fix the Press Kit page so it is fully scrollable and the scrollbar is visible.
 
 **Planned changes:**
-- Move the PasswordGateModal so it appears on the landing page (`/`) instead of the press kit page (`/press-kit`); the press kit content must not be visible while the modal is open
-- If a user navigates directly to `/press-kit` without the sessionStorage verification flag, redirect them to `/` where the password gate is shown
-- Remove the "Trailer" heading/label text from the video section on the press kit page
-- Reorder press kit sections to: Game logo → YouTube video → About → Game Details → Features → Screenshots → Download all screenshots button → Socials → Press email
+- Remove or override any CSS (`overflow:hidden`, `overflow:clip`, or similar) on the `/press-kit` route's root container and any wrapping parent elements that suppresses vertical scrolling.
+- Ensure the page body and root container allow vertical scroll on the `/press-kit` route without affecting the `/` or `/admin` routes.
 
-**User-visible outcome:** The password prompt now appears on the landing page before any press kit content is accessible; the video section no longer shows a "Trailer" header; and the press kit sections appear in the new specified order.
+**User-visible outcome:** Users can scroll through the entire Press Kit page and see a browser scrollbar, giving access to all sections including logo, video, about, game details, features, screenshots, download button, socials, and press email.

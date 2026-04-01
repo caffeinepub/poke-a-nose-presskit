@@ -32,9 +32,13 @@ export default function PressKitPage() {
   const pressEmail = content?.pressEmail ?? '';
 
   return (
-    <div className="page-bg">
-      <div className="page-content">
-        <main className="max-w-4xl mx-auto px-4 py-8 space-y-12">
+    <div className="min-h-screen relative">
+      {/* Fixed background */}
+      <div className="page-bg" />
+
+      {/* Scrollable content */}
+      <div className="page-content min-h-screen flex flex-col">
+        <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 space-y-12">
 
           {/* 1. Game Logo */}
           <section className="flex justify-center">

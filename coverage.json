@@ -1,46 +1,23 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T16:30:45.934Z",
+  "generatedAt": "2026-03-02T19:31:34.328Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-18",
-        "summary": "Move the password gate so it blocks access to the press kit from the landing page. When password protection is enabled, the PasswordGateModal must be shown on the landing page (the '/' route) before the user can navigate to the press kit ('/press-kit'). The press kit page content must not be visible while the password dialog is open. Only after successful password verification (sessionStorage flag set) should the user be allowed to view the press kit.",
+        "id": "REQ-21",
+        "summary": "Fix the PressKitPage so that the page is fully scrollable and a scrollbar is visible/accessible. Ensure the root container and any parent elements on the /press-kit route do not have overflow:hidden, overflow:clip, or any other CSS that suppresses scrolling. The page body and root container must allow vertical scroll so users can reach all sections (logo, video, about, game details, features, screenshots, download button, socials, press email).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/LandingPage.tsx",
           "frontend/src/pages/PressKitPage.tsx",
-          "frontend/src/components/PasswordGateModal.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/LandingPage.tsx",
-          "frontend/src/pages/PressKitPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-19",
-        "summary": "Remove the 'Trailer' header/label text from the press kit page video section. The VideoSection component or its parent in PressKitPage must no longer render any heading or label text that says 'Trailer'. Only the video thumbnail and player should remain.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PressKitPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PressKitPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-20",
-        "summary": "Reorder the sections displayed on the PressKitPage to match the following vertical sequence: 1. Game logo, 2. YouTube video, 3. About, 4. Game Details, 5. Features, 6. Screenshots, 7. Download all screenshots button, 8. Socials, 9. Press email. Do not add, remove, or alter any content within each section — only the order of sections changes.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PressKitPage.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
           "frontend/src/pages/PressKitPage.tsx"
@@ -53,7 +30,6 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/LandingPage.tsx",
     "frontend/src/pages/PressKitPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
